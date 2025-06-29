@@ -1,0 +1,280 @@
+/* ==========================================================================
+   RESPONSIVE DESIGN - MEDIA QUERIES
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        border-radius: 10px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    input[type="text"], 
+    input[type="number"], 
+    input[type="date"] {
+        font-size: 16px;
+        padding: 14px 16px;
+        min-height: 52px;
+    }
+
+    label {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+    .chart-controls {
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .time-range-btn {
+        padding: 6px 12px;
+        font-size: 12px !important;
+        min-width: 70px;
+        color: var(--primary-color) !important;
+    }
+    
+    .time-range-btn:hover,
+    .time-range-btn.active {
+        color: white !important;
+    }
+
+    /* Mejoras específicas para gráficos en móviles */
+    .chart-container {
+        margin: 15px 0;
+        padding: 10px;
+    }
+
+    .chart-wrapper {
+        padding: 15px;
+        min-height: 350px; /* Altura aumentada para móviles */
+    }
+
+    .chart-wrapper h3 {
+        font-size: 1.1em;
+        margin-bottom: 15px;
+    }
+
+    .chart-canvas-wrapper {
+        height: 320px !important; /* Altura específica para móviles */
+        margin-bottom: 10px;
+    }
+
+    .chart-canvas-wrapper canvas {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 320px !important;
+    }
+
+    /* Control específico del canvas del gráfico */
+    #gastosChart {
+        max-width: 100% !important;
+        max-height: 320px !important;
+        width: auto !important;
+        height: auto !important;
+    }
+
+    .producto-acciones {
+        flex-direction: column;
+        gap: 5px;
+        align-items: stretch;
+    }
+
+    .btn-edit, 
+    .btn-delete {
+        width: 100%;
+        margin-right: 0 !important;
+        text-align: center;
+    }
+
+    /* Modales en móvil */
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .modal-title {
+        font-size: 1.2em;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-btn {
+        width: 100%;
+    }
+
+    .confirm-modal-content {
+        width: 95%;
+        padding: 25px;
+        margin: 10px;
+    }
+
+    .confirm-modal-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .confirm-btn {
+        width: 100%;
+    }
+}
+
+/* Mejoras específicas para dispositivos muy pequeños (teléfonos pequeños) */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .header {
+        padding: 20px 25px;
+    }
+
+    .header h1 {
+        font-size: 2em;
+    }
+
+    .form-section {
+        padding: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    input[type="text"], 
+    input[type="number"], 
+    input[type="date"] {
+        font-size: 16px;
+        padding: 12px 14px;
+        min-height: 48px;
+    }
+
+    label {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .chart-controls {
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .time-range-btn {
+        padding: 5px 10px;
+        font-size: 0.75em;
+        min-width: 60px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-value {
+        font-size: 1.5em;
+    }
+
+    .producto-item {
+        padding: 12px;
+    }
+
+    .producto-info {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .modal-content {
+        padding: 15px;
+    }
+
+    .confirm-modal-content {
+        padding: 20px;
+    }
+
+    .chart-wrapper {
+        padding: 10px;
+        min-height: 300px;
+    }
+
+    .chart-canvas-wrapper {
+        height: 280px !important;
+    }
+
+    .chart-canvas-wrapper canvas {
+        max-height: 280px !important;
+    }
+
+    #gastosChart {
+        max-height: 280px !important;
+    }
+
+    .chart-wrapper h3 {
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+
+    .stats-grid {
+        padding: 10px;
+    }
+
+    .stat-card {
+        padding: 12px;
+        min-height: 80px;
+    }
+
+    .stat-value {
+        font-size: 1.3em;
+    }
+
+    .stat-label {
+        font-size: 0.8em;
+    }
+
+    .time-range-btn {
+        padding: 5px 10px;
+        font-size: 0.75em;
+        min-width: 60px;
+    }
+}
+
+/* Impresión */
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+
+    .container {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .btn,
+    .producto-acciones,
+    .modal-overlay,
+    .confirm-modal-overlay,
+    #loadingIndicator {
+        display: none !important;
+    }
+
+    .chart-canvas-wrapper {
+        break-inside: avoid;
+    }
+}

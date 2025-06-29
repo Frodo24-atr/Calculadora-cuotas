@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Cuotas - v2025.06.29</title>
+    <link rel="icon" href="data:,">
+    
+    <!-- Hojas de Estilo -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/modals.css">
+    <link rel="stylesheet" href="assets/css/charts.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+    <!-- Librerías Externas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Estilos adicionales para el botón PDF -->
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.1; transform: scale(1.05); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6); }
+        }
+        
+        .pdf-download-section:hover {
+            transform: translateY(0px);
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        #btnDescargarPDF {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #btnDescargarPDF:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        #btnDescargarPDF:active {
+            transform: translateY(-1px) scale(1.02) !important;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3) !important;
+        }
+        
+        /* Fix para texto de botones que desaparece en hover */
+        .time-range-btn, .btn {
+            color: white !important;
+            text-decoration: none !important;
+        }
+        
+        .time-range-btn:hover, .btn:hover {
+            color: white !important;
+            text-decoration: none !important;
+        }
+        
+        .time-range-btn.active {
+            color: white !important;
+        }
+        
+        /* Específico para botones de rango */
+        button.time-range-btn {
+            color: var(--primary-color) !important;
+        }
+        
+        button.time-range-btn:hover, button.time-range-btn.active {
+            color: white !important;
+        }
+        
+        #btnDescargarPDF {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #btnDescargarPDF::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        #btnDescargarPDF:hover::before {
+            left: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .pdf-download-section {
+                margin: 30px 10px 20px 10px;
+                padding: 20px;
+            }
+            
+            .pdf-download-section h3 {
+                font-size: 20px !important;
+            }
+            
+            .pdf-download-section p {
+                font-size: 14px !important;
+            }
+            
+            #btnDescargarPDF {
+                padding: 12px 25px !important;
+                font-size: 16px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💰 Calculadora de Cuotas</h1>
+            <p>Gestiona tus productos y pagos de forma inteligente</p>
+            <small style="opacity: 0.7; font-size: 12px;">Versión actualizada - 29/06/2025</small>
+        </div>
+
+        <!-- Indicador de Carga -->
+        <div id="loadingIndicator" class="loading-indicator">
+            <div style="text-align: center;">
+                <div style="border: 4px solid #f3f3f3; border-top: 4px solid #4CAF50; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p style="color: #333; font-size: 18px; margin: 0;">Cargando Calculadora de Cuotas...</p>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">Preparando recursos...</p>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div id="mainContent" style="display: block;" class="main-content">
+            
+            <!-- Sección del Formulario -->
+            <div class="form-section">
+                <h2>📝 Agregar Nuevo Producto</h2>
+                <div class="form-group">
+                    <label for="nombreProducto">Nombre del Producto:</label>
+                    <input type="text" id="nombreProducto" placeholder="Ej: Smartphone Samsung">
+                </div>
+                <div class="form-group">
+                    <label for="valorTotalProducto">Valor Total ($):</label>
+                    <input type="number" id="valorTotalProducto" placeholder="Ej: 500000" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="numeroCuotas">Número de Cuotas:</label>
+                    <input type="number" id="numeroCuotas" placeholder="Ej: 12" min="1" max="60">
+                </div>
+                <div class="form-group">
+                    <label for="fechaInicio">Fecha de Inicio:</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-primary" onclick="agregarProducto()">✅ Agregar Producto</button>
+                    <button type="button" id="btnBorrarTodo" class="btn btn-warning" onclick="limpiarTodosProductos()" style="background: #ff9800; border-color: #ff9800; display: none;">🗑️ Borrar Todo</button>
+                </div>
+                <div id="resultado" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Sección de Productos -->
+            <div class="products-section">
+                <h2>📦 Productos Registrados</h2>
+                <div id="statsSection" style="display: block;">
+                    <!-- Controles de Rango de Tiempo -->
+                    <div class="chart-controls">
+                        <button class="time-range-btn active" data-range="all">Todo</button>
+                        <button class="time-range-btn" data-range="6">6 Meses</button>
+                        <button class="time-range-btn" data-range="12">1 Año</button>
+                        <button class="time-range-btn" data-range="24">2 Años</button>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalProductos">0</div>
+                            <div class="stat-label">Productos Activos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="valorTotal">$0</div>
+                            <div class="stat-label">Valor Total</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="promedioMensual">$0</div>
+                            <div class="stat-label">Promedio Mensual</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="proximoMes">$0</div>
+                            <div class="stat-label">Próximo Mes</div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico -->
+                    <div class="chart-container">
+                        <div class="chart-wrapper">
+                            <h3>� Estrategia de Cuotas por Período</h3>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="gastosChart"></canvas>
+                            </div>
+                        </div>
+                        <div id="chartMessage" class="chart-message">
+                            <p>📊 No hay productos registrados para mostrar estadísticas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Productos -->
+                <div id="listaProductos" class="productos-lista">
+                    <p class="no-products">No hay productos registrados. ¡Agrega tu primer producto arriba! 🚀</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botón de Descarga PDF -->
+        <div class="pdf-download-section" style="
+            text-align: center; 
+            margin: 40px 0 30px 0; 
+            padding: 30px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: pulse 3s ease-in-out infinite;
+            "></div>
+            <div style="position: relative; z-index: 2;">
+                <h3 style="color: white; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">📄 Exportar Reporte</h3>
+                <p style="color: rgba(255,255,255,0.9); margin: 0 0 25px 0; font-size: 16px;">Descarga un resumen completo de tus productos y cuotas</p>
+                <button 
+                    id="btnDescargarPDF" 
+                    onclick="descargarPDF()" 
+                    class="btn"
+                >
+                    <span style="font-size: 22px;">📥</span>
+                    Descargar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Producto</h3>
+                <span class="close" onclick="cerrarModalEdicion()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modal-nombre">Nombre del Producto:</label>
+                    <input type="text" id="modal-nombre">
+                </div>
+                <div class="form-group">
+                    <label for="modal-valor">Valor Total ($):</label>
+                    <input type="number" id="modal-valor" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="modal-cuotas">Número de Cuotas:</label>
+                    <input type="number" id="modal-cuotas" min="1" max="60">
+                </div>
+                <div class="form-group">
+                    <label for="modal-fecha">Fecha de Inicio:</label>
+                    <input type="date" id="modal-fecha">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalEdicion()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarEdicionModal()">💾 Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-modal-text">¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="confirm-product-name"></strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer confirm-modal-buttons">
+                <button type="button" class="confirm-btn confirm-btn-cancel" onclick="cerrarConfirmacion()">Cancelar</button>
+                <button type="button" class="confirm-btn confirm-btn-delete" onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de la Aplicación -->
+    <!-- Orden de carga importante: utilidades -> almacenamiento -> módulos específicos -> app principal -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/app.js"></script>
+    
+    <!-- Script de emergencia para ocultar loading -->
+    <script>
+        /* Backup directo para ocultar loading después de 3 segundos */
+        setTimeout(function() {
+            console.log('🆘 Script de emergencia: Ocultando loading...');
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) {
+                loading.style.display = 'none';
+                console.log('✅ Loading ocultado por script de emergencia');
+            }
+        }, 3000);
+        
+        /* Backup adicional al cargar la página */
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loading = document.getElementById('loadingIndicator');
+                if (loading && window.getComputedStyle(loading).display !== 'none') {
+                    loading.style.display = 'none';
+                    console.log('✅ Loading ocultado por evento load');
+                }
+            }, 1000);
+        });
+    </script>
+
+    <!-- Script de depuración para modales -->
+    <script>
+        /* Script de diagnóstico para modal de eliminación */
+        window.debugModal = function() {
+            console.log('🔍 DIAGNÓSTICO DEL MODAL');
+            console.log('📋 Verificando funciones...');
+            
+            const functionsToCheck = [
+                'eliminarProducto',
+                'confirmarEliminacion', 
+                'cerrarConfirmacion',
+                'abrirModalConfirmacion',
+                'getProductoById',
+                'deleteProducto'
+            ];
+            
+            functionsToCheck.forEach(func => {
+                if (typeof window[func] === 'function') {
+                    console.log(`✅ ${func} - Disponible`);
+                } else {
+                    console.log(`❌ ${func} - NO ENCONTRADA`);
+                }
+            });
+            
+            console.log('🔍 Verificando elementos DOM...');
+            const modal = document.getElementById('confirmModal');
+            const productName = document.getElementById('confirm-product-name');
+            
+            console.log('Modal element:', modal);
+            console.log('Product name element:', productName);
+            
+            if (modal) {
+                console.log('Modal display:', window.getComputedStyle(modal).display);
+                console.log('Modal classes:', modal.className);
+            }
+        };
+        
+        /* Auto-ejecutar diagnóstico después de cargar */
+        setTimeout(() => {
+            if (window.debugModal) {
+                console.log('🚀 Ejecutando diagnóstico automático...');
+                window.debugModal();
+            }
+        }, 4000);
+    </script>
+
+    <!-- Script de prueba para el modal -->
+    <script>
+        /* Función de prueba para el modal (disponible en window) */
+        window.probarModal = function() {
+            console.log('🧪 PROBANDO MODAL DE CONFIRMACIÓN');
+            
+            /* Verificar que el modal existe */
+            const modal = document.getElementById('confirmModal');
+            if (!modal) {
+                console.error('❌ Modal no encontrado');
+                return;
+            }
+            
+            console.log('✅ Modal encontrado');
+            
+            /* Establecer un nombre de prueba */
+            const productName = document.getElementById('confirm-product-name');
+            if (productName) {
+                productName.textContent = 'Producto de Prueba';
+                console.log('✅ Nombre de producto establecido');
+            }
+            
+            /* Establecer un ID de prueba */
+            if (typeof setProductoEliminandoId === 'function') {
+                setProductoEliminandoId(999);
+                console.log('✅ ID de prueba establecido');
+            }
+            
+            /* Intentar abrir el modal */
+            if (typeof abrirModalConfirmacion === 'function') {
+                console.log('🚀 Abriendo modal...');
+                abrirModalConfirmacion();
+            } else {
+                console.error('❌ Función abrirModalConfirmacion no encontrada');
+            }
+        };
+        
+        /* Función para cerrar modal de prueba */
+        window.cerrarModalPrueba = function() {
+            if (typeof cerrarConfirmacion === 'function') {
+                cerrarConfirmacion();
+                console.log('✅ Modal cerrado');
+            }
+    </script>
+
+    <!-- Funcionalidad para descarga PDF -->
+    <script>
+        /**
+         * Genera y descarga un PDF con la información de productos
+         */
+        function descargarPDF() {
+            try {
+                const productos = getProductos();
+                
+                if (productos.length === 0) {
+                    alert('No hay productos para exportar. Agrega algunos productos primero.');
+                    return;
+                }
+
+                // Verificar que jsPDF esté disponible con múltiples formas de acceso
+                let jsPDF = null;
+                if (typeof window.jsPDF !== 'undefined') {
+                    jsPDF = window.jsPDF.jsPDF || window.jsPDF;
+                } else if (typeof window.jspdf !== 'undefined') {
+                    jsPDF = window.jspdf.jsPDF || window.jspdf;
+                }
+                
+                if (!jsPDF) {
+                    console.log('jsPDF no disponible, usando método alternativo...');
+                    descargarTextoAlternativo(productos);
+                    return;
+                }
+
+                // Crear nuevo documento PDF
+                const doc = new jsPDF();
+                
+                // Configuración
+                const pageWidth = doc.internal.pageSize.width;
+                const margin = 20;
+                let yPosition = 30;
+                
+                // Título principal
+                doc.setFontSize(24);
+                doc.setTextColor(102, 126, 234);
+                doc.text('Calculadora de Cuotas', pageWidth / 2, yPosition, { align: 'center' });
+                
+                yPosition += 10;
+                doc.setFontSize(14);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Reporte de Productos y Cuotas', pageWidth / 2, yPosition, { align: 'center' });
+                
+                yPosition += 5;
+                doc.setFontSize(10);
+                doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, pageWidth / 2, yPosition, { align: 'center' });
+                
+                yPosition += 20;
+                
+                // Estadísticas generales
+                const stats = calcularEstadisticas(productos);
+                
+                doc.setFontSize(16);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Resumen General', margin, yPosition);
+                yPosition += 15;
+                
+                doc.setFontSize(12);
+                const resumenLineas = [
+                    `Total de productos: ${stats.totalProductos}`,
+                    `Valor total: $${stats.valorTotal.toLocaleString('es-ES')}`,
+                    `Promedio mensual: $${Math.round(stats.promedioMensual).toLocaleString('es-ES')}`,
+                    `Proximo mes: $${Math.round(stats.proximoMes).toLocaleString('es-ES')}`
+                ];
+                
+                resumenLineas.forEach(linea => {
+                    doc.text(linea, margin + 5, yPosition);
+                    yPosition += 8;
+                });
+                
+                yPosition += 15;
+                
+                // Lista de productos
+                doc.setFontSize(16);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Detalle de Productos', margin, yPosition);
+                yPosition += 15;
+                
+                productos.forEach((producto, index) => {
+                    // Verificar si necesitamos nueva página
+                    if (yPosition > 250) {
+                        doc.addPage();
+                        yPosition = 30;
+                    }
+                    
+                    // Encabezado del producto
+                    doc.setFontSize(14);
+                    doc.setTextColor(102, 126, 234);
+                    doc.text(`${index + 1}. ${producto.nombre}`, margin, yPosition);
+                    yPosition += 12;
+                    
+                    // Detalles del producto
+                    doc.setFontSize(11);
+                    doc.setTextColor(60, 60, 60);
+                    
+                    const detalles = [
+                        `Valor total: $${producto.valor.toLocaleString('es-ES')}`,
+                        `Numero de cuotas: ${producto.cuotas}`,
+                        `Valor por cuota: $${producto.valorCuota.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                        `Fecha de inicio: ${new Date(producto.fechaInicio).toLocaleDateString('es-ES')}`,
+                        `Cuotas pagadas: ${producto.cuotasPagadas || 0} de ${producto.cuotas}`
+                    ];
+                    
+                    detalles.forEach(detalle => {
+                        doc.text(`- ${detalle}`, margin + 5, yPosition);
+                        yPosition += 7;
+                    });
+                    
+                    yPosition += 10;
+                });
+                
+                // Footer
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(
+                        `Pagina ${i} de ${totalPages} - Calculadora de Cuotas v2025.06.29`,
+                        pageWidth / 2,
+                        doc.internal.pageSize.height - 10,
+                        { align: 'center' }
+                    );
+                }
+                
+                // Descargar PDF
+                const fecha = new Date().toISOString().split('T')[0];
+                const nombreArchivo = `calculadora-cuotas-${fecha}.pdf`;
+                doc.save(nombreArchivo);
+                
+                // Mostrar mensaje de éxito
+                mostrarMensajeExitoPDF(nombreArchivo);
+                
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                
+                // Fallback al método alternativo
+                const productos = getProductos();
+                if (productos.length > 0) {
+                    descargarTextoAlternativo(productos);
+                } else {
+                    alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+                }
+            }
+        }
+        
+        /**
+         * Método alternativo para descargar información como archivo de texto
+         */
+        function descargarTextoAlternativo(productos) {
+            try {
+                let contenido = '='.repeat(50) + '\n';
+                contenido += '💰 CALCULADORA DE CUOTAS - REPORTE\n';
+                contenido += '='.repeat(50) + '\n\n';
+                contenido += `Fecha de generación: ${new Date().toLocaleDateString('es-ES')}\n\n`;
+                
+                // Estadísticas
+                const stats = calcularEstadisticas(productos);
+                contenido += '📊 RESUMEN GENERAL\n';
+                contenido += '-'.repeat(30) + '\n';
+                contenido += `Total de productos: ${stats.totalProductos}\n`;
+                contenido += `Valor total: $${stats.valorTotal.toLocaleString('es-ES')}\n`;
+                contenido += `Promedio mensual: $${Math.round(stats.promedioMensual).toLocaleString('es-ES')}\n`;
+                contenido += `Próximo mes: $${Math.round(stats.proximoMes).toLocaleString('es-ES')}\n\n`;
+                
+                // Productos
+                contenido += '📦 DETALLE DE PRODUCTOS\n';
+                contenido += '-'.repeat(30) + '\n\n';
+                
+                productos.forEach((producto, index) => {
+                    contenido += `${index + 1}. ${producto.nombre}\n`;
+                    contenido += `   • Valor total: $${producto.valor.toLocaleString('es-ES')}\n`;
+                    contenido += `   • Número de cuotas: ${producto.cuotas}\n`;
+                    contenido += `   • Valor por cuota: $${producto.valorCuota.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}\n`;
+                    contenido += `   • Fecha de inicio: ${new Date(producto.fechaInicio).toLocaleDateString('es-ES')}\n`;
+                    contenido += `   • Cuotas pagadas: ${producto.cuotasPagadas || 0} de ${producto.cuotas}\n\n`;
+                });
+                
+                contenido += '\n' + '='.repeat(50) + '\n';
+                contenido += 'Generado por Calculadora de Cuotas v2025.06.29\n';
+                contenido += '='.repeat(50);
+                
+                // Crear y descargar archivo
+                const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const fecha = new Date().toISOString().split('T')[0];
+                
+                a.href = url;
+                a.download = `calculadora-cuotas-${fecha}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                // Mostrar mensaje de éxito
+                mostrarMensajeExitoPDF(`calculadora-cuotas-${fecha}.txt`);
+                
+            } catch (error) {
+                console.error('Error en método alternativo:', error);
+                alert('Error al generar el archivo. Por favor, intenta nuevamente.');
+            }
+        }
+        
+        /**
+         * Muestra mensaje de éxito después de descargar PDF
+         */
+        function mostrarMensajeExitoPDF(nombreArchivo) {
+            const btnPDF = document.getElementById('btnDescargarPDF');
+            const textoOriginal = btnPDF.innerHTML;
+            
+            btnPDF.innerHTML = '<span style="font-size: 20px;">✅</span> Descargado';
+            btnPDF.style.background = '#28a745';
+            btnPDF.style.color = 'white';
+            
+            setTimeout(() => {
+                btnPDF.innerHTML = textoOriginal;
+                btnPDF.style.background = 'white';
+                btnPDF.style.color = '#667eea';
+            }, 3000);
+        }
+        
+        // Exportar función al ámbito global
+        window.descargarPDF = descargarPDF;
+        
+        // Verificar disponibilidad de jsPDF al cargar la página
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const btnPDF = document.getElementById('btnDescargarPDF');
+                let jsPDF = null;
+                
+                if (typeof window.jsPDF !== 'undefined') {
+                    jsPDF = window.jsPDF.jsPDF || window.jsPDF;
+                } else if (typeof window.jspdf !== 'undefined') {
+                    jsPDF = window.jspdf.jsPDF || window.jspdf;
+                }
+                
+                if (jsPDF) {
+                    console.log('✅ jsPDF cargado correctamente');
+                    btnPDF.title = 'Descargar reporte en formato PDF';
+                } else {
+                    console.log('⚠️ jsPDF no disponible, se usará formato texto');
+                    btnPDF.title = 'Descargar reporte en formato texto (PDF no disponible)';
+                    btnPDF.innerHTML = '<span style="font-size: 22px;">📄</span>Descargar Reporte';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
