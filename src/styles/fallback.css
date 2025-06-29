@@ -120,25 +120,50 @@ body {
 
 .chart-controls {
   display: flex;
-  gap: 10px;
-  margin: 20px 0;
+  align-items: center;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
-.time-range-btn {
-  padding: 8px 16px;
-  border: 2px solid #667eea;
-  background: white;
-  color: #667eea;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.chart-type-controls {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 2px;
 }
 
-.time-range-btn.active,
-.time-range-btn:hover {
-  background: #667eea;
+.chart-type-btn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.chart-type-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.chart-type-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.time-range-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .chart-container {
@@ -741,6 +766,172 @@ body {
   position: relative;
   height: 400px;
   width: 100%;
+}
+
+/* ================================================= */
+/* CONTROLES DE GRÁFICOS MEJORADOS */
+/* ================================================= */
+
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.chart-type-controls {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 2px;
+}
+
+.chart-type-btn {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+}
+
+.chart-type-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
+}
+
+.chart-type-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.time-range-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ================================================= */
+/* MENSAJE VACÍO DEL GRÁFICO */
+/* ================================================= */
+
+.chart-empty-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+  border-radius: 16px;
+  border: 2px dashed rgba(102, 126, 234, 0.3);
+  margin: 20px 0;
+}
+
+.empty-chart-content {
+  text-align: center;
+  padding: 40px 20px;
+  max-width: 400px;
+}
+
+.empty-chart-content i {
+  font-size: 3rem;
+  color: #667eea;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.empty-chart-content h4 {
+  color: #333;
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.empty-chart-content p {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ================================================= */
+/* RESPONSIVE PARA CONTROLES DE GRÁFICO */
+/* ================================================= */
+
+@media (max-width: 768px) {
+  .chart-controls {
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .chart-type-controls {
+    order: 2;
+    margin-top: 10px;
+  }
+  
+  .time-range-controls {
+    order: 1;
+    justify-content: center;
+  }
+  
+  .chart-type-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  .empty-chart-content {
+    padding: 30px 15px;
+  }
+  
+  .empty-chart-content h4 {
+    font-size: 1.2rem;
+  }
+  
+  .empty-chart-content p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .chart-type-controls,
+  .time-range-controls {
+    justify-content: center;
+    order: unset;
+    margin: 0;
+  }
+  
+  .chart-empty-message {
+    min-height: 250px;
+    margin: 15px 0;
+  }
+  
+  .empty-chart-content {
+    padding: 25px 15px;
+  }
+  
+  .empty-chart-content i {
+    font-size: 2.5rem;
+  }
+  
+  .empty-chart-content h4 {
+    font-size: 1.1rem;
+  }
 }
 
 /* ===== PRODUCTOS ===== */

@@ -9,6 +9,7 @@ class CalculadoraCuotas {
     this.state = {
       products: [],
       currentTimeRange: 'all',
+      currentChartType: 'bar', // Nuevo estado para tipo de gráfico
       isLoading: true,
       modal: { isOpen: false },
     };
@@ -108,6 +109,16 @@ class CalculadoraCuotas {
       btn.addEventListener('click', (e) => {
         const range = e.target.getAttribute('data-range');
         this.updateTimeRange(range);
+      });
+    });
+
+    // Botones de tipo de gráfico
+    document.querySelectorAll('.chart-type-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const type = e.target.getAttribute('data-type') || e.target.closest('[data-type]')?.getAttribute('data-type');
+        if (type) {
+          this.updateChartType(type);
+        }
       });
     });
 
@@ -345,21 +356,54 @@ class CalculadoraCuotas {
     
     if (!canvas) return;
 
+    // Si no hay productos, mostrar mensaje vacío
     if (this.state.products.length === 0) {
-      if (chartMessage) chartMessage.style.display = 'block';
+      if (chartMessage) chartMessage.style.display = 'flex';
       canvas.style.display = 'none';
       return;
     }
 
+    // Ocultar mensaje y mostrar canvas
     if (chartMessage) chartMessage.style.display = 'none';
     canvas.style.display = 'block';
 
+    // Calcular número de meses según el rango seleccionado
+    const monthsToShow = this.getMonthsToShow();
+    
     // Preparar datos del gráfico
+    const { months, payments } = this.generateChartData(monthsToShow);
+
+    // Destruir gráfico anterior si existe
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+    }
+
+    // Crear configuración según el tipo de gráfico
+    const chartConfig = this.getChartConfig(months, payments);
+
+    // Crear nuevo gráfico
+    const ctx = canvas.getContext('2d');
+    if (ctx && window.Chart) {
+      this.chartInstance = new window.Chart(ctx, chartConfig);
+      console.log(`✅ Gráfico actualizado: tipo ${this.state.currentChartType}, rango ${this.state.currentTimeRange}`);
+    }
+  }
+
+  getMonthsToShow() {
+    switch (this.state.currentTimeRange) {
+      case '3m': return 3;
+      case '6m': return 6;
+      case 'all':
+      default: return 12;
+    }
+  }
+
+  generateChartData(monthsToShow) {
     const months = [];
     const payments = [];
     const currentDate = new Date();
     
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < monthsToShow; i++) {
       const month = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
       months.push(month.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
       
@@ -372,51 +416,130 @@ class CalculadoraCuotas {
         })
         .reduce((sum, product) => sum + product.monthlyPayment, 0);
       
-      payments.push(monthPayments);
+      payments.push(Math.round(monthPayments));
     }
 
-    // Destruir gráfico anterior si existe
-    if (this.chartInstance) {
-      this.chartInstance.destroy();
-    }
+    return { months, payments };
+  }
 
-    // Crear nuevo gráfico
-    const ctx = canvas.getContext('2d');
-    if (ctx && window.Chart) {
-      this.chartInstance = new window.Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: months,
-          datasets: [{
-            label: 'Pagos Mensuales',
-            data: payments,
-            backgroundColor: 'rgba(76, 175, 80, 0.8)',
-            borderColor: 'rgba(76, 175, 80, 1)',
-            borderWidth: 2,
-            borderRadius: 6,
-            borderSkipped: false,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
+  getChartConfig(months, payments) {
+    const baseConfig = {
+      data: {
+        labels: months,
+        datasets: [this.getDatasetConfig(payments)]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                callback: function(value) {
-                  return '$' + value.toLocaleString();
-                }
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: '#667eea',
+            borderWidth: 1,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                return `Cuotas: $${context.parsed.y.toLocaleString('es-ES')}`;
               }
             }
           }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + value.toLocaleString('es-ES');
+              },
+              color: '#666'
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.1)',
+              drawBorder: false
+            }
+          },
+          x: {
+            ticks: {
+              color: '#666'
+            },
+            grid: {
+              display: false
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
         }
-      });
+      }
+    };
+
+    // Agregar tipo específico
+    baseConfig.type = this.getChartJSType();
+    
+    return baseConfig;
+  }
+
+  getChartJSType() {
+    // Mapear nuestros tipos a tipos de Chart.js
+    switch (this.state.currentChartType) {
+      case 'line': return 'line';
+      case 'area': return 'line'; // Área es una línea con fill
+      case 'bar':
+      default: return 'bar';
+    }
+  }
+
+  getDatasetConfig(payments) {
+    const baseDataset = {
+      data: payments,
+      tension: 0.4,
+      borderWidth: 3,
+      pointRadius: 6,
+      pointHoverRadius: 8,
+      pointBackgroundColor: '#fff',
+      pointBorderWidth: 3
+    };
+
+    switch (this.state.currentChartType) {
+      case 'line':
+        return {
+          ...baseDataset,
+          label: 'Pagos Mensuales',
+          borderColor: '#667eea',
+          backgroundColor: 'transparent',
+          pointBorderColor: '#667eea',
+          fill: false
+        };
+        
+      case 'area':
+        return {
+          ...baseDataset,
+          label: 'Pagos Mensuales',
+          borderColor: '#667eea',
+          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+          pointBorderColor: '#667eea',
+          fill: true
+        };
+        
+      case 'bar':
+      default:
+        return {
+          label: 'Pagos Mensuales',
+          data: payments,
+          backgroundColor: 'rgba(102, 126, 234, 0.8)',
+          borderColor: '#667eea',
+          borderWidth: 2,
+          borderRadius: 6,
+          borderSkipped: false,
+          hoverBackgroundColor: 'rgba(102, 126, 234, 0.9)',
+          hoverBorderColor: '#5a6fd8'
+        };
     }
   }
 
@@ -429,7 +552,31 @@ class CalculadoraCuotas {
     });
     document.querySelector(`[data-range="${range}"]`)?.classList.add('active');
     
+    // Actualizar gráfico con nuevo rango
+    this.updateChart();
     console.log(`Rango de tiempo actualizado: ${range}`);
+  }
+
+  updateChartType(type) {
+    this.state.currentChartType = type;
+    
+    // Actualizar botones activos
+    document.querySelectorAll('.chart-type-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelector(`[data-type="${type}"]`)?.classList.add('active');
+    
+    // Actualizar gráfico con nuevo tipo
+    this.updateChart();
+    console.log(`Tipo de gráfico actualizado: ${type}`);
+    
+    // Mostrar notificación del cambio
+    const typeNames = {
+      'bar': 'Gráfico de Barras',
+      'line': 'Gráfico de Líneas', 
+      'area': 'Gráfico de Área'
+    };
+    this.showNotification('info', 'Vista actualizada', `Cambiado a ${typeNames[type]}`, 3000);
   }
 
   async generatePDF() {

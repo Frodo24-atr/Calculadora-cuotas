@@ -201,23 +201,47 @@
                 <div class="chart-section">
                     <div class="chart-header">
                         <h3><i class="fas fa-chart-bar"></i> Gráfico de Cuotas</h3>
-                        <div class="time-range-controls">
-                            <button class="time-range-btn active" data-range="all">
-                                <i class="fas fa-globe"></i>
-                                Todo
-                            </button>
-                            <button class="time-range-btn" data-range="6m">
-                                <i class="fas fa-calendar-alt"></i>
-                                6 Meses
-                            </button>
-                            <button class="time-range-btn" data-range="3m">
-                                <i class="fas fa-calendar"></i>
-                                3 Meses
-                            </button>
+                        <div class="chart-controls">
+                            <!-- Controles de tipo de gráfico -->
+                            <div class="chart-type-controls">
+                                <button class="chart-type-btn active" data-type="bar" title="Gráfico de Barras">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                                <button class="chart-type-btn" data-type="line" title="Gráfico de Líneas">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                                <button class="chart-type-btn" data-type="area" title="Gráfico de Área">
+                                    <i class="fas fa-chart-area"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Controles de tiempo -->
+                            <div class="time-range-controls">
+                                <button class="time-range-btn active" data-range="all">
+                                    <i class="fas fa-globe"></i>
+                                    Todo
+                                </button>
+                                <button class="time-range-btn" data-range="6m">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    6 Meses
+                                </button>
+                                <button class="time-range-btn" data-range="3m">
+                                    <i class="fas fa-calendar"></i>
+                                    3 Meses
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="chart-container">
-                        <canvas id="gastosChart"></canvas>
+                        <!-- Mensaje cuando no hay productos -->
+                        <div id="chartMessage" class="chart-empty-message">
+                            <div class="empty-chart-content">
+                                <i class="fas fa-chart-pie"></i>
+                                <h4>📊 ¡Agrega un producto para visualizar el gráfico!</h4>
+                                <p>Una vez que agregues productos, podrás ver aquí el análisis de tus cuotas mensuales</p>
+                            </div>
+                        </div>
+                        <canvas id="gastosChart" style="display: none;"></canvas>
                     </div>
                 </div>
             </div>
