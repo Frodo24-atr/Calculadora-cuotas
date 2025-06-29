@@ -87,6 +87,14 @@ class CalculadoraCuotas {
       });
     }
 
+    // Botón eliminar todos los productos
+    const btnBorrarTodo = document.getElementById('btnBorrarTodo');
+    if (btnBorrarTodo) {
+      btnBorrarTodo.addEventListener('click', () => {
+        this.handleDeleteAllProducts();
+      });
+    }
+
     // Botón descargar PDF
     const btnPDF = document.getElementById('btnDescargarPDF');
     if (btnPDF) {
@@ -164,7 +172,7 @@ class CalculadoraCuotas {
     const fecha = document.getElementById('fechaInicio')?.value;
 
     if (!nombre || !valor || !cuotas || !fecha) {
-      alert('Por favor completa todos los campos');
+      this.showNotification('error', 'Error', 'Por favor completa todos los campos');
       return;
     }
 
@@ -187,6 +195,9 @@ class CalculadoraCuotas {
     this.renderProducts();
     this.clearForm();
     this.updateStats();
+    
+    // Mostrar notificación de éxito
+    this.showNotification('success', '¡Producto agregado!', `"${nombre}" se ha agregado correctamente`);
     
     // Generar recordatorios automáticamente
     this.generateReminders();
@@ -247,6 +258,8 @@ class CalculadoraCuotas {
   renderProducts() {
     console.log('🎨 Renderizando productos...', this.state.products);
     const container = document.getElementById('listaProductos');
+    const btnBorrarTodo = document.getElementById('btnBorrarTodo');
+    
     if (!container) {
       console.error('❌ Contenedor listaProductos no encontrado');
       return;
@@ -255,6 +268,11 @@ class CalculadoraCuotas {
     if (this.state.products.length === 0) {
       console.log('📭 No hay productos para mostrar');
       container.innerHTML = '<p class="no-products">No hay productos registrados. ¡Agrega tu primer producto arriba! 🚀</p>';
+      
+      // Ocultar botón eliminar todos
+      if (btnBorrarTodo) {
+        btnBorrarTodo.style.display = 'none';
+      }
       
       // Ocultar sección de recordatorios si no hay productos
       if (this.remindersManager) {
@@ -282,6 +300,12 @@ class CalculadoraCuotas {
         </div>
       </div>
     `).join('');
+    
+    // Mostrar botón eliminar todos si hay productos
+    if (btnBorrarTodo) {
+      btnBorrarTodo.style.display = 'block';
+    }
+    
     console.log('✅ Productos renderizados correctamente');
     
     // Mostrar sección de recordatorios si hay productos y generar recordatorios
@@ -916,7 +940,7 @@ class CalculadoraCuotas {
     const fecha = document.getElementById('modal-fecha').value;
 
     if (!nombre || !valor || !cuotas || !fecha) {
-      alert('Por favor completa todos los campos');
+      this.showNotification('error', 'Error', 'Por favor completa todos los campos');
       return;
     }
 
@@ -942,6 +966,9 @@ class CalculadoraCuotas {
     this.updateStats();
     this.closeModal('editModal');
     this.currentEditingId = null;
+    
+    // Mostrar notificación de éxito
+    this.showNotification('success', '¡Producto actualizado!', `"${nombre}" se ha modificado correctamente`);
   }
 
   deleteProduct(id) {
@@ -961,12 +988,38 @@ class CalculadoraCuotas {
   confirmDelete() {
     if (!this.currentDeletingId) return;
 
+    const product = this.state.products.find(p => p.id === this.currentDeletingId);
+    const productName = product ? product.name : 'Producto';
+
     this.state.products = this.state.products.filter(p => p.id !== this.currentDeletingId);
     this.saveProducts();
     this.renderProducts();
     this.updateStats();
     this.closeModal('confirmModal');
     this.currentDeletingId = null;
+    
+    // Mostrar notificación de eliminación
+    this.showNotification('warning', 'Producto eliminado', `"${productName}" se ha eliminado correctamente`);
+  }
+
+  handleDeleteAllProducts() {
+    if (this.state.products.length === 0) {
+      this.showNotification('info', 'Sin productos', 'No hay productos para eliminar');
+      return;
+    }
+
+    const productCount = this.state.products.length;
+    
+    // Crear modal de confirmación personalizado para eliminar todos
+    if (confirm(`¿Estás seguro de que deseas eliminar TODOS los ${productCount} productos?\n\nEsta acción no se puede deshacer.`)) {
+      this.state.products = [];
+      this.saveProducts();
+      this.renderProducts();
+      this.updateStats();
+      
+      // Mostrar notificación de eliminación masiva
+      this.showNotification('warning', 'Productos eliminados', `Se eliminaron ${productCount} productos correctamente`);
+    }
   }
 
   openModal(modalId) {
@@ -1023,7 +1076,91 @@ class CalculadoraCuotas {
   }
 
   showError(message) {
-    alert(`Error: ${message}`);
+    this.showNotification('error', 'Error', message);
+  }
+
+  // Sistema de notificaciones flotantes
+  showNotification(type = 'info', title = '', message = '', duration = 5000) {
+    const container = document.getElementById('notificationContainer');
+    if (!container) return;
+
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    // Definir iconos según el tipo
+    const icons = {
+      success: 'fas fa-check-circle',
+      error: 'fas fa-exclamation-circle',
+      warning: 'fas fa-exclamation-triangle',
+      info: 'fas fa-info-circle'
+    };
+
+    notification.innerHTML = `
+      <div class="notification-icon">
+        <i class="${icons[type] || icons.info}"></i>
+      </div>
+      <div class="notification-content">
+        ${title ? `<div class="notification-title">${title}</div>` : ''}
+        <div class="notification-message">${message}</div>
+      </div>
+      <button class="notification-close">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="notification-progress"></div>
+    `;
+
+    // Agregar al contenedor
+    container.appendChild(notification);
+
+    // Configurar cierre manual
+    const closeBtn = notification.querySelector('.notification-close');
+    closeBtn.addEventListener('click', () => {
+      this.removeNotification(notification);
+    });
+
+    // Mostrar con animación
+    requestAnimationFrame(() => {
+      notification.classList.add('show');
+    });
+
+    // Barra de progreso
+    const progressBar = notification.querySelector('.notification-progress');
+    if (duration > 0) {
+      progressBar.style.width = '100%';
+      progressBar.style.transitionDuration = `${duration}ms`;
+      
+      requestAnimationFrame(() => {
+        progressBar.style.width = '0%';
+      });
+
+      // Auto-remover después del tiempo especificado
+      setTimeout(() => {
+        this.removeNotification(notification);
+      }, duration);
+    }
+  }
+
+  removeNotification(notification) {
+    if (!notification || !notification.parentNode) return;
+    
+    notification.classList.remove('show');
+    notification.classList.add('hide');
+    
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 400);
+  }
+
+  // Función para mostrar múltiples notificaciones
+  showMultipleNotifications(notifications) {
+    notifications.forEach((notif, index) => {
+      setTimeout(() => {
+        this.showNotification(notif.type, notif.title, notif.message, notif.duration);
+      }, index * 200); // Delay progresivo para mejor UX
+    });
   }
 
   // Inicializar sistema de recordatorios
