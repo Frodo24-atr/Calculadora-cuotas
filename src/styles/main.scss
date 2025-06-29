@@ -376,7 +376,6 @@ input[type='date'] {
   margin: 40px 0 30px 0;
   padding: 30px;
   background: linear-gradient(135deg, $primary-color 0%, #764ba2 100%);
-  border-radius: 20px;
   box-shadow: 0 10px 30px rgba($primary-color, 0.3);
   position: relative;
   overflow: hidden;
@@ -461,6 +460,159 @@ input[type='date'] {
 
   .pdf-icon {
     font-size: 22px;
+  }
+}
+
+/* =================================
+   Modals
+   ================================= */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease-in-out;
+  
+  &.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.modal-content {
+  background-color: white;
+  margin: auto;
+  padding: 0;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
+  position: relative;
+  z-index: 10000;
+}
+
+.modal-header {
+  padding: 20px 20px 10px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h3 {
+    margin: 0;
+    color: $text-primary;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    
+    &:hover,
+    &:focus {
+      color: #000;
+      text-decoration: none;
+    }
+  }
+}
+
+.modal-body {
+  padding: 20px;
+  
+  .form-group {
+    margin-bottom: 20px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: $text-primary;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+}
+
+.modal-footer {
+  padding: 15px 20px 20px 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  border-top: 1px solid #eee;
+}
+
+/* Confirm Modal */
+.confirm-modal {
+  z-index: 10001;
+  
+  .confirm-modal-content {
+    @extend .modal-content;
+    max-width: 400px;
+  }
+  
+  .confirm-modal-text {
+    margin-bottom: 10px;
+    color: $text-secondary;
+  }
+  
+  .confirm-modal-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .confirm-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    &.confirm-btn-cancel {
+      background-color: #6c757d;
+      color: white;
+      
+      &:hover {
+        background-color: #5a6268;
+      }
+    }
+    
+    &.confirm-btn-delete {
+      background-color: #dc3545;
+      color: white;
+      
+      &:hover {
+        background-color: #c82333;
+      }
+    }
   }
 }
 
