@@ -412,50 +412,62 @@ class RemindersManager {
 let remindersManager;
 
 // Funciones globales para los botones
-async function setupWhatsAppReminder() {
+window.setupWhatsAppReminder = async function() {
   const number = document.getElementById('whatsappNumber').value;
   const days = document.getElementById('whatsappDays').value;
 
   try {
-    await remindersManager.setupWhatsApp(number, days);
+    if (!window.remindersManager) {
+      throw new Error('Sistema de recordatorios no inicializado');
+    }
+    await window.remindersManager.setupWhatsApp(number, days);
     alert('✅ Recordatorios de WhatsApp configurados correctamente');
   } catch (error) {
     alert('❌ Error: ' + error.message);
   }
-}
+};
 
-async function setupEmailReminder() {
+window.setupEmailReminder = async function() {
   const email = document.getElementById('emailAddress').value;
   const days = document.getElementById('emailDays').value;
 
   try {
-    await remindersManager.setupEmail(email, days);
+    if (!window.remindersManager) {
+      throw new Error('Sistema de recordatorios no inicializado');
+    }
+    await window.remindersManager.setupEmail(email, days);
     alert('✅ Recordatorios de email configurados correctamente');
   } catch (error) {
     alert('❌ Error: ' + error.message);
   }
-}
+};
 
-async function setupCalendarReminder() {
+window.setupCalendarReminder = async function() {
   const email = document.getElementById('googleEmail').value;
   const type = document.getElementById('calendarType').value;
 
   try {
-    await remindersManager.setupGoogleCalendar(email, type);
+    if (!window.remindersManager) {
+      throw new Error('Sistema de recordatorios no inicializado');
+    }
+    await window.remindersManager.setupGoogleCalendar(email, type);
     alert('✅ Google Calendar conectado correctamente');
     
     // Crear eventos automáticamente si hay productos
-    if (remindersManager.reminders.length > 0) {
-      const results = await remindersManager.createAllCalendarEvents();
+    if (window.remindersManager.reminders.length > 0) {
+      const results = await window.remindersManager.createAllCalendarEvents();
       const successful = results.filter(r => r.success).length;
       alert(`📅 Se crearon ${successful} eventos en tu calendario`);
     }
   } catch (error) {
     alert('❌ Error: ' + error.message);
   }
-}
+};
 
 // Exportar para uso en otros módulos
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = RemindersManager;
 }
+
+// Hacer disponible globalmente
+window.RemindersManager = RemindersManager;
