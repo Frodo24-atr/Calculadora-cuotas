@@ -1,0 +1,44 @@
+{
+  "name": "nueva-carpeta",
+  "version": "1.0.0",
+  "description": "```\r 📁 Calculadora de Cuotas/\r ├── 📄 index.html                 # Archivo principal HTML\r ├── 📄 manifest.json             # Configuración PWA  \r ├── 📄 service-worker.js          # Service Worker para PWA\r ├── 📄 README.md                  # Esta documentación\r ├── 📁 assets/                    # Recursos estáticos\r │   ├── 📁 css/                   # Hojas de estilo modularizadas\r │   │   ├── 📄 main.css           # Estilos principales y utilidades\r │   │   ├── 📄 layout.css         # Estructura y layout\r │   │   ├── 📄 components.css     # Componentes (formularios, botones, productos)\r │   │   ├── 📄 modals.css         # Estilos de modales\r │   │   ├── 📄 charts.css         # Estilos de gráficos\r │   │   └── 📄 responsive.css     # Media queries y responsive design\r │   └── 📁 js/                    # Scripts modularizados\r │       ├── 📄 app.js             # Archivo principal e inicialización\r │       ├── 📄 storage.js         # Gestión de localStorage\r │       ├── 📄 products.js        # CRUD de productos\r │       ├── 📄 statistics.js      # Cálculo de estadísticas\r │       ├── 📄 charts.js          # Gráficos con Chart.js\r │       ├── 📄 modals.js          # Gestión de modales\r │       └── 📄 utils.js           # Funciones auxiliares\r └── 📁 components/                # Componentes reutilizables (futuro)\r ```",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "vite --port 3000 --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Frodo24-atr/Calculadora-cuotas.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Frodo24-atr/Calculadora-cuotas/issues"
+  },
+  "homepage": "https://github.com/Frodo24-atr/Calculadora-cuotas#readme",
+  "devDependencies": {
+    "@types/node": "^24.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^9.30.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "^3.6.2",
+    "sass": "^1.89.2",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "jspdf": "^3.0.1"
+  }
+}
