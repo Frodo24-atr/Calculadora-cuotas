@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Sistema de Recordatorios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .delete-btn {
+            background: #dc3545;
+        }
+        .delete-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test - Sistema de Recordatorios</h1>
+        
+        <div id="status-container">
+            <div class="status warning">🔄 Verificando inicialización...</div>
+        </div>
+
+        <div id="test-actions" style="display: none;">
+            <h3>Acciones de Prueba:</h3>
+            <button onclick="testDeleteIndividual()">🗑️ Test Eliminar Individual</button>
+            <button onclick="testDeleteAll()" class="delete-btn">🗑️ Test Eliminar Todos</button>
+            <button onclick="testAddProduct()">➕ Agregar Producto de Prueba</button>
+            <button onclick="checkStatus()">🔄 Verificar Estado</button>
+        </div>
+
+        <div id="reminders-test">
+            <h3>Lista de Recordatorios de Prueba:</h3>
+            <div id="nextReminders" class="reminders-list">
+                <p>No hay recordatorios programados</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button onclick="location.href='index.html'">⬅️ Volver a la App Principal</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./config/services.js"></script>
+    <script src="./modules/reminders.js"></script>
+
+    <script>
+        function updateStatus(message, type = 'warning') {
+            const container = document.getElementById('status-container');
+            container.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function checkStatus() {
+            const statusContainer = document.getElementById('status-container');
+            const actionsDiv = document.getElementById('test-actions');
+            
+            if (window.remindersManager) {
+                updateStatus('✅ Sistema de recordatorios inicializado correctamente', 'success');
+                actionsDiv.style.display = 'block';
+                
+                // Mostrar información adicional
+                const upcoming = window.remindersManager.getUpcomingReminders();
+                updateStatus(
+                    `✅ Sistema inicializado - ${upcoming.length} recordatorios pendientes`, 
+                    'success'
+                );
+            } else if (window.RemindersManager) {
+                updateStatus('🔄 RemindersManager disponible, intentando inicializar...', 'warning');
+                try {
+                    window.remindersManager = new RemindersManager();
+                    updateStatus('✅ Sistema inicializado exitosamente', 'success');
+                    actionsDiv.style.display = 'block';
+                } catch (error) {
+                    updateStatus(`❌ Error inicializando: ${error.message}`, 'error');
+                }
+            } else {
+                updateStatus('❌ RemindersManager no disponible', 'error');
+            }
+        }
+
+        function testDeleteIndividual() {
+            if (window.deleteIndividualReminder) {
+                window.deleteIndividualReminder(0);
+            } else {
+                alert('❌ Función deleteIndividualReminder no disponible');
+            }
+        }
+
+        function testDeleteAll() {
+            if (window.deleteAllReminders) {
+                window.deleteAllReminders();
+            } else {
+                alert('❌ Función deleteAllReminders no disponible');
+            }
+        }
+
+        function testAddProduct() {
+            // Simular agregar un producto para generar recordatorios
+            const testProduct = {
+                id: 'test-' + Date.now(),
+                name: 'Producto de Prueba',
+                value: 12000,
+                installments: 6,
+                startDate: new Date().toISOString().split('T')[0]
+            };
+
+            let products = [];
+            try {
+                products = JSON.parse(localStorage.getItem('products') || '[]');
+            } catch (e) {
+                products = [];
+            }
+
+            products.push(testProduct);
+            localStorage.setItem('products', JSON.stringify(products));
+
+            if (window.remindersManager) {
+                window.remindersManager.generateReminders(products);
+                alert('✅ Producto de prueba agregado y recordatorios generados');
+                checkStatus();
+            } else {
+                alert('❌ Sistema de recordatorios no disponible');
+            }
+        }
+
+        // Verificar estado al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(checkStatus, 500);
+            
+            // Verificar cada 2 segundos durante los primeros 10 segundos
+            let checks = 0;
+            const interval = setInterval(() => {
+                checks++;
+                if (checks > 5) {
+                    clearInterval(interval);
+                    return;
+                }
+                if (!window.remindersManager) {
+                    checkStatus();
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

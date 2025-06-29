@@ -6,11 +6,6 @@
 class RemindersManager {
   constructor() {
     this.config = {
-      whatsapp: {
-        enabled: false,
-        number: '',
-        daysAhead: 3
-      },
       email: {
         enabled: false,
         address: '',
@@ -104,28 +99,6 @@ class RemindersManager {
     }
   }
 
-  // Configurar recordatorio de WhatsApp
-  setupWhatsApp(number, daysAhead) {
-    if (!number || !number.trim()) {
-      throw new Error('Número de WhatsApp requerido');
-    }
-
-    // Validar formato del número
-    const cleanNumber = number.replace(/\s+/g, '').replace(/[^\d+]/g, '');
-    if (!cleanNumber.startsWith('+') || cleanNumber.length < 10) {
-      throw new Error('Formato de número inválido. Use el formato: +57 300 123 4567');
-    }
-
-    this.config.whatsapp = {
-      enabled: true,
-      number: cleanNumber,
-      daysAhead: parseInt(daysAhead) || 3
-    };
-
-    this.saveConfig();
-    return true;
-  }
-
   // Configurar recordatorio de Email
   async setupEmail(address, daysAhead) {
     if (!address || !this.validateEmail(address)) {
@@ -183,22 +156,7 @@ class RemindersManager {
       for (let i = 0; i < product.installments; i++) {
         const paymentDate = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
         
-        // Crear recordatorios según la configuración
-        if (this.config.whatsapp.enabled) {
-          const reminderDate = new Date(paymentDate);
-          reminderDate.setDate(reminderDate.getDate() - this.config.whatsapp.daysAhead);
-          
-          this.reminders.push({
-            type: 'whatsapp',
-            product: product.name,
-            paymentDate: paymentDate,
-            reminderDate: reminderDate,
-            amount: product.monthlyPayment,
-            installment: i + 1,
-            totalInstallments: product.installments
-          });
-        }
-
+        // Crear recordatorios solo para Email
         if (this.config.email.enabled) {
           const reminderDate = new Date(paymentDate);
           reminderDate.setDate(reminderDate.getDate() - this.config.email.daysAhead);
@@ -439,8 +397,8 @@ class RemindersManager {
     }
 
     const remindersHTML = upcoming.map((reminder, index) => {
-      const typeIcon = reminder.type === 'whatsapp' ? '💬' : '📧';
-      const typeName = reminder.type === 'whatsapp' ? 'WhatsApp' : 'Email';
+      const typeIcon = '';
+      const typeName = 'Email';
       
       return `
         <div class="reminder-item">
@@ -459,19 +417,19 @@ class RemindersManager {
 
     nextRemindersDiv.innerHTML = remindersHTML;
 
+    // Mostrar/ocultar controles de eliminación según haya recordatorios
+    const remindersControls = document.getElementById('remindersControls');
+    if (remindersControls) {
+      remindersControls.style.display = upcoming.length > 0 ? 'block' : 'none';
+    }
+
     // Actualizar estados de configuración
     this.updateStatusIndicators();
   }
 
   // Actualizar indicadores de estado
   updateStatusIndicators() {
-    const whatsappStatus = document.getElementById('whatsappStatus');
     const emailStatus = document.getElementById('emailStatus');
-
-    if (whatsappStatus) {
-      whatsappStatus.textContent = this.config.whatsapp.enabled ? 
-        `Configurado (${this.config.whatsapp.number})` : 'No configurado';
-    }
 
     if (emailStatus) {
       emailStatus.textContent = this.config.email.enabled ? 
@@ -499,36 +457,17 @@ class RemindersManager {
 let remindersManager;
 
 // Funciones globales para los botones
-window.setupWhatsAppReminder = async function() {
-  const number = document.getElementById('whatsappNumber').value;
-  const days = document.getElementById('whatsappDays').value;
-
-  try {
-    if (!window.remindersManager) {
-      throw new Error('Sistema de recordatorios no inicializado');
-    }
-    await window.remindersManager.setupWhatsApp(number, days);
-    
-    // Regenerar recordatorios si hay productos
-    const products = JSON.parse(localStorage.getItem('products') || '[]');
-    if (products.length > 0) {
-      window.remindersManager.generateReminders(products);
-    }
-    
-    alert('✅ Recordatorios de WhatsApp configurados correctamente');
-  } catch (error) {
-    alert('❌ Error: ' + error.message);
-  }
-};
-
 window.setupEmailReminder = async function() {
   const email = document.getElementById('emailAddress').value;
   const days = document.getElementById('emailDays').value;
 
   try {
+    // Intentar inicializar si no está disponible
     if (!window.remindersManager) {
-      throw new Error('Sistema de recordatorios no inicializado');
+      window.remindersManager = new RemindersManager();
+      console.log('🔄 Sistema de recordatorios inicializado automáticamente');
     }
+    
     await window.remindersManager.setupEmail(email, days);
     
     // Regenerar recordatorios si hay productos
@@ -545,16 +484,23 @@ window.setupEmailReminder = async function() {
 
 // Función para eliminar recordatorio individual
 window.deleteIndividualReminder = function(index) {
+  // Intentar inicializar si no está disponible
   if (!window.remindersManager) {
-    alert('❌ Sistema de recordatorios no inicializado');
-    return;
+    try {
+      window.remindersManager = new RemindersManager();
+      console.log('🔄 Sistema de recordatorios inicializado automáticamente');
+    } catch (error) {
+      alert('❌ Error: No se pudo inicializar el sistema de recordatorios');
+      console.error('Error:', error);
+      return;
+    }
   }
   
   const upcoming = window.remindersManager.getUpcomingReminders();
   if (index >= 0 && index < upcoming.length) {
     const reminder = upcoming[index];
     
-    if (confirm(`¿Eliminar recordatorio de "${reminder.product}"?\n\nFecha: ${reminder.reminderDate.toLocaleDateString('es-ES')}\nTipo: ${reminder.type === 'whatsapp' ? 'WhatsApp' : 'Email'}`)) {
+    if (confirm(`¿Eliminar recordatorio de "${reminder.product}"?\n\nFecha: ${reminder.reminderDate.toLocaleDateString('es-ES')}\nTipo: Email`)) {
       const deleted = window.remindersManager.deleteReminder(index);
       if (deleted) {
         alert('✅ Recordatorio eliminado correctamente');
@@ -567,9 +513,16 @@ window.deleteIndividualReminder = function(index) {
 
 // Función para eliminar todos los recordatorios
 window.deleteAllReminders = function() {
+  // Intentar inicializar si no está disponible
   if (!window.remindersManager) {
-    alert('❌ Sistema de recordatorios no inicializado');
-    return;
+    try {
+      window.remindersManager = new RemindersManager();
+      console.log('🔄 Sistema de recordatorios inicializado automáticamente');
+    } catch (error) {
+      alert('❌ Error: No se pudo inicializar el sistema de recordatorios');
+      console.error('Error:', error);
+      return;
+    }
   }
   
   const upcoming = window.remindersManager.getUpcomingReminders();
@@ -594,6 +547,16 @@ window.RemindersManager = RemindersManager;
 
 // Mostrar advertencias según el entorno al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar el sistema de recordatorios automáticamente
+  if (!window.remindersManager) {
+    try {
+      window.remindersManager = new RemindersManager();
+      console.log('✅ Sistema de recordatorios inicializado automáticamente');
+    } catch (error) {
+      console.error('❌ Error inicializando sistema de recordatorios:', error);
+    }
+  }
+
   // Mostrar advertencia de CORS para email
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const isFile = window.location.protocol === 'file:';

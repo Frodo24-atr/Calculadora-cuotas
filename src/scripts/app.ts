@@ -67,12 +67,28 @@ export class CalculadoraCuotas {
     // Inicializar gestor de gráficos
     chartManager.initialize('gastosChart');
 
-    // Inicializar sistema de recordatorios
-    if (typeof (window as any).RemindersManager !== 'undefined') {
-      (window as any).remindersManager = new (window as any).RemindersManager();
-      console.log('✅ Sistema de recordatorios inicializado');
-    } else {
-      console.warn('⚠️ Sistema de recordatorios no disponible');
+    // Inicializar sistema de recordatorios con reintentos
+    let remindersInitialized = false;
+    for (let attempt = 0; attempt < 3 && !remindersInitialized; attempt++) {
+      try {
+        if (typeof (window as any).RemindersManager !== 'undefined') {
+          if (!(window as any).remindersManager) {
+            (window as any).remindersManager = new (window as any).RemindersManager();
+          }
+          console.log('✅ Sistema de recordatorios inicializado');
+          remindersInitialized = true;
+        } else {
+          console.warn(`⚠️ Intento ${attempt + 1}: RemindersManager no disponible, reintentando...`);
+          await new Promise(resolve => setTimeout(resolve, 100)); // Esperar 100ms
+        }
+      } catch (error) {
+        console.error(`❌ Error en intento ${attempt + 1} de inicialización de recordatorios:`, error);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    
+    if (!remindersInitialized) {
+      console.warn('⚠️ Sistema de recordatorios no pudo inicializarse, funcionará en modo fallback');
     }
 
     // Configurar listener para cambios en productos
