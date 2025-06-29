@@ -1,0 +1,73 @@
+// ==========================================================================
+// VARIABLES SCSS - CALCULADORA DE CUOTAS
+// ==========================================================================
+
+// Colors
+$primary-color: #667eea;
+$primary-dark: #5a6fd8;
+$secondary-color: #764ba2;
+$secondary-dark: #6a4190;
+$danger-color: #f44336;
+$danger-dark: #d32f2f;
+$warning-color: #ff9800;
+$warning-dark: #f57c00;
+$info-color: #2196f3;
+$success-color: #4caf50;
+
+// Text colors
+$text-primary: #333;
+$text-secondary: #666;
+$text-light: #999;
+
+// Background colors
+$bg-primary: #ffffff;
+$bg-secondary: #f8f9fa;
+$bg-light: #fafafa;
+$bg-gradient: linear-gradient(135deg, #{$primary-color} 0%, #{$secondary-color} 100%);
+
+// Border colors
+$border-color: #e0e0e0;
+$border-light: #e9ecef;
+
+// Shadows
+$shadow-light: 0 2px 5px rgba(0, 0, 0, 0.1);
+$shadow-medium: 0 4px 15px rgba(0, 0, 0, 0.1);
+$shadow-heavy: 0 10px 30px rgba(0, 0, 0, 0.3);
+$shadow-primary: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+// Border radius
+$radius-small: 8px;
+$radius-medium: 12px;
+$radius-large: 15px;
+$radius-xlarge: 20px;
+
+// Font
+$font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+// Spacing
+$spacing-xs: 5px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$spacing-lg: 20px;
+$spacing-xl: 25px;
+$spacing-xxl: 30px;
+
+// Breakpoints
+$mobile: 768px;
+$tablet: 1024px;
+$desktop: 1200px;
+
+// Z-index
+$z-modal: 1000;
+$z-loading: 999;
+$z-tooltip: 998;
+
+// Transitions
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Component sizes
+$button-height: 48px;
+$input-height: 48px;
+$mobile-input-height: 52px;
