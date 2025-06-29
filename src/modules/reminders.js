@@ -43,6 +43,12 @@ class RemindersManager {
     }
   }
 
+  // Guardar configuración
+  saveConfig() {
+    localStorage.setItem('remindersConfig', JSON.stringify(this.config));
+    this.updateUI();
+  }
+
   // Cargar recordatorios ya enviados
   loadSentReminders() {
     const saved = localStorage.getItem('sentReminders');
