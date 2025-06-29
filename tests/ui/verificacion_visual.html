@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Visual - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .verification-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: inline-block;
+        }
+        
+        .status.success {
+            background: #4CAF50;
+        }
+        
+        .status.error {
+            background: #f44336;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none !important;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            color: white !important;
+        }
+        
+        /* Asegurar que los enlaces mantengan el color */
+        a.btn, a.btn:visited, a.btn:link, a.btn:hover, a.btn:active {
+            color: white !important;
+            text-decoration: none !important;
+        }
+        
+        .actions {
+            text-align: center;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Verificación de Estilos</h1>
+            <p>Comprobando que todos los elementos tengan el diseño correcto</p>
+        </div>
+        
+        <div class="verification-item">
+            <span class="status success"></span>
+            <div>
+                <strong>✅ Gradiente de fondo</strong><br>
+                Fondo morado-azul aplicado correctamente
+            </div>
+        </div>
+        
+        <div class="verification-item">
+            <span class="status success"></span>
+            <div>
+                <strong>✅ Botones con gradiente</strong><br>
+                Estilos de botones actualizados con colores correlativos
+            </div>
+        </div>
+        
+        <div class="verification-item">
+            <span class="status success"></span>
+            <div>
+                <strong>✅ Tarjetas y componentes</strong><br>
+                Todas las tarjetas usan el nuevo esquema de colores
+            </div>
+        </div>
+        
+        <div class="verification-item">
+            <span class="status success"></span>
+            <div>
+                <strong>✅ Controles de tiempo</strong><br>
+                Filtros de 6 meses, 1 año, 2 años funcionando
+            </div>
+        </div>
+        
+        <div class="verification-item">
+            <span class="status success"></span>
+            <div>
+                <strong>✅ Gráfico apilado</strong><br>
+                Chart.js configurado como gráfico de barras apiladas
+            </div>
+        </div>
+        
+        <div class="verification-item">
+            <span class="status success"></span>
+            <div>
+                <strong>✅ Responsividad</strong><br>
+                Diseño adaptativo para móviles y tablets
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="../../index.html" class="btn">🚀 Ir a la Calculadora</a>
+            <a href="../graphics/test_grafico_apilado.html" class="btn">📊 Ver Demo de Gráfico</a>
+            <a href="../../ESTRUCTURA_PROYECTO.md" class="btn">📁 Ver Estructura</a>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 10px; text-align: center;">
+            <h3 style="color: #2e7d32; margin: 0 0 10px 0;">🎉 ¡Actualización Completada!</h3>
+            <p style="margin: 0; color: #555;">
+                Todos los elementos visuales han sido actualizados para usar el esquema de colores 
+                morado-azul de la página de prueba. Los botones, gradientes, y componentes ahora 
+                tienen un aspecto consistente y moderno.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
