@@ -1,6 +1,6 @@
-// Importaciones SCSS
-@import 'variables';
-@import 'mixins';
+// Importaciones SCSS modernas
+@use 'variables' as *;
+@use 'mixins' as *;
 
 // ==========================================================================
 // MAIN STYLES - CALCULADORA DE CUOTAS

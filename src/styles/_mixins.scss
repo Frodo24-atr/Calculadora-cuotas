@@ -2,7 +2,7 @@
 // MIXINS SCSS - CALCULADORA DE CUOTAS
 // ==========================================================================
 
-@import 'variables';
+@use 'variables' as *;
 
 // Button mixin
 @mixin button-base {
