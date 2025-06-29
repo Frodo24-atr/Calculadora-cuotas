@@ -187,6 +187,9 @@ class CalculadoraCuotas {
     this.renderProducts();
     this.clearForm();
     this.updateStats();
+    
+    // Generar recordatorios automáticamente
+    this.generateReminders();
   }
 
   loadStoredProducts() {
@@ -200,6 +203,11 @@ class CalculadoraCuotas {
           endDate: new Date(p.endDate)
         }));
         console.log(`📦 Productos cargados desde localStorage: ${this.state.products.length}`);
+        
+        // Generar recordatorios para productos existentes
+        setTimeout(() => {
+          this.generateReminders();
+        }, 2000); // Esperar a que el sistema de recordatorios esté listo
       } else {
         console.log('📦 No hay productos guardados en localStorage');
         this.state.products = [];
@@ -213,8 +221,26 @@ class CalculadoraCuotas {
   saveProducts() {
     try {
       localStorage.setItem('calculadora-productos', JSON.stringify(this.state.products));
+      
+      // También guardar en el formato que espera el sistema de recordatorios
+      localStorage.setItem('products', JSON.stringify(this.state.products));
+      
+      // Generar recordatorios si hay productos
+      this.generateReminders();
     } catch (error) {
       console.error('Error guardando productos:', error);
+    }
+  }
+
+  // Generar recordatorios para todos los productos
+  generateReminders() {
+    if (this.remindersManager && this.state.products.length > 0) {
+      try {
+        this.remindersManager.generateReminders(this.state.products);
+        console.log('📅 Recordatorios generados para todos los productos');
+      } catch (error) {
+        console.error('❌ Error generando recordatorios:', error);
+      }
     }
   }
 

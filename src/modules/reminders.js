@@ -27,8 +27,12 @@ class RemindersManager {
     };
     
     this.reminders = [];
+    this.sentReminders = new Set(); // Para evitar enviar duplicados
+    this.checkInterval = null; // Intervalo de verificación
     this.loadConfig();
+    this.loadSentReminders();
     this.initializeServices();
+    this.startReminderScheduler();
   }
 
   // Cargar configuración del localStorage
@@ -39,10 +43,17 @@ class RemindersManager {
     }
   }
 
-  // Guardar configuración
-  saveConfig() {
-    localStorage.setItem('remindersConfig', JSON.stringify(this.config));
-    this.updateUI();
+  // Cargar recordatorios ya enviados
+  loadSentReminders() {
+    const saved = localStorage.getItem('sentReminders');
+    if (saved) {
+      this.sentReminders = new Set(JSON.parse(saved));
+    }
+  }
+
+  // Guardar recordatorios enviados
+  saveSentReminders() {
+    localStorage.setItem('sentReminders', JSON.stringify([...this.sentReminders]));
   }
 
   // Inicializar servicios externos
@@ -246,7 +257,21 @@ class RemindersManager {
 
     // Ordenar por fecha de recordatorio
     this.reminders.sort((a, b) => a.reminderDate - b.reminderDate);
+    
+    // Verificar inmediatamente si hay recordatorios pendientes
+    setTimeout(() => {
+      this.checkPendingReminders();
+    }, 1000);
+    
     this.updateUI();
+    
+    console.log(`📅 Se generaron ${this.reminders.length} recordatorios`);
+  }
+
+  // Forzar verificación manual de recordatorios
+  async forceCheckReminders() {
+    console.log('🔄 Verificando recordatorios manualmente...');
+    await this.checkPendingReminders();
   }
 
   // Enviar recordatorio por WhatsApp
@@ -261,7 +286,87 @@ class RemindersManager {
     );
 
     const whatsappUrl = `https://wa.me/${this.config.whatsapp.number.replace('+', '')}?text=${message}`;
+    
+    // Mostrar notificación al usuario
+    this.showReminderNotification('WhatsApp', reminder);
+    
+    // Abrir WhatsApp (el usuario debe hacer clic para enviar)
     window.open(whatsappUrl, '_blank');
+  }
+
+  // Mostrar notificación de recordatorio
+  showReminderNotification(type, reminder) {
+    // Crear notificación visual
+    const notification = document.createElement('div');
+    notification.className = 'reminder-notification';
+    notification.innerHTML = `
+      <div class="notification-content">
+        <div class="notification-icon">🔔</div>
+        <div class="notification-text">
+          <strong>Recordatorio ${type}</strong><br>
+          ${reminder.product} - $${Math.round(reminder.amount).toLocaleString('es-ES')}<br>
+          <small>Fecha de pago: ${reminder.paymentDate.toLocaleDateString('es-ES')}</small>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" class="notification-close">×</button>
+      </div>
+    `;
+
+    // Agregar estilos si no existen
+    if (!document.getElementById('reminder-notification-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'reminder-notification-styles';
+      styles.textContent = `
+        .reminder-notification {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 15px;
+          border-radius: 10px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+          z-index: 10000;
+          max-width: 350px;
+          animation: slideIn 0.3s ease-out;
+        }
+        .notification-content {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .notification-icon {
+          font-size: 24px;
+        }
+        .notification-text {
+          flex: 1;
+          font-size: 14px;
+        }
+        .notification-close {
+          background: rgba(255,255,255,0.2);
+          border: none;
+          color: white;
+          width: 25px;
+          height: 25px;
+          border-radius: 50%;
+          cursor: pointer;
+          font-size: 16px;
+        }
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `;
+      document.head.appendChild(styles);
+    }
+
+    document.body.appendChild(notification);
+
+    // Auto-remover después de 8 segundos
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, 8000);
   }
 
   // Enviar recordatorio por email
@@ -406,6 +511,92 @@ class RemindersManager {
     const section = document.getElementById('recordatoriosSection');
     section.style.display = show ? 'block' : 'none';
   }
+
+  // Iniciar el programador de recordatorios
+  startReminderScheduler() {
+    // Verificar cada hora si hay recordatorios pendientes
+    this.checkInterval = setInterval(() => {
+      this.checkPendingReminders();
+    }, 60 * 60 * 1000); // Cada hora
+
+    // También verificar inmediatamente
+    setTimeout(() => {
+      this.checkPendingReminders();
+    }, 5000); // 5 segundos después de cargar
+
+    console.log('📅 Programador de recordatorios iniciado');
+  }
+
+  // Verificar recordatorios pendientes
+  async checkPendingReminders() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    for (const reminder of this.reminders) {
+      const reminderDate = new Date(
+        reminder.reminderDate.getFullYear(),
+        reminder.reminderDate.getMonth(),
+        reminder.reminderDate.getDate()
+      );
+
+      // Crear ID único para el recordatorio
+      const reminderId = `${reminder.type}_${reminder.product}_${reminder.installment}_${reminderDate.getTime()}`;
+
+      // Si es hoy o ya pasó y no se ha enviado
+      if (reminderDate <= today && !this.sentReminders.has(reminderId)) {
+        try {
+          await this.sendScheduledReminder(reminder, reminderId);
+          console.log(`✅ Recordatorio enviado: ${reminder.product} - ${reminder.type}`);
+        } catch (error) {
+          console.error(`❌ Error enviando recordatorio: ${error.message}`);
+        }
+      }
+    }
+  }
+
+  // Enviar recordatorio programado
+  async sendScheduledReminder(reminder, reminderId) {
+    switch (reminder.type) {
+      case 'whatsapp':
+        await this.sendWhatsAppReminder(reminder);
+        break;
+      case 'email':
+        await this.sendEmailReminder(reminder);
+        break;
+      case 'calendar':
+        // Los eventos de calendario se crean una sola vez
+        break;
+    }
+
+    // Marcar como enviado
+    this.sentReminders.add(reminderId);
+    this.saveSentReminders();
+  }
+
+  // Verificar y enviar recordatorios pendientes
+  async checkAndSendReminders() {
+    const now = new Date();
+    const pendingReminders = this.reminders.filter(reminder => {
+      return reminder.reminderDate <= now && !this.sentReminders.has(reminder.reminderDate.getTime());
+    });
+
+    for (const reminder of pendingReminders) {
+      try {
+        if (reminder.type === 'whatsapp') {
+          await this.sendWhatsAppReminder(reminder);
+        } else if (reminder.type === 'email') {
+          await this.sendEmailReminder(reminder);
+        } else if (reminder.type === 'calendar') {
+          await this.createCalendarEvent(reminder);
+        }
+
+        // Marcar como enviado
+        this.sentReminders.add(reminder.reminderDate.getTime());
+      } catch (error) {
+        console.error('Error enviando recordatorio:', error.message);
+      }
+    }
+  }
 }
 
 // Instancia global
@@ -421,6 +612,13 @@ window.setupWhatsAppReminder = async function() {
       throw new Error('Sistema de recordatorios no inicializado');
     }
     await window.remindersManager.setupWhatsApp(number, days);
+    
+    // Regenerar recordatorios si hay productos
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    if (products.length > 0) {
+      window.remindersManager.generateReminders(products);
+    }
+    
     alert('✅ Recordatorios de WhatsApp configurados correctamente');
   } catch (error) {
     alert('❌ Error: ' + error.message);
@@ -436,6 +634,13 @@ window.setupEmailReminder = async function() {
       throw new Error('Sistema de recordatorios no inicializado');
     }
     await window.remindersManager.setupEmail(email, days);
+    
+    // Regenerar recordatorios si hay productos
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    if (products.length > 0) {
+      window.remindersManager.generateReminders(products);
+    }
+    
     alert('✅ Recordatorios de email configurados correctamente');
   } catch (error) {
     alert('❌ Error: ' + error.message);
@@ -462,6 +667,18 @@ window.setupCalendarReminder = async function() {
   } catch (error) {
     alert('❌ Error: ' + error.message);
   }
+};
+
+// Función para probar recordatorios manualmente
+window.testReminders = async function() {
+  if (!window.remindersManager) {
+    alert('❌ Sistema de recordatorios no inicializado');
+    return;
+  }
+  
+  console.log('🧪 Probando recordatorios...');
+  await window.remindersManager.forceCheckReminders();
+  alert('✅ Verificación de recordatorios completada. Revisa la consola para más detalles.');
 };
 
 // Exportar para uso en otros módulos
