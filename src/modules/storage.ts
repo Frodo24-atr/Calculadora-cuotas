@@ -1,4 +1,4 @@
-import type { Product, StorageManager } from '@/types';
+import type { Product, StorageManager } from '../types/index';
 
 /**
  * Gestor de almacenamiento local para productos

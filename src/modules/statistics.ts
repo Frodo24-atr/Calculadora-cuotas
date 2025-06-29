@@ -1,4 +1,4 @@
-import type { Product, Statistics } from '@/types';
+import type { Product, Statistics } from '../types/index';
 
 /**
  * Calculador de estadísticas para productos

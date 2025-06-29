@@ -8,7 +8,7 @@ import {
   Legend,
   type ChartConfiguration,
 } from 'chart.js';
-import type { Product, ChartData, TimeRange, ColorScheme } from '@/types';
+import type { Product, ChartData, TimeRange, ColorScheme } from '../types/index';
 
 // Registrar componentes de Chart.js
 Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);

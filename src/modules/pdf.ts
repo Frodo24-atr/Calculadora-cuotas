@@ -3,9 +3,9 @@
  * Maneja la exportación de datos de productos en formato PDF y texto alternativo
  */
 
-import { Product, Statistics } from '../types/index.js';
-import { storageManager } from './storage.js';
-import { StatisticsCalculator } from './statistics.js';
+import { Product, Statistics } from '../types/index';
+import { storageManager } from './storage';
+import { StatisticsCalculator } from './statistics';
 
 // Declara jsPDF para TypeScript
 declare global {

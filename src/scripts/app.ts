@@ -1,9 +1,13 @@
-import type { Product, ProductFormData, TimeRange, AppState } from '@/types';
-import { productManager } from '@/modules/products';
-import { chartManager } from '@/modules/charts';
-import { statisticsCalculator } from '@/modules/statistics';
-import { logger, formatCurrency, isMobile } from '@/modules/utils';
-import { downloadPDF, checkPDFAvailability } from '@/modules/pdf';
+console.log('🔍 Script app.ts cargado');
+
+import type { Product, ProductFormData, TimeRange, AppState } from '../types/index';
+import { productManager } from '../modules/products';
+import { chartManager } from '../modules/charts';
+import { statisticsCalculator } from '../modules/statistics';
+import { logger, formatCurrency, isMobile } from '../modules/utils';
+import { downloadPDF, checkPDFAvailability } from '../modules/pdf';
+
+console.log('🔍 Imports completados');
 
 /**
  * Aplicación principal - Calculadora de Cuotas
@@ -28,26 +32,30 @@ export class CalculadoraCuotas {
    */
   private async initialize(): Promise<void> {
     try {
-      logger.info('Inicializando Calculadora de Cuotas...');
+      console.log('🚀 Inicializando Calculadora de Cuotas...');
 
       // Mostrar loading
       this.showLoading();
 
       // Inicializar módulos
+      console.log('🔧 Inicializando módulos...');
       await this.initializeModules();
 
       // Configurar eventos
+      console.log('⚡ Configurando eventos...');
       this.setupEventListeners();
 
       // Cargar datos iniciales
+      console.log('📊 Cargando datos iniciales...');
       this.loadInitialData();
 
       // Ocultar loading
+      console.log('✅ Ocultando loading...');
       this.hideLoading();
 
-      logger.success('Aplicación inicializada correctamente');
+      console.log('✅ Aplicación inicializada correctamente');
     } catch (error) {
-      logger.error('Error inicializando aplicación:', error);
+      console.error('❌ Error inicializando aplicación:', error);
       this.showError('Error al inicializar la aplicación');
     }
   }
@@ -633,9 +641,19 @@ export class CalculadoraCuotas {
 }
 
 // Inicializar aplicación cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
+console.log('🔍 DOM Estado:', document.readyState);
+
+if (document.readyState === 'loading') {
+  console.log('🔍 Esperando DOMContentLoaded...');
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('🔍 DOMContentLoaded disparado, creando aplicación...');
+    window.app = new CalculadoraCuotas();
+  });
+} else {
+  console.log('🔍 DOM ya está cargado, creando aplicación...');
+  // DOM ya está cargado
   window.app = new CalculadoraCuotas();
-});
+}
 
 // Declarar el tipo global para window
 declare global {

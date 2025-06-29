@@ -379,6 +379,7 @@ input[type='date'] {
   box-shadow: 0 10px 30px rgba($primary-color, 0.3);
   position: relative;
   overflow: hidden;
+  /* border-radius removido intencionalmente según requerimientos */
 
   &:hover {
     transform: translateY(0px);
