@@ -10,6 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
+    <!-- EmailJS para envío de emails -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <!-- Google APIs para Calendar -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    
     <!-- Estilos CSS básicos (fallback mientras se arregla SCSS) -->
     <link rel="stylesheet" href="./styles/fallback.css">
 </head>
@@ -113,6 +120,110 @@
             </div>
         </div>
         
+        <!-- Sección de Recordatorios -->
+        <div id="recordatoriosSection" class="recordatorios-section" style="display: none;">
+            <div class="recordatorios-header">
+                <h3>🔔 Recordatorios de Pagos</h3>
+                <p>Configura notificaciones automáticas para no olvidar tus cuotas</p>
+            </div>
+            
+            <div class="recordatorios-grid">
+                <!-- WhatsApp Reminder -->
+                <div class="recordatorio-card whatsapp-card">
+                    <div class="recordatorio-icon">💬</div>
+                    <h4>WhatsApp</h4>
+                    <p>Recibe recordatorios por WhatsApp</p>
+                    <div class="recordatorio-input-group">
+                        <label for="whatsappNumber">Número de WhatsApp:</label>
+                        <input type="tel" id="whatsappNumber" placeholder="+57 300 123 4567" class="recordatorio-input">
+                        <small>Incluye código de país (ej: +57 para Colombia)</small>
+                    </div>
+                    <div class="recordatorio-config">
+                        <label for="whatsappDays">Recordar con:</label>
+                        <select id="whatsappDays" class="recordatorio-select">
+                            <option value="1">1 día de anticipación</option>
+                            <option value="3" selected>3 días de anticipación</option>
+                            <option value="7">1 semana de anticipación</option>
+                        </select>
+                    </div>
+                    <button class="recordatorio-btn whatsapp-btn" onclick="setupWhatsAppReminder()">
+                        Configurar WhatsApp
+                    </button>
+                </div>
+
+                <!-- Email Reminder -->
+                <div class="recordatorio-card email-card">
+                    <div class="recordatorio-icon">📧</div>
+                    <h4>Gmail</h4>
+                    <p>Recibe recordatorios por correo electrónico</p>
+                    <div class="recordatorio-input-group">
+                        <label for="emailAddress">Correo electrónico:</label>
+                        <input type="email" id="emailAddress" placeholder="tu@email.com" class="recordatorio-input">
+                        <small>Usaremos EmailJS para enviar los recordatorios</small>
+                    </div>
+                    <div class="recordatorio-config">
+                        <label for="emailDays">Recordar con:</label>
+                        <select id="emailDays" class="recordatorio-select">
+                            <option value="1">1 día de anticipación</option>
+                            <option value="3" selected>3 días de anticipación</option>
+                            <option value="7">1 semana de anticipación</option>
+                        </select>
+                    </div>
+                    <button class="recordatorio-btn email-btn" onclick="setupEmailReminder()">
+                        Configurar Email
+                    </button>
+                </div>
+
+                <!-- Google Calendar Reminder -->
+                <div class="recordatorio-card calendar-card">
+                    <div class="recordatorio-icon">📅</div>
+                    <h4>Google Calendar</h4>
+                    <p>Agrega eventos automáticamente al calendario</p>
+                    <div class="recordatorio-input-group">
+                        <label for="googleEmail">Cuenta de Google:</label>
+                        <input type="email" id="googleEmail" placeholder="tu@gmail.com" class="recordatorio-input">
+                        <small>Necesitarás autorizar el acceso a tu calendario</small>
+                    </div>
+                    <div class="recordatorio-config">
+                        <label for="calendarType">Tipo de evento:</label>
+                        <select id="calendarType" class="recordatorio-select">
+                            <option value="reminder">Solo recordatorio</option>
+                            <option value="event" selected>Evento completo</option>
+                            <option value="both">Ambos</option>
+                        </select>
+                    </div>
+                    <button class="recordatorio-btn calendar-btn" onclick="setupCalendarReminder()">
+                        Conectar con Google
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estado de Recordatorios -->
+            <div class="recordatorios-status">
+                <h4>📊 Estado de Recordatorios</h4>
+                <div class="status-grid">
+                    <div class="status-item whatsapp-status">
+                        <span class="status-icon">💬</span>
+                        <span class="status-text" id="whatsappStatus">No configurado</span>
+                    </div>
+                    <div class="status-item email-status">
+                        <span class="status-icon">📧</span>
+                        <span class="status-text" id="emailStatus">No configurado</span>
+                    </div>
+                    <div class="status-item calendar-status">
+                        <span class="status-icon">📅</span>
+                        <span class="status-text" id="calendarStatus">No configurado</span>
+                    </div>
+                </div>
+                <div class="next-reminders">
+                    <h5>Próximos recordatorios:</h5>
+                    <div id="nextReminders" class="reminders-list">
+                        <p>No hay recordatorios programados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Botón de Descarga PDF -->
         <div class="pdf-download-section">
             <div class="pdf-download-background"></div>
@@ -161,7 +272,7 @@
 
     <!-- Modal de Confirmación -->
     <div id="confirmModal" class="modal confirm-modal">
-        <div class="confirm-modal-content">
+        <div class="modal-content confirm-modal-content">
             <div class="modal-header">
                 <h3>⚠️ Confirmar Eliminación</h3>
             </div>
@@ -178,6 +289,8 @@
     </div>
 
     <!-- Scripts JavaScript (sin problemas de MIME type) -->
+    <script src="./config/services.js"></script>
+    <script src="./modules/reminders.js"></script>
     <script type="module" src="./scripts/app.js"></script>
 </body>
 </html>

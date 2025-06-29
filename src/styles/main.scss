@@ -567,53 +567,140 @@ input[type='date'] {
   border-top: 1px solid #eee;
 }
 
-/* Confirm Modal */
-.confirm-modal {
-  z-index: 10001;
+/* Confirm Modal - Estilos específicos para el modal de confirmación de eliminación */
+.modal.confirm-modal {
+  background-color: rgba(220, 53, 69, 0.3) !important; /* Fondo rojizo translúcido */
+  z-index: 10001 !important;
   
   .confirm-modal-content {
-    @extend .modal-content;
-    max-width: 400px;
+    background-color: white !important;
+    margin: auto !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+    width: 90% !important;
+    max-width: 450px !important;
+    box-shadow: 0 15px 40px rgba(220, 53, 69, 0.5) !important; /* Sombra rojiza */
+    position: relative !important;
+    z-index: 10002 !important;
+    border: 4px solid #dc3545 !important; /* Borde rojo de advertencia */
+    animation: shakeWarning 0.5s ease-in-out !important;
+  }
+  
+  .modal-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    color: white !important;
+    padding: 20px !important;
+    border-bottom: none !important;
+    border-radius: 8px 8px 0 0 !important;
+    
+    h3 {
+      color: white !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      margin: 0 !important;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+    }
+  }
+  
+  .modal-body {
+    padding: 25px !important;
+    text-align: center !important;
+    background: #fff8f8 !important; /* Fondo ligeramente rojizo */
+    
+    p {
+      margin: 10px 0 !important;
+      color: #721c24 !important;
+    }
+    
+    strong {
+      color: #dc3545 !important;
+      font-weight: 700 !important;
+      font-size: 18px !important;
+      background: rgba(220, 53, 69, 0.1) !important;
+      padding: 5px 10px !important;
+      border-radius: 5px !important;
+      display: inline-block !important;
+    }
   }
   
   .confirm-modal-text {
-    margin-bottom: 10px;
-    color: $text-secondary;
+    font-size: 16px !important;
+    color: #721c24 !important;
+    margin-bottom: 15px !important;
+    font-weight: 500 !important;
   }
   
-  .confirm-modal-buttons {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 20px;
+  .modal-footer {
+    background: #f8f9fa !important;
+    padding: 20px !important;
+    border-radius: 0 0 8px 8px !important;
+    justify-content: center !important;
+    gap: 15px !important;
+    display: flex !important;
   }
   
   .confirm-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    padding: 12px 30px !important;
+    border: none !important;
+    border-radius: 25px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
     
     &.confirm-btn-cancel {
-      background-color: #6c757d;
-      color: white;
+      background: #6c757d !important;
+      color: white !important;
       
       &:hover {
-        background-color: #5a6268;
+        background: #5a6268 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4) !important;
       }
     }
     
     &.confirm-btn-delete {
-      background-color: #dc3545;
-      color: white;
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+      color: white !important;
+      position: relative !important;
+      overflow: hidden !important;
       
       &:hover {
-        background-color: #c82333;
+        background: linear-gradient(135deg, #c82333 0%, #a02229 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 25px rgba(220, 53, 69, 0.5) !important;
+      }
+      
+      &:before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent) !important;
+        transition: left 0.5s !important;
+      }
+      
+      &:hover:before {
+        left: 100% !important;
       }
     }
+    
+    &:active {
+      transform: translateY(0) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+    }
   }
+}
+
+@keyframes shakeWarning {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 // ==========================================================================
