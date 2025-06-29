@@ -1,6 +1,5 @@
-// Importaciones SCSS modernas
+// Importaciones SCSS modernas - solo variables
 @use 'variables' as *;
-@use 'mixins' as *;
 
 // ==========================================================================
 // MAIN STYLES - CALCULADORA DE CUOTAS
@@ -614,6 +613,81 @@ input[type='date'] {
         background-color: #c82333;
       }
     }
+  }
+}
+
+// ==========================================================================
+// MIXINS INCLUIDOS PARA EVITAR CONFLICTOS
+// ==========================================================================
+
+// Button mixin
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: $radius-medium;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Card mixin
+@mixin card {
+  background: $bg-primary;
+  border-radius: $radius-large;
+  box-shadow: $shadow-medium;
+  padding: $spacing-xl;
+  border: 1px solid $border-light;
+}
+
+// Responsive mixin
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: 1024px) {
+    @content;
+  }
+}
+
+// Flex center mixin
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Text ellipsis mixin
+@mixin text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Transition mixin
+@mixin transition($property: all, $duration: 0.3s, $easing: ease) {
+  transition: $property $duration $easing;
+}
+
+// Box shadow hover effect
+@mixin hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-heavy;
   }
 }
 
