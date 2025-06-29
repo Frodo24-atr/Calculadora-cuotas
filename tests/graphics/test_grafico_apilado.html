@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Gráfico Apilado - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .time-range-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        
+        .time-range-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .time-range-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .chart-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .chart-canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+        }
+        
+        .chart-canvas-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .products-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .legend-text {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .actions {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .chart-canvas-wrapper {
+                height: 300px;
+            }
+            
+            .controls {
+                gap: 5px;
+            }
+            
+            .time-range-btn {
+                padding: 8px 16px;
+                font-size: 12px;
+                min-width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Prueba de Gráfico Apilado</h1>
+            <p>Estrategia de Cuotas por Período - Estilo Similar a la Imagen</p>
+        </div>
+        
+        <div class="info-panel">
+            <div class="info-card">
+                <div class="info-value" id="totalProductos">3</div>
+                <div class="info-label">Productos Activos</div>
+            </div>
+            <div class="info-card">
+                <div class="info-value" id="valorTotal">$4.5M</div>
+                <div class="info-label">Valor Total</div>
+            </div>
+            <div class="info-card">
+                <div class="info-value" id="totalMeses">12</div>
+                <div class="info-label">Meses Proyectados</div>
+            </div>
+        </div>
+        
+        <!-- Controles de Filtro -->
+        <div class="controls">
+            <button class="time-range-btn active" data-range="all">Todos los Períodos</button>
+            <button class="time-range-btn" data-range="6">6 Meses</button>
+            <button class="time-range-btn" data-range="12">1 Año</button>
+            <button class="time-range-btn" data-range="24">2 Años</button>
+        </div>
+        
+        <!-- Leyenda de Productos -->
+        <div class="products-legend" id="productsLegend">
+            <!-- Se llenará dinámicamente -->
+        </div>
+        
+        <!-- Gráfico -->
+        <div class="chart-container">
+            <div class="chart-wrapper">
+                <h3 style="text-align: center; color: #333; margin-bottom: 20px;">📊 Estrategia de Cuotas por Período</h3>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="stackedChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn" onclick="cambiarDatos()">🔄 Cambiar Datos</button>
+            <button class="btn" onclick="regenerarGrafico()">📈 Regenerar Gráfico</button>
+            <button class="btn" onclick="mostrarInfo()">ℹ️ Información</button>
+        </div>
+        
+        <div id="logOutput" style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 20px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto; display: none;"></div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <script>
+        let stackedChart = null;
+        let currentDataSet = 1;
+        let currentRange = 'all';
+        
+        // Datos de prueba que simulan productos con cuotas
+        const productosTest = [
+            {
+                id: 'laptop',
+                nombre: 'Laptop Dell',
+                valor: 2500000,
+                cuotas: 12,
+                valorCuota: 208333,
+                fechaInicio: '2024-01-01'
+            },
+            {
+                id: 'telefono',
+                nombre: 'iPhone 15',
+                valor: 1800000,
+                cuotas: 8,
+                valorCuota: 225000,
+                fechaInicio: '2024-02-01'
+            },
+            {
+                id: 'tablet',
+                nombre: 'iPad Pro',
+                valor: 1200000,
+                cuotas: 6,
+                valorCuota: 200000,
+                fechaInicio: '2024-03-01'
+            }
+        ];
+        
+        // Colores correlativos con la página web
+        const coloresProductos = [
+            { bg: 'rgba(76, 175, 80, 0.8)', border: 'rgba(76, 175, 80, 1)', name: 'Verde Principal' },
+            { bg: 'rgba(33, 150, 243, 0.8)', border: 'rgba(33, 150, 243, 1)', name: 'Azul Info' },
+            { bg: 'rgba(255, 152, 0, 0.8)', border: 'rgba(255, 152, 0, 1)', name: 'Naranja Advertencia' }
+        ];
+        
+        function log(message) {
+            const logOutput = document.getElementById('logOutput');
+            logOutput.style.display = 'block';
+            const time = new Date().toLocaleTimeString();
+            logOutput.innerHTML += `[${time}] ${message}\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+            console.log(message);
+        }
+        
+        function calcularGastosMensualesApilado(productos, mesesRango = 'all') {
+            const gastosPorProductoPorMes = {};
+            const ahora = new Date();
+            const todosLosMeses = new Set();
+            
+            // Inicializar estructura para cada producto
+            productos.forEach((producto, index) => {
+                gastosPorProductoPorMes[producto.id] = {
+                    nombre: producto.nombre,
+                    gastosPorMes: {},
+                    color: coloresProductos[index % coloresProductos.length]
+                };
+            });
+            
+            // Calcular gastos para cada producto por mes
+            productos.forEach(producto => {
+                const fechaInicio = new Date(producto.fechaInicio);
+                
+                for (let i = 0; i < producto.cuotas; i++) {
+                    const fecha = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth() + i, 1);
+                    const mesKey = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    todosLosMeses.add(mesKey);
+                    
+                    if (!gastosPorProductoPorMes[producto.id].gastosPorMes[mesKey]) {
+                        gastosPorProductoPorMes[producto.id].gastosPorMes[mesKey] = 0;
+                    }
+                    
+                    gastosPorProductoPorMes[producto.id].gastosPorMes[mesKey] += producto.valorCuota;
+                }
+            });
+
+            let mesesOrdenados = Array.from(todosLosMeses).sort();
+            
+            // Aplicar filtro de rango
+            if (mesesRango !== 'all') {
+                const mesesLimite = parseInt(mesesRango);
+                if (!isNaN(mesesLimite) && mesesLimite > 0) {
+                    const fechaInicio = new Date(ahora.getFullYear(), ahora.getMonth() - mesesLimite + 1, 1);
+                    const fechaFin = new Date(ahora.getFullYear(), ahora.getMonth() + 12, 1);
+                    
+                    mesesOrdenados = mesesOrdenados.filter(mes => {
+                        const [año, mesNum] = mes.split('-');
+                        const fechaMes = new Date(parseInt(año), parseInt(mesNum) - 1, 1);
+                        return fechaMes >= fechaInicio && fechaMes <= fechaFin;
+                    }).slice(0, mesesLimite * 2);
+                }
+            }
+            
+            return formatearDatosGraficoApilado(mesesOrdenados, gastosPorProductoPorMes);
+        }
+        
+        function formatearDatosGraficoApilado(mesesOrdenados, gastosPorProductoPorMes) {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Formatear etiquetas de meses en español
+            const meses = mesesOrdenados.map(mes => {
+                const [año, mesNum] = mes.split('-');
+                const fecha = new Date(año, mesNum - 1, 1);
+                
+                if (isMobile) {
+                    return fecha.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+                } else {
+                    return fecha.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+                }
+            });
+            
+            // Crear datasets para cada producto
+            const datasets = [];
+            const productosIds = Object.keys(gastosPorProductoPorMes);
+            
+            productosIds.forEach((productoId, index) => {
+                const productoData = gastosPorProductoPorMes[productoId];
+                const datosProducto = mesesOrdenados.map(mes => {
+                    return Math.round(productoData.gastosPorMes[mes] || 0);
+                });
+                
+                if (datosProducto.some(valor => valor > 0)) {
+                    datasets.push({
+                        label: productoData.nombre,
+                        data: datosProducto,
+                        backgroundColor: productoData.color.bg,
+                        borderColor: productoData.color.border,
+                        borderWidth: isMobile ? 1 : 2,
+                        borderRadius: isMobile ? 4 : 6,
+                        borderSkipped: false,
+                        barPercentage: isMobile ? 0.9 : 0.8,
+                        categoryPercentage: isMobile ? 0.95 : 0.85,
+                        maxBarThickness: isMobile ? 50 : 70,
+                        minBarLength: 2,
+                        stack: 'stack1'
+                    });
+                }
+            });
+            
+            return { 
+                meses, 
+                datasets, 
+                mesesKeys: mesesOrdenados,
+                totalProductos: productosIds.length
+            };
+        }
+        
+        function crearGraficoApilado() {
+            const ctx = document.getElementById('stackedChart').getContext('2d');
+            const isMobile = window.innerWidth <= 768;
+            
+            log(`🎨 Creando gráfico apilado para ${isMobile ? 'móvil' : 'desktop'} con filtro: ${currentRange}`);
+            
+            // Destruir gráfico existente
+            if (stackedChart) {
+                stackedChart.destroy();
+            }
+            
+            // Calcular datos
+            const gastosData = calcularGastosMensualesApilado(productosTest, currentRange);
+            log(`📊 Datasets creados: ${gastosData.datasets.length}`);
+            log(`📅 Períodos: ${gastosData.meses.length}`);
+            
+            // Actualizar leyenda
+            actualizarLeyenda(gastosData.datasets);
+            
+            stackedChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: gastosData.meses,
+                    datasets: gastosData.datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: isMobile ? 1.2 : 2.5,
+                    scales: {
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.08)',
+                                drawBorder: false
+                            },
+                            border: { display: false },
+                            ticks: {
+                                color: '#666',
+                                font: { size: isMobile ? 9 : 11, weight: '500' },
+                                padding: isMobile ? 4 : 6,
+                                callback: function(value) {
+                                    if (value >= 1000000) return '$' + (value / 1000000).toFixed(1) + 'M';
+                                    if (value >= 1000) return '$' + (value / 1000).toFixed(0) + 'K';
+                                    return '$' + value.toLocaleString('es-ES');
+                                }
+                            },
+                            title: {
+                                display: !isMobile,
+                                text: 'Valor de Cuotas ($)',
+                                color: '#666',
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            stacked: true,
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: {
+                                color: '#666',
+                                font: { size: isMobile ? 8 : 10, weight: '500' },
+                                padding: isMobile ? 4 : 6,
+                                maxRotation: isMobile ? 45 : 0,
+                                minRotation: isMobile ? 45 : 0
+                            },
+                            title: {
+                                display: !isMobile,
+                                text: 'Período',
+                                color: '#666',
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: { size: isMobile ? 11 : 13, weight: 'bold' },
+                                usePointStyle: true,
+                                pointStyle: 'rect',
+                                padding: isMobile ? 8 : 12
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(33, 150, 243, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            titleFont: { size: isMobile ? 12 : 14, weight: 'bold' },
+                            bodyFont: { size: isMobile ? 11 : 13 },
+                            padding: isMobile ? 8 : 12,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                title: function(context) {
+                                    return `📅 ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    const productName = context.dataset.label;
+                                    const value = context.parsed.y;
+                                    return `🔸 ${productName}: $${value.toLocaleString('es-ES')}`;
+                                },
+                                footer: function(tooltipItems) {
+                                    let total = 0;
+                                    tooltipItems.forEach(item => total += item.parsed.y);
+                                    return `💰 Total del mes: $${total.toLocaleString('es-ES')}`;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            });
+            
+            log('✅ Gráfico apilado creado exitosamente');
+        }
+        
+        function actualizarLeyenda(datasets) {
+            const legendContainer = document.getElementById('productsLegend');
+            legendContainer.innerHTML = '';
+            
+            datasets.forEach(dataset => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                legendItem.innerHTML = `
+                    <div class="legend-color" style="background-color: ${dataset.backgroundColor}; border-color: ${dataset.borderColor}"></div>
+                    <div class="legend-text">${dataset.label}</div>
+                `;
+                legendContainer.appendChild(legendItem);
+            });
+        }
+        
+        function cambiarFiltro(rango) {
+            currentRange = rango;
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.time-range-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const botonActivo = document.querySelector(`[data-range="${rango}"]`);
+            if (botonActivo) {
+                botonActivo.classList.add('active');
+            }
+            
+            log(`🔄 Cambiando filtro a: ${rango}`);
+            crearGraficoApilado();
+        }
+        
+        function cambiarDatos() {
+            // Generar datos aleatorios
+            productosTest.forEach(producto => {
+                producto.valorCuota = Math.floor(Math.random() * 300000) + 100000;
+                producto.cuotas = Math.floor(Math.random() * 12) + 6;
+                producto.valor = producto.valorCuota * producto.cuotas;
+            });
+            
+            log('🎲 Datos cambiados aleatoriamente');
+            crearGraficoApilado();
+        }
+        
+        function regenerarGrafico() {
+            log('🔄 Regenerando gráfico...');
+            crearGraficoApilado();
+        }
+        
+        function mostrarInfo() {
+            log('ℹ️ Información del gráfico:');
+            log(`  • Filtro actual: ${currentRange}`);
+            log(`  • Productos: ${productosTest.length}`);
+            log(`  • Tipo de dispositivo: ${window.innerWidth <= 768 ? 'Móvil' : 'Desktop'}`);
+            log(`  • Ancho de pantalla: ${window.innerWidth}px`);
+        }
+        
+        // Inicialización
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                crearGraficoApilado();
+                log('🚀 Aplicación de prueba iniciada');
+            }, 500);
+        });
+        
+        // Event listeners para controles
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.time-range-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const rango = this.getAttribute('data-range');
+                    cambiarFiltro(rango);
+                });
+            });
+        });
+        
+        // Manejar redimensionamiento
+        window.addEventListener('resize', function() {
+            setTimeout(() => {
+                log('📱 Pantalla redimensionada, recreando gráfico...');
+                crearGraficoApilado();
+            }, 300);
+        });
+    </script>
+</body>
+</html>

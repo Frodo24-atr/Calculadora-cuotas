@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <        <button class="test-btn" onclick="showConfirmModal()">🗑️ Probar Modal Normal de Eliminación</button>
+        
+        <div style="margin-top: 20px;">
+            <small style="color: #666; font-style: italic;">
+                ℹ️ Modal de eliminación normal sin efectos especiales.<br>
+                Diseño limpio y profesional sin distracciones visuales o sonoras.
+            </small>
+        </div>button class="test-btn" onclick="showConfirmModal()">🗑️ Probar Modal de Eliminación</button>eta charset="UTF-                <li><strong>Animación de "temblor" suave</strong> al aparecer (3 repeticiones)</li>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal de Eliminación</title>
+    <link rel="stylesheet" href="./src/styles/fallback.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .test-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px;
+        }
+        .test-btn:hover {
+            background: #c82333;
+        }
+        
+        /* PRUEBA: Animación de advertencia suave */
+        .confirm-modal.vibrating .confirm-modal-content {
+            animation: shakeWarning 0.5s ease-in-out 3 !important;
+        }
+        
+        @keyframes shakeWarning {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Modal de Eliminación</h1>
+        <p>Haz clic en el botón para probar el nuevo estilo del modal de confirmación de eliminación</p>
+        
+        <button class="test-btn" onclick="showConfirmModal()">� MODO ULTRA DIFÍCIL - ¡BUENA SUERTE HACIENDO CLIC! 😈</button>
+        
+        <div style="margin-top: 20px;">
+            <small style="color: #666; font-style: italic;">
+                ⚠️ Este modal tiene efectos visuales y sonoros para indicar que es una acción de eliminación.<br>
+                Incluye temblor suave, colores de advertencia y sonido de alarma.<br>
+                Los efectos se pueden desactivar fácilmente removiendo las clases CSS correspondientes.
+            </small>
+        </div>
+        
+        <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+            <h3>✅ Características que deberías ver:</h3>
+            <ul style="text-align: left; max-width: 500px; margin: 0 auto;">
+                <li><strong>Fondo rojizo translúcido</strong> en lugar del fondo negro típico</li>
+                <li><strong>Borde rojo grueso</strong> alrededor del modal</li>
+                <li><strong>Header con gradiente rojo</strong> y texto blanco</li>
+                <li><strong>Sombra rojiza</strong> para dar efecto de profundidad</li>
+                <li><strong>Animación de "temblor"</strong> al aparecer</li>
+                <li><strong>🔥 MODO ULTRA DIFÍCIL ACTIVADO</strong> - ¡ROTA, ESCALA Y SE MUEVE COMO LOCO! �</li>
+                <li><strong>🆕 NUEVO: Sonido de alarma</strong> al mostrar el modal</li>
+                <li><strong>Botones estilizados</strong> con efectos hover</li>
+                <li><strong>Sin transparencia</strong> - completamente opaco y visible</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-modal-text">¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="confirm-product-name">Producto de Prueba</strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer confirm-modal-buttons">
+                <button type="button" class="confirm-btn confirm-btn-cancel" onclick="hideConfirmModal()">Cancelar</button>
+                <button type="button" class="confirm-btn confirm-btn-delete" onclick="hideConfirmModal()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PRUEBA: Crear sonido de alarma normal
+        function createAlarmSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Configurar el sonido de alarma normal
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.15);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.3);
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.45);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.6);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.8);
+        }
+        
+        function showConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+            
+            // PRUEBA: Añadir clase de vibración
+            modal.classList.add('vibrating');
+            
+            // PRUEBA: Reproducir sonido de alarma
+            try {
+                createAlarmSound();
+            } catch (e) {
+                console.log('No se pudo reproducir el sonido de alarma:', e);
+            }
+        }
+        
+        function hideConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            
+            // PRUEBA: Remover clase de vibración
+            modal.classList.remove('vibrating');
+        }
+        
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideConfirmModal();
+            }
+        });
+    </script>
+</body>
+</html>

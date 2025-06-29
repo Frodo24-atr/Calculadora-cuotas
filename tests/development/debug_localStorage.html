@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug localStorage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        pre { background: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug localStorage - Calculadora de Cuotas</h1>
+    
+    <button onclick="checkLocalStorage()">📦 Verificar localStorage</button>
+    <button onclick="clearLocalStorage()">🗑️ Limpiar localStorage</button>
+    <button onclick="addTestData()">➕ Añadir datos de prueba</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function checkLocalStorage() {
+            const data = localStorage.getItem('calculadora-productos');
+            const results = document.getElementById('results');
+            
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    results.innerHTML = `
+                        <h3>✅ Datos encontrados en localStorage:</h3>
+                        <p><strong>Número de productos:</strong> ${parsed.length}</p>
+                        <pre>${JSON.stringify(parsed, null, 2)}</pre>
+                    `;
+                } catch (e) {
+                    results.innerHTML = `
+                        <h3>❌ Error parsing datos:</h3>
+                        <p>${e.message}</p>
+                        <pre>${data}</pre>
+                    `;
+                }
+            } else {
+                results.innerHTML = '<h3>📭 No hay datos en localStorage</h3>';
+            }
+        }
+        
+        function clearLocalStorage() {
+            localStorage.removeItem('calculadora-productos');
+            checkLocalStorage();
+            alert('🗑️ localStorage limpiado');
+        }
+        
+        function addTestData() {
+            const testData = [
+                {
+                    id: '1735488000000',
+                    name: 'iPhone 15 Pro',
+                    totalValue: 1200000,
+                    installments: 12,
+                    startDate: '2025-06-01T00:00:00.000Z',
+                    endDate: '2026-06-01T00:00:00.000Z',
+                    monthlyPayment: 100000
+                },
+                {
+                    id: '1735488100000',
+                    name: 'MacBook Pro',
+                    totalValue: 2500000,
+                    installments: 24,
+                    startDate: '2025-07-01T00:00:00.000Z',
+                    endDate: '2027-07-01T00:00:00.000Z',
+                    monthlyPayment: 104166.67
+                }
+            ];
+            
+            localStorage.setItem('calculadora-productos', JSON.stringify(testData));
+            checkLocalStorage();
+            alert('✅ Datos de prueba añadidos');
+        }
+        
+        // Verificar automáticamente al cargar
+        checkLocalStorage();
+    </script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Eliminar - Aplicación Principal</title>
+    
+    <!-- CSS de la aplicación -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/modals.css">
+    <link rel="stylesheet" href="assets/css/charts.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 10000;
+        }
+        .debug-panel .close-btn {
+            float: right;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Test Eliminar - Aplicación Principal</h1>
+            <p>Diagnóstico del botón eliminar en el entorno real</p>
+        </div>
+
+        <!-- Panel de Debug -->
+        <div class="debug-panel" id="debugPanel">
+            <button class="close-btn" onclick="toggleDebug()">✕</button>
+            <div><strong>🔧 Debug Panel</strong></div>
+            <div id="debugLog"></div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div id="mainContent" class="main-content">
+            
+            <!-- Botones de Prueba -->
+            <div class="form-section">
+                <h2>🧪 Controles de Prueba</h2>
+                <button onclick="crearProductoTest()" class="btn" style="background: #4CAF50; margin: 5px;">➕ Crear Producto Test</button>
+                <button onclick="verificarFunciones()" class="btn" style="background: #2196F3; margin: 5px;">🔍 Verificar Funciones</button>
+                <button onclick="limpiarTodo()" class="btn" style="background: #FF9800; margin: 5px;">🧹 Limpiar Todo</button>
+            </div>
+
+            <!-- Lista de Productos -->
+            <div class="products-section">
+                <h2>📦 Productos</h2>
+                <div id="lista-productos" class="productos-lista"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="modal-confirmacion" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-modal-text">¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="confirm-product-name"></strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer confirm-modal-buttons">
+                <button type="button" class="confirm-btn confirm-btn-cancel" onclick="cerrarConfirmacion()">Cancelar</button>
+                <button type="button" class="confirm-btn confirm-btn-delete" onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de la Aplicación -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <script>
+        let debugVisible = true;
+
+        function debugLog(mensaje, tipo = 'info') {
+            const debugLogEl = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = {
+                'success': '#4CAF50',
+                'error': '#f44336', 
+                'warning': '#FF9800',
+                'info': '#2196F3'
+            }[tipo] || '#fff';
+            
+            debugLogEl.innerHTML += `<div style="color: ${color}; margin: 2px 0;">[${timestamp}] ${mensaje}</div>`;
+            debugLogEl.scrollTop = debugLogEl.scrollHeight;
+        }
+
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            debugVisible = !debugVisible;
+            panel.style.display = debugVisible ? 'block' : 'none';
+        }
+
+        function crearProductoTest() {
+            debugLog('🧪 Creando producto de prueba...', 'info');
+            
+            const producto = {
+                id: Date.now(),
+                nombre: 'Smartphone Test',
+                valor: 50000,
+                cuotas: 6,
+                fechaInicio: '2025-01-01',
+                valorCuota: 8333.33,
+                cuotasPagadas: 0
+            };
+
+            try {
+                const productos = getProductos();
+                productos.push(producto);
+                saveProductos(productos);
+                cargarProductos();
+                debugLog('✅ Producto creado y guardado', 'success');
+            } catch (error) {
+                debugLog(`❌ Error al crear producto: ${error.message}`, 'error');
+            }
+        }
+
+        function verificarFunciones() {
+            debugLog('🔍 Verificando funciones...', 'info');
+            
+            const funciones = [
+                'eliminarProducto',
+                'eliminarProductoDirecto', 
+                'confirmarEliminacion',
+                'abrirModalConfirmacion',
+                'cerrarConfirmacion',
+                'cargarProductos'
+            ];
+
+            funciones.forEach(func => {
+                const existe = typeof window[func] === 'function';
+                const status = existe ? '✅' : '❌';
+                debugLog(`${status} ${func}: ${existe ? 'OK' : 'NO ENCONTRADA'}`, existe ? 'success' : 'error');
+            });
+        }
+
+        function limpiarTodo() {
+            debugLog('🧹 Limpiando todos los productos...', 'info');
+            try {
+                saveProductos([]);
+                cargarProductos();
+                debugLog('✅ Productos eliminados', 'success');
+            } catch (error) {
+                debugLog(`❌ Error al limpiar: ${error.message}`, 'error');
+            }
+        }
+
+        // Override de console para capturar errores
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            debugLog(`💥 ERROR: ${args.join(' ')}`, 'error');
+        };
+
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            // Solo mostrar logs importantes
+            const mensaje = args.join(' ');
+            if (mensaje.includes('Eliminando') || mensaje.includes('Error') || mensaje.includes('producto')) {
+                debugLog(mensaje, 'info');
+            }
+        };
+
+        // Inicialización
+        window.addEventListener('DOMContentLoaded', () => {
+            debugLog('🚀 Aplicación iniciada', 'info');
+            setTimeout(() => {
+                verificarFunciones();
+                cargarProductos();
+            }, 1000);
+        });
+
+        // Interceptar clicks en botones eliminar
+        document.addEventListener('click', function(event) {
+            if (event.target.textContent.includes('Eliminar') || event.target.textContent.includes('🗑️')) {
+                debugLog(`🖱️ Click en botón eliminar detectado: ${event.target.outerHTML}`, 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

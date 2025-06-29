@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test con Scripts Reales - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .error-log {
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 50px;
+            border: 2px dashed #007bff;
+        }
+        .form-buttons {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test con Scripts Reales</h1>
+    
+    <div class="test-section">
+        <h2>📝 Formulario Real</h2>
+        <input type="text" id="nombreProducto" placeholder="Nombre del producto" value="Producto Test">
+        <input type="number" id="valorTotalProducto" placeholder="Valor total" value="1000000">
+        <input type="number" id="numeroCuotas" placeholder="Número de cuotas" value="12">
+        <input type="date" id="fechaInicio">
+        
+        <div class="form-buttons">
+            <button type="button" class="btn btn-primary" onclick="agregarProducto()">✅ Agregar Producto (Real)</button>
+            <button type="button" onclick="testManual()">🧪 Test Manual</button>
+        </div>
+        
+        <div id="resultado"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📦 Lista de Productos</h2>
+        <div id="listaProductos"></div>
+        <button type="button" id="btnBorrarTodo" style="display: none;">🗑️ Borrar Todo</button>
+    </div>
+    
+    <div class="error-log" id="errorLog">
+=== LOG DE ERRORES Y EVENTOS ===
+    </div>
+
+    <!-- Scripts de la aplicación real -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+
+    <script>
+        // Sistema de logging mejorado
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        console.log = function(...args) {
+            logToPage('LOG', args.join(' '));
+            originalConsoleLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            logToPage('ERROR', args.join(' '));
+            originalConsoleError.apply(console, args);
+        };
+
+        // Capturar todos los errores
+        window.onerror = function(mensaje, archivo, linea, columna, error) {
+            logToPage('WINDOW ERROR', `${mensaje} en ${archivo}:${linea}:${columna}`);
+            if (error && error.stack) {
+                logToPage('STACK', error.stack);
+            }
+            return false;
+        };
+
+        window.addEventListener('unhandledrejection', function(event) {
+            logToPage('PROMISE REJECTED', event.reason);
+        });
+
+        function logToPage(tipo, mensaje) {
+            const errorLog = document.getElementById('errorLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = tipo === 'ERROR' ? '❌' : tipo === 'LOG' ? 'ℹ️' : '⚠️';
+            errorLog.textContent += `[${timestamp}] ${prefix} ${tipo}: ${mensaje}\n`;
+            errorLog.scrollTop = errorLog.scrollHeight;
+        }
+
+        // Establecer fecha inicial
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaEl = document.getElementById('fechaInicio');
+            if (fechaEl) {
+                fechaEl.value = new Date().toISOString().split('T')[0];
+            }
+            logToPage('DOM', 'DOM cargado completamente');
+            
+            // Verificar elementos críticos
+            setTimeout(() => {
+                const elementos = ['nombreProducto', 'valorTotalProducto', 'numeroCuotas', 'fechaInicio', 'resultado'];
+                elementos.forEach(id => {
+                    const el = document.getElementById(id);
+                    logToPage('ELEMENT CHECK', `${id}: ${el ? 'ENCONTRADO' : 'NO ENCONTRADO'}`);
+                });
+            }, 100);
+        });
+
+        function testManual() {
+            logToPage('TEST', 'Iniciando test manual');
+            
+            try {
+                const resultadoEl = document.getElementById('resultado');
+                logToPage('TEST', `Elemento resultado: ${resultadoEl ? 'ENCONTRADO' : 'NO ENCONTRADO'}`);
+                
+                if (!resultadoEl) {
+                    throw new Error('No se encontró elemento resultado');
+                }
+                
+                resultadoEl.innerHTML = '<div style="background: #d4edda; color: #155724; padding: 10px;">✅ Test manual exitoso</div>';
+                logToPage('TEST', 'innerHTML asignado correctamente');
+                
+            } catch (error) {
+                logToPage('TEST ERROR', error.message);
+                logToPage('STACK', error.stack);
+            }
+        }
+
+        // Interceptar la función agregarProducto original para logging
+        if (typeof agregarProducto === 'function') {
+            const originalAgregarProducto = agregarProducto;
+            agregarProducto = function() {
+                logToPage('FUNCTION CALL', 'agregarProducto() llamada');
+                try {
+                    return originalAgregarProducto.apply(this, arguments);
+                } catch (error) {
+                    logToPage('FUNCTION ERROR', `Error en agregarProducto: ${error.message}`);
+                    logToPage('STACK', error.stack);
+                    throw error;
+                }
+            };
+        } else {
+            logToPage('WARNING', 'Función agregarProducto no encontrada');
+        }
+    </script>
+</body>
+</html>

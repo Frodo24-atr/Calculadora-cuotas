@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Gráficos Móviles - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 10px;
+            background: #f5f5f5;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .info-section {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .device-info {
+            background: #f3e5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .chart-test {
+            background: white;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .chart-test h3 {
+            color: #4caf50;
+            margin: 0 0 15px 0;
+            text-align: center;
+        }
+        
+        .chart-wrapper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        .chart-canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            margin-bottom: 10px;
+        }
+        
+        .chart-canvas-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .stats-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-wrapper {
+                padding: 10px;
+                min-height: 320px;
+            }
+            
+            .chart-canvas-wrapper {
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .chart-wrapper {
+                padding: 8px;
+                min-height: 280px;
+            }
+            
+            .chart-canvas-wrapper {
+                height: 260px;
+            }
+            
+            .stats-info {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Test de Gráficos para Móviles</h1>
+        
+        <div class="info-section">
+            <h3>📋 Información del Dispositivo</h3>
+            <div class="device-info" id="deviceInfo">
+                <strong>Ancho de pantalla:</strong> <span id="screenWidth"></span>px<br>
+                <strong>Alto de pantalla:</strong> <span id="screenHeight"></span>px<br>
+                <strong>Tipo de dispositivo:</strong> <span id="deviceType"></span><br>
+                <strong>Orientación:</strong> <span id="orientation"></span>
+            </div>
+        </div>
+        
+        <div class="stats-info">
+            <div class="stat-item">
+                <div class="stat-value" id="totalProductos">3</div>
+                <div class="stat-label">Productos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="valorTotal">$4.5M</div>
+                <div class="stat-label">Valor Total</div>
+            </div>
+        </div>
+        
+        <div class="chart-test">
+            <h3>📊 Gráfico de Barras Optimizado para Móviles</h3>
+            <p style="text-align: center; color: #666; font-size: 14px;">
+                Las barras deben verse más gruesas y espaciadas en dispositivos móviles
+            </p>
+            
+            <div class="chart-wrapper">
+                <div class="chart-canvas-wrapper">
+                    <canvas id="testChart"></canvas>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="btn" onclick="recrearGrafico()">🔄 Recrear Gráfico</button>
+                <button class="btn" onclick="cambiarDatos()">📊 Cambiar Datos</button>
+                <button class="btn" onclick="mostrarInfo()">ℹ️ Info del Gráfico</button>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>🎯 Optimizaciones Aplicadas</h3>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>barPercentage:</strong> 0.9 (móvil) vs 0.8 (desktop)</li>
+                <li><strong>categoryPercentage:</strong> 0.95 (móvil) vs 0.8 (desktop)</li>
+                <li><strong>maxBarThickness:</strong> 60px (móvil) vs 80px (desktop)</li>
+                <li><strong>Altura del gráfico:</strong> Adaptativa según pantalla</li>
+                <li><strong>Fuentes:</strong> Más pequeñas en móviles</li>
+                <li><strong>Etiquetas X:</strong> Rotadas 45° en móviles</li>
+            </ul>
+        </div>
+        
+        <div id="logOutput" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <script>
+        let testChart = null;
+        let currentDataSet = 1;
+        
+        // Datos de prueba
+        const dataSets = [
+            {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                data: [250000, 150000, 300000, 200000, 180000, 220000],
+                label: 'Cuotas Mensuales'
+            },
+            {
+                labels: ['Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                data: [180000, 320000, 150000, 280000, 190000, 240000],
+                label: 'Segundo Semestre'
+            },
+            {
+                labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                data: [450000, 380000, 520000, 410000],
+                label: 'Trimestres'
+            }
+        ];
+        
+        function log(message) {
+            const logOutput = document.getElementById('logOutput');
+            const time = new Date().toLocaleTimeString();
+            logOutput.innerHTML += `[${time}] ${message}\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+            console.log(message);
+        }
+        
+        function detectarDispositivo() {
+            const width = window.innerWidth;
+            let tipo = 'Desktop';
+            
+            if (width <= 480) tipo = 'Móvil Pequeño';
+            else if (width <= 768) tipo = 'Móvil/Tablet';
+            else if (width <= 1024) tipo = 'Tablet Grande';
+            
+            return tipo;
+        }
+        
+        function actualizarInfoDispositivo() {
+            document.getElementById('screenWidth').textContent = window.innerWidth;
+            document.getElementById('screenHeight').textContent = window.innerHeight;
+            document.getElementById('deviceType').textContent = detectarDispositivo();
+            document.getElementById('orientation').textContent = window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait';
+        }
+        
+        function crearGrafico() {
+            const ctx = document.getElementById('testChart').getContext('2d');
+            const isMobile = window.innerWidth <= 768;
+            const isSmallMobile = window.innerWidth <= 480;
+            
+            const currentData = dataSets[currentDataSet - 1];
+            
+            // Destruir gráfico existente
+            if (testChart) {
+                testChart.destroy();
+            }
+            
+            log(`🎨 Creando gráfico para ${detectarDispositivo()} (${window.innerWidth}px)`);
+            log(`📊 Configuración móvil: ${isMobile ? 'SÍ' : 'NO'}`);
+            
+            testChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: currentData.labels,
+                    datasets: [{
+                        label: currentData.label,
+                        data: currentData.data,
+                        backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                        borderColor: 'rgba(76, 175, 80, 1)',
+                        borderWidth: 2,
+                        borderRadius: isMobile ? 6 : 8,
+                        borderSkipped: false,
+                        // Configuraciones clave para móviles
+                        barPercentage: isMobile ? 0.9 : 0.8,
+                        categoryPercentage: isMobile ? 0.95 : 0.8,
+                        maxBarThickness: isMobile ? (isSmallMobile ? 50 : 60) : 80,
+                        minBarLength: isMobile ? 3 : 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: isMobile ? 1.2 : 2,
+                    layout: {
+                        padding: {
+                            top: isMobile ? 5 : 10,
+                            bottom: isMobile ? 5 : 10,
+                            left: isMobile ? 5 : 10,
+                            right: isMobile ? 5 : 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#333',
+                                font: {
+                                    size: isMobile ? (isSmallMobile ? 10 : 12) : 14,
+                                    weight: 'bold'
+                                },
+                                usePointStyle: true,
+                                padding: isMobile ? 8 : 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(33, 150, 243, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            titleFont: {
+                                size: isMobile ? 12 : 14
+                            },
+                            bodyFont: {
+                                size: isMobile ? 11 : 13
+                            },
+                            padding: isMobile ? 8 : 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.08)',
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: isMobile ? (isSmallMobile ? 9 : 10) : 12,
+                                    weight: '500'
+                                },
+                                padding: isMobile ? 4 : 8,
+                                callback: function(value) {
+                                    return '$' + (value / 1000) + 'K';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: isMobile ? (isSmallMobile ? 8 : 9) : 11,
+                                    weight: '500'
+                                },
+                                padding: isMobile ? 4 : 8,
+                                maxRotation: isMobile ? 45 : 0,
+                                minRotation: isMobile ? 45 : 0
+                            }
+                        }
+                    },
+                    onResize: function(chart, size) {
+                        const maxHeight = window.innerWidth <= 768 ? (window.innerWidth <= 480 ? 260 : 300) : 280;
+                        if (size.height > maxHeight) {
+                            chart.canvas.style.height = maxHeight + 'px';
+                        }
+                        log(`📐 Gráfico redimensionado: ${size.width}x${size.height}`);
+                    }
+                }
+            });
+            
+            log(`✅ Gráfico creado con barPercentage: ${isMobile ? 0.9 : 0.8}`);
+            log(`📏 maxBarThickness: ${isMobile ? (isSmallMobile ? 50 : 60) : 80}px`);
+        }
+        
+        function recrearGrafico() {
+            log('🔄 Recreando gráfico...');
+            crearGrafico();
+        }
+        
+        function cambiarDatos() {
+            currentDataSet = currentDataSet === 3 ? 1 : currentDataSet + 1;
+            log(`📊 Cambiando a conjunto de datos ${currentDataSet}`);
+            crearGrafico();
+        }
+        
+        function mostrarInfo() {
+            if (testChart) {
+                const isMobile = window.innerWidth <= 768;
+                const config = testChart.data.datasets[0];
+                
+                log('ℹ️ Información del gráfico actual:');
+                log(`  • Tipo de dispositivo: ${detectarDispositivo()}`);
+                log(`  • Configuración móvil: ${isMobile ? 'SÍ' : 'NO'}`);
+                log(`  • barPercentage: ${config.barPercentage}`);
+                log(`  • categoryPercentage: ${config.categoryPercentage}`);
+                log(`  • maxBarThickness: ${config.maxBarThickness}px`);
+                log(`  • Número de barras: ${testChart.data.labels.length}`);
+                log(`  • Ancho del canvas: ${testChart.canvas.width}px`);
+                log(`  • Alto del canvas: ${testChart.canvas.height}px`);
+            }
+        }
+        
+        // Inicialización
+        window.addEventListener('load', function() {
+            actualizarInfoDispositivo();
+            setTimeout(() => {
+                crearGrafico();
+                log('🚀 Aplicación de prueba iniciada');
+            }, 500);
+        });
+        
+        // Manejar redimensionamiento
+        window.addEventListener('resize', function() {
+            actualizarInfoDispositivo();
+            setTimeout(() => {
+                log('📱 Pantalla redimensionada, recreando gráfico...');
+                crearGrafico();
+            }, 300);
+        });
+        
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                actualizarInfoDispositivo();
+                log('🔄 Orientación cambiada, recreando gráfico...');
+                crearGrafico();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

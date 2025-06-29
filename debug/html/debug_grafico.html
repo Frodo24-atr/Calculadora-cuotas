@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Gráfico - Diagnóstico</title>
+    
+    <!-- CSS de la aplicación -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/modals.css">
+    <link rel="stylesheet" href="assets/css/charts.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <style>
+        .debug-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .debug-console {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .test-chart {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background: white;
+        }
+        .error { color: #f00; }
+        .success { color: #0f0; }
+        .warning { color: #ff0; }
+        .info { color: #0ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Debug Gráfico</h1>
+            <p>Diagnóstico del problema con el gráfico</p>
+        </div>
+
+        <div class="debug-panel">
+            <h3>🧪 Controles de Test</h3>
+            <button onclick="verificarChart()" class="btn" style="background: #007bff; margin: 5px;">📊 Verificar Chart.js</button>
+            <button onclick="crearProductoTest()" class="btn" style="background: #28a745; margin: 5px;">➕ Crear Producto</button>
+            <button onclick="testGraficoManual()" class="btn" style="background: #17a2b8; margin: 5px;">🎯 Test Gráfico Manual</button>
+            <button onclick="limpiarProductos()" class="btn" style="background: #dc3545; margin: 5px;">🧹 Limpiar</button>
+            <button onclick="limpiarConsola()" class="btn" style="background: #6c757d; margin: 5px;">🗂️ Limpiar Log</button>
+        </div>
+
+        <!-- Estado del Gráfico -->
+        <div class="debug-panel">
+            <h3>📊 Estado del Gráfico</h3>
+            <div id="chart-status"></div>
+        </div>
+
+        <!-- Gráfico de Prueba -->
+        <div class="test-chart">
+            <h3>📈 Gráfico de Prueba</h3>
+            <div class="chart-canvas-wrapper">
+                <canvas id="gastosChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Log Console -->
+        <div class="debug-panel">
+            <h3>📜 Log de Eventos</h3>
+            <div class="debug-console" id="debugLog"></div>
+        </div>
+    </div>
+
+    <!-- Scripts de la Aplicación -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <script>
+        let testCounter = 1;
+
+        function debugLog(mensaje, tipo = 'info') {
+            const debugLogEl = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'success': '#0f0',
+                'error': '#f00', 
+                'warning': '#ff0',
+                'info': '#0ff'
+            };
+            
+            debugLogEl.innerHTML += `<div style="color: ${colors[tipo] || '#fff'}; margin: 2px 0;">[${timestamp}] ${mensaje}</div>`;
+            debugLogEl.scrollTop = debugLogEl.scrollHeight;
+        }
+
+        function limpiarConsola() {
+            document.getElementById('debugLog').innerHTML = '';
+            debugLog('🧹 Consola limpiada', 'info');
+        }
+
+        function verificarChart() {
+            debugLog('🔍 === VERIFICACIÓN CHART.JS ===', 'info');
+            
+            // 1. Verificar Chart.js
+            if (typeof Chart !== 'undefined') {
+                debugLog('✅ Chart.js está disponible', 'success');
+                debugLog(`   Versión: ${Chart.version || 'No especificada'}`, 'info');
+            } else {
+                debugLog('❌ Chart.js NO está disponible', 'error');
+            }
+
+            // 2. Verificar canvas
+            const canvas = document.getElementById('gastosChart');
+            if (canvas) {
+                debugLog('✅ Canvas encontrado', 'success');
+                debugLog(`   ID: ${canvas.id}`, 'info');
+                debugLog(`   Tamaño: ${canvas.offsetWidth}x${canvas.offsetHeight}`, 'info');
+            } else {
+                debugLog('❌ Canvas NO encontrado', 'error');
+            }
+
+            // 3. Verificar funciones
+            const funciones = ['actualizarGrafico', 'crearGrafico', 'getProductos'];
+            funciones.forEach(func => {
+                const existe = typeof window[func] === 'function';
+                debugLog(`${existe ? '✅' : '❌'} ${func}: ${existe ? 'OK' : 'NO ENCONTRADA'}`, existe ? 'success' : 'error');
+            });
+
+            // 4. Verificar productos
+            try {
+                const productos = getProductos();
+                debugLog(`📦 Productos en storage: ${productos.length}`, 'info');
+                productos.forEach((p, i) => {
+                    debugLog(`   ${i+1}. ${p.nombre} - $${p.valor}`, 'info');
+                });
+            } catch (error) {
+                debugLog(`❌ Error al obtener productos: ${error.message}`, 'error');
+            }
+
+            // Actualizar estado
+            actualizarEstadoGrafico();
+        }
+
+        function crearProductoTest() {
+            debugLog(`➕ Creando producto test ${testCounter}...`, 'info');
+            
+            const producto = {
+                id: Date.now(),
+                nombre: `Producto Test ${testCounter}`,
+                valor: 10000 * testCounter,
+                cuotas: 6,
+                fechaInicio: '2025-01-01',
+                valorCuota: (10000 * testCounter) / 6,
+                cuotasPagadas: 0
+            };
+
+            try {
+                const productos = getProductos();
+                productos.push(producto);
+                saveProductos(productos);
+                debugLog(`✅ Producto ${testCounter} creado y guardado`, 'success');
+                
+                testCounter++;
+                
+                // Intentar actualizar gráfico
+                debugLog('🔄 Intentando actualizar gráfico...', 'info');
+                if (typeof actualizarGrafico === 'function') {
+                    actualizarGrafico();
+                    debugLog('✅ actualizarGrafico() llamada', 'success');
+                } else {
+                    debugLog('❌ actualizarGrafico no disponible', 'error');
+                }
+                
+                // Verificar después de actualizar
+                setTimeout(() => {
+                    verificarGraficoCreado();
+                }, 1000);
+                
+            } catch (error) {
+                debugLog(`❌ Error al crear producto: ${error.message}`, 'error');
+            }
+        }
+
+        function testGraficoManual() {
+            debugLog('🎯 === TEST GRÁFICO MANUAL ===', 'warning');
+            
+            try {
+                // Verificar que tenemos productos
+                const productos = getProductos();
+                if (productos.length === 0) {
+                    debugLog('⚠️ No hay productos. Creando uno...', 'warning');
+                    crearProductoTest();
+                    return;
+                }
+
+                debugLog(`📊 Probando gráfico con ${productos.length} producto(s)`, 'info');
+                
+                // Llamar directamente a crearGrafico
+                if (typeof crearGrafico === 'function') {
+                    debugLog('🚀 Llamando a crearGrafico()...', 'info');
+                    crearGrafico();
+                    
+                    setTimeout(() => {
+                        verificarGraficoCreado();
+                    }, 500);
+                } else {
+                    debugLog('❌ Función crearGrafico no disponible', 'error');
+                }
+                
+            } catch (error) {
+                debugLog(`❌ Error en test manual: ${error.message}`, 'error');
+            }
+        }
+
+        function verificarGraficoCreado() {
+            debugLog('🔍 Verificando si el gráfico se creó...', 'info');
+            
+            const canvas = document.getElementById('gastosChart');
+            if (!canvas) {
+                debugLog('❌ Canvas desaparecido', 'error');
+                return;
+            }
+
+            // Verificar si Chart.js creó una instancia
+            if (canvas._chartjs) {
+                debugLog('✅ Instancia de Chart.js detectada', 'success');
+                debugLog(`   Tipo: ${canvas._chartjs.config.type}`, 'info');
+                debugLog(`   Datasets: ${canvas._chartjs.data.datasets.length}`, 'info');
+            } else {
+                debugLog('❌ No hay instancia de Chart.js en el canvas', 'error');
+            }
+
+            // Verificar el contenido del contenedor
+            const wrapper = canvas.parentElement;
+            if (wrapper) {
+                debugLog(`📏 Contenedor: ${wrapper.innerHTML.length} caracteres`, 'info');
+                if (wrapper.innerHTML.includes('No hay datos')) {
+                    debugLog('⚠️ Mostrando mensaje de "No hay datos"', 'warning');
+                } else if (wrapper.innerHTML.includes('Error')) {
+                    debugLog('❌ Mostrando mensaje de error', 'error');
+                }
+            }
+        }
+
+        function actualizarEstadoGrafico() {
+            const statusEl = document.getElementById('chart-status');
+            const productos = getProductos();
+            const canvas = document.getElementById('gastosChart');
+            
+            let html = '<ul style="margin: 0; padding-left: 20px;">';
+            
+            // Estado de Chart.js
+            html += `<li><strong>Chart.js:</strong> ${typeof Chart !== 'undefined' ? '✅ Disponible' : '❌ No disponible'}</li>`;
+            
+            // Estado del canvas
+            html += `<li><strong>Canvas:</strong> ${canvas ? '✅ Existe' : '❌ No encontrado'}</li>`;
+            
+            // Estado de productos
+            html += `<li><strong>Productos:</strong> ${productos.length} registrados</li>`;
+            
+            // Estado de la instancia
+            if (canvas && canvas._chartjs) {
+                html += `<li><strong>Instancia Chart:</strong> ✅ Creada (${canvas._chartjs.config.type})</li>`;
+            } else {
+                html += `<li><strong>Instancia Chart:</strong> ❌ No creada</li>`;
+            }
+            
+            html += '</ul>';
+            statusEl.innerHTML = html;
+        }
+
+        function limpiarProductos() {
+            debugLog('🧹 Limpiando todos los productos...', 'info');
+            saveProductos([]);
+            testCounter = 1;
+            
+            if (typeof actualizarGrafico === 'function') {
+                actualizarGrafico();
+            }
+            
+            setTimeout(() => {
+                verificarChart();
+            }, 500);
+        }
+
+        // Override console para capturar logs
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const mensaje = args.join(' ');
+            if (mensaje.includes('gráfico') || mensaje.includes('Chart') || mensaje.includes('canvas')) {
+                debugLog(`📡 APP: ${mensaje}`, 'info');
+            }
+        };
+
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            debugLog(`💥 ERROR: ${args.join(' ')}`, 'error');
+        };
+
+        // Inicialización
+        window.addEventListener('DOMContentLoaded', () => {
+            debugLog('🚀 Debug gráfico iniciado', 'success');
+            setTimeout(() => {
+                verificarChart();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 Debug Botones Eliminar - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .btn-delete {
+            background: #f44336;
+        }
+        .btn-delete-direct {
+            background: #d32f2f;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 15px 0;
+        }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .confirm-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .confirm-btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        .confirm-btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Debug Botones Eliminar</h1>
+    
+    <div class="test-section">
+        <h2>📝 Agregar Producto de Prueba</h2>
+        <input type="text" id="nombreProducto" placeholder="Nombre del producto" value="Producto Test">
+        <input type="number" id="valorTotalProducto" placeholder="Valor total" value="1000000">
+        <input type="number" id="numeroCuotas" placeholder="Número de cuotas" value="12">
+        <input type="date" id="fechaInicio">
+        <button onclick="agregarProductoPrueba()">➕ Agregar Producto</button>
+        <div id="resultado"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📦 Lista de Productos</h2>
+        <div id="listaProductos"></div>
+        <button onclick="cargarProductos()">🔄 Recargar Lista</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Tests de Botones</h2>
+        <button onclick="testEliminarProducto()">🧪 Test Eliminar (Modal)</button>
+        <button onclick="testEliminarDirecto()">🧪 Test Eliminar Directo</button>
+        <button onclick="verificarFunciones()">🔍 Verificar Funciones</button>
+        <div id="resultadoTests"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Log de Debug</h2>
+        <button onclick="limpiarLog()">🧹 Limpiar Log</button>
+        <div id="logDebug" class="log">Esperando eventos...\n</div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="confirm-product-name">Nombre del producto</strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="confirm-btn confirm-btn-cancel" onclick="cerrarConfirmacion()">Cancelar</button>
+                <button type="button" class="confirm-btn confirm-btn-delete" onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de la aplicación -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+
+    <script>
+        // Sistema de logging
+        function log(mensaje, tipo = 'info') {
+            const logEl = document.getElementById('logDebug');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = tipo === 'error' ? '❌' : tipo === 'success' ? '✅' : tipo === 'warning' ? '⚠️' : 'ℹ️';
+            logEl.textContent += `[${timestamp}] ${icon} ${mensaje}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            
+            // También al console original
+            if (tipo === 'error') {
+                console.error(mensaje);
+            } else {
+                console.log(mensaje);
+            }
+        }
+
+        // Interceptar errores
+        window.onerror = function(mensaje, archivo, linea, columna, error) {
+            log(`ERROR GLOBAL: ${mensaje} en ${archivo}:${linea}:${columna}`, 'error');
+            return false;
+        };
+
+        // Interceptar console.log y console.error
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            log(`CONSOLE: ${args.join(' ')}`, 'info');
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            log(`CONSOLE ERROR: ${args.join(' ')}`, 'error');
+            originalError.apply(console, args);
+        };
+
+        function limpiarLog() {
+            document.getElementById('logDebug').textContent = 'Log limpiado...\n';
+        }
+
+        function agregarProductoPrueba() {
+            log('Agregando producto de prueba...', 'info');
+            
+            // Establecer fecha si no está establecida
+            const fechaEl = document.getElementById('fechaInicio');
+            if (!fechaEl.value) {
+                fechaEl.value = new Date().toISOString().split('T')[0];
+            }
+            
+            try {
+                if (typeof agregarProducto === 'function') {
+                    agregarProducto();
+                    log('Producto agregado exitosamente', 'success');
+                } else {
+                    log('Función agregarProducto no encontrada', 'error');
+                }
+            } catch (error) {
+                log(`Error al agregar producto: ${error.message}`, 'error');
+            }
+        }
+
+        function testEliminarProducto() {
+            log('Iniciando test de eliminar con modal...', 'info');
+            
+            const productos = getProductos();
+            if (productos.length === 0) {
+                log('No hay productos para eliminar', 'warning');
+                return;
+            }
+            
+            const producto = productos[0];
+            log(`Probando eliminar producto: ${producto.nombre} (ID: ${producto.id})`, 'info');
+            
+            try {
+                if (typeof eliminarProducto === 'function') {
+                    eliminarProducto(producto.id);
+                    log('Función eliminarProducto llamada correctamente', 'success');
+                } else {
+                    log('Función eliminarProducto no encontrada', 'error');
+                }
+            } catch (error) {
+                log(`Error en eliminarProducto: ${error.message}`, 'error');
+            }
+        }
+
+        function testEliminarDirecto() {
+            log('Iniciando test de eliminar directo...', 'info');
+            
+            const productos = getProductos();
+            if (productos.length === 0) {
+                log('No hay productos para eliminar', 'warning');
+                return;
+            }
+            
+            const producto = productos[0];
+            log(`Probando eliminar directo: ${producto.nombre} (ID: ${producto.id})`, 'info');
+            
+            try {
+                if (typeof eliminarProductoDirecto === 'function') {
+                    eliminarProductoDirecto(producto.id);
+                    log('Función eliminarProductoDirecto llamada correctamente', 'success');
+                } else {
+                    log('Función eliminarProductoDirecto no encontrada', 'error');
+                }
+            } catch (error) {
+                log(`Error en eliminarProductoDirecto: ${error.message}`, 'error');
+            }
+        }
+
+        function verificarFunciones() {
+            log('Verificando funciones disponibles...', 'info');
+            
+            const funciones = [
+                'agregarProducto',
+                'eliminarProducto', 
+                'eliminarProductoDirecto',
+                'confirmarEliminacion',
+                'abrirModalConfirmacion',
+                'cerrarConfirmacion',
+                'cargarProductos',
+                'getProductos',
+                'deleteProducto'
+            ];
+            
+            funciones.forEach(nombre => {
+                if (typeof window[nombre] === 'function') {
+                    log(`✅ ${nombre}: DISPONIBLE`, 'success');
+                } else {
+                    log(`❌ ${nombre}: NO DISPONIBLE`, 'error');
+                }
+            });
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM cargado completamente', 'success');
+            
+            // Establecer fecha
+            const fechaEl = document.getElementById('fechaInicio');
+            if (fechaEl) {
+                fechaEl.value = new Date().toISOString().split('T')[0];
+            }
+            
+            // Verificar elementos críticos
+            const elementos = ['confirmModal', 'confirm-product-name', 'listaProductos'];
+            elementos.forEach(id => {
+                const el = document.getElementById(id);
+                log(`Elemento ${id}: ${el ? 'ENCONTRADO' : 'NO ENCONTRADO'}`, el ? 'success' : 'error');
+            });
+            
+            // Cargar productos existentes
+            setTimeout(() => {
+                cargarProductos();
+                verificarFunciones();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

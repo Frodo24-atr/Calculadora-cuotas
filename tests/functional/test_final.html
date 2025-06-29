@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Test Final - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 4px; margin: 5px 0; }
+        .log { background: #000; color: #0f0; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>✅ Test Final - Calculadora de Cuotas</h1>
+    
+    <div class="test-section">
+        <h2>🔍 Verificación de Elementos DOM</h2>
+        <button onclick="verificarTodosLosElementos()">Verificar Todos los Elementos</button>
+        <div id="resultadoVerificacion"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🧪 Prueba de Funciones</h2>
+        <button onclick="probarAgregarProducto()">Probar Agregar Producto</button>
+        <button onclick="probarMostrarMensaje()">Probar Mostrar Mensaje</button>
+        <button onclick="probarModales()">Probar Modales</button>
+        <div id="resultadoPruebas"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Log de Eventos</h2>
+        <button onclick="limpiarLog()">Limpiar Log</button>
+        <div id="logEventos" class="log">Esperando eventos...\n</div>
+    </div>
+
+    <!-- Incluir los scripts de la aplicación -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <script>
+        // Sistema de logging
+        function log(mensaje, tipo = 'info') {
+            const logEl = document.getElementById('logEventos');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = tipo === 'error' ? '❌' : tipo === 'success' ? '✅' : 'ℹ️';
+            logEl.textContent += `[${timestamp}] ${icon} ${mensaje}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // Capturar errores
+        window.onerror = function(mensaje, archivo, linea, columna, error) {
+            log(`ERROR: ${mensaje} en ${archivo}:${linea}:${columna}`, 'error');
+            return false;
+        };
+
+        // Interceptar console.log y console.error
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            log(`LOG: ${args.join(' ')}`, 'info');
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            log(`ERROR: ${args.join(' ')}`, 'error');
+            originalError.apply(console, args);
+        };
+
+        function verificarTodosLosElementos() {
+            const elementos = [
+                'loadingIndicator', 'fechaInicio', 'nombreProducto', 'valorTotalProducto',
+                'numeroCuotas', 'listaProductos', 'confirm-product-name', 'modal-nombre',
+                'modal-valor', 'modal-cuotas', 'modal-fecha', 'resultado', 'btnBorrarTodo',
+                'gastosChart', 'editModal', 'confirmModal', 'modalGenerico', 'totalProductos',
+                'valorTotal', 'promedioMensual', 'proximoMes', 'statsSection'
+            ];
+            
+            const resultadoEl = document.getElementById('resultadoVerificacion');
+            let html = '<h3>Resultado de Verificación:</h3>';
+            let todosEncontrados = true;
+            
+            elementos.forEach(id => {
+                const elemento = document.getElementById(id);
+                const existe = !!elemento;
+                const clase = existe ? 'success' : 'error';
+                const icono = existe ? '✅' : '❌';
+                html += `<div class="${clase}">${icono} ${id}: ${existe ? 'ENCONTRADO' : 'NO ENCONTRADO'}</div>`;
+                
+                if (!existe) todosEncontrados = false;
+                log(`Elemento ${id}: ${existe ? 'ENCONTRADO' : 'NO ENCONTRADO'}`, existe ? 'success' : 'error');
+            });
+            
+            if (todosEncontrados) {
+                html += '<div class="success">🎉 ¡Todos los elementos necesarios están presentes!</div>';
+                log('Verificación completa: TODOS LOS ELEMENTOS ENCONTRADOS', 'success');
+            } else {
+                html += '<div class="error">⚠️ Algunos elementos están faltando</div>';
+                log('Verificación completa: ALGUNOS ELEMENTOS FALTANTES', 'error');
+            }
+            
+            resultadoEl.innerHTML = html;
+        }
+
+        function probarMostrarMensaje() {
+            log('Probando mostrar mensaje en elemento resultado', 'info');
+            
+            try {
+                const resultadoEl = document.getElementById('resultado');
+                if (!resultadoEl) {
+                    throw new Error('Elemento resultado no encontrado');
+                }
+                
+                resultadoEl.innerHTML = `
+                    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; border: 1px solid #c3e6cb;">
+                        <strong>✅ Test de mensaje exitoso!</strong><br>
+                        <em>El elemento resultado funciona correctamente</em>
+                    </div>
+                `;
+                
+                log('Mensaje mostrado correctamente en elemento resultado', 'success');
+                
+                // Limpiar después de 3 segundos
+                setTimeout(() => {
+                    if (resultadoEl) {
+                        resultadoEl.innerHTML = '';
+                        log('Mensaje limpiado correctamente', 'success');
+                    }
+                }, 3000);
+                
+            } catch (error) {
+                log(`Error al mostrar mensaje: ${error.message}`, 'error');
+            }
+        }
+
+        function probarAgregarProducto() {
+            log('Iniciando prueba de agregar producto', 'info');
+            
+            try {
+                // Simular datos en el formulario
+                const nombreEl = document.getElementById('nombreProducto');
+                const valorEl = document.getElementById('valorTotalProducto');
+                const cuotasEl = document.getElementById('numeroCuotas');
+                const fechaEl = document.getElementById('fechaInicio');
+                
+                if (!nombreEl || !valorEl || !cuotasEl || !fechaEl) {
+                    throw new Error('Elementos del formulario no encontrados');
+                }
+                
+                // Solo verificar que los elementos existen
+                log('Elementos del formulario encontrados correctamente', 'success');
+                
+                // Verificar que la función agregarProducto existe
+                if (typeof agregarProducto === 'function') {
+                    log('Función agregarProducto encontrada y disponible', 'success');
+                } else {
+                    log('Función agregarProducto NO encontrada', 'error');
+                }
+                
+            } catch (error) {
+                log(`Error en prueba de agregar producto: ${error.message}`, 'error');
+            }
+        }
+
+        function probarModales() {
+            log('Probando modales...', 'info');
+            
+            const modales = ['editModal', 'confirmModal', 'modalGenerico'];
+            
+            modales.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    log(`Modal ${modalId}: ENCONTRADO`, 'success');
+                } else {
+                    log(`Modal ${modalId}: NO ENCONTRADO`, 'error');
+                }
+            });
+        }
+
+        function limpiarLog() {
+            document.getElementById('logEventos').textContent = 'Log limpiado...\n';
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM cargado completamente', 'success');
+            
+            // Verificar automáticamente después de un breve delay
+            setTimeout(() => {
+                log('Ejecutando verificación automática...', 'info');
+                verificarTodosLosElementos();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

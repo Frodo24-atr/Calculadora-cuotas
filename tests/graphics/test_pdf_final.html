@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Botón PDF - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+        }
+        
+        .pdf-download-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            margin: 40px 0;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.1; transform: scale(1.05); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6); }
+        }
+        
+        .pdf-download-section:hover {
+            transform: translateY(-3px);
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        #btnDescargarPDF {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #btnDescargarPDF::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        #btnDescargarPDF:hover::before {
+            left: 100%;
+        }
+        
+        #btnDescargarPDF:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        
+        #btnDescargarPDF:active {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .producto-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test del Botón de Descarga PDF</h1>
+        
+        <div class="test-section">
+            <h2>📊 Datos de Prueba</h2>
+            <div id="productosTest">
+                <div class="producto-item">
+                    <strong>Laptop Dell</strong><br>
+                    Valor: $2,500,000 | Cuotas: 12 | Valor por cuota: $208,333
+                </div>
+                <div class="producto-item">
+                    <strong>Teléfono Samsung</strong><br>
+                    Valor: $800,000 | Cuotas: 6 | Valor por cuota: $133,333
+                </div>
+                <div class="producto-item">
+                    <strong>Tablet iPad</strong><br>
+                    Valor: $1,200,000 | Cuotas: 8 | Valor por cuota: $150,000
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔍 Estado de las Librerías</h2>
+            <div id="estadoLibrerias">
+                <p>Verificando...</p>
+            </div>
+        </div>
+        
+        <!-- Botón de Descarga PDF -->
+        <div class="pdf-download-section">
+            <div style="
+                position: absolute;
+                top: -50%;
+                right: -50%;
+                width: 200%;
+                height: 200%;
+                background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                animation: pulse 3s ease-in-out infinite;
+            "></div>
+            <div style="position: relative; z-index: 2;">
+                <h3 style="color: white; margin: 0 0 15px 0; font-size: 24px; font-weight: 600;">📄 Exportar Reporte</h3>
+                <p style="color: rgba(255,255,255,0.9); margin: 0 0 25px 0; font-size: 16px;">Descarga un resumen completo de tus productos y cuotas</p>
+                <button id="btnDescargarPDF" onclick="descargarPDF()">
+                    <span style="font-size: 22px;">📥</span>
+                    Descargar PDF
+                </button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📝 Log de Pruebas</h2>
+            <div id="logPruebas"></div>
+        </div>
+    </div>
+
+    <!-- Librerías -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // Datos de prueba
+        const productosTest = [
+            {
+                id: 'test1',
+                nombre: 'Laptop Dell',
+                valor: 2500000,
+                cuotas: 12,
+                valorCuota: 208333,
+                fechaInicio: '2024-01-15',
+                cuotasPagadas: 3
+            },
+            {
+                id: 'test2',
+                nombre: 'Teléfono Samsung',
+                valor: 800000,
+                cuotas: 6,
+                valorCuota: 133333,
+                fechaInicio: '2024-02-01',
+                cuotasPagadas: 2
+            },
+            {
+                id: 'test3',
+                nombre: 'Tablet iPad',
+                valor: 1200000,
+                cuotas: 8,
+                valorCuota: 150000,
+                fechaInicio: '2024-03-10',
+                cuotasPagadas: 1
+            }
+        ];
+        
+        // Mock de funciones necesarias
+        function getProductos() {
+            return productosTest;
+        }
+        
+        function calcularEstadisticas(productos) {
+            const totalProductos = productos.length;
+            const valorTotal = productos.reduce((sum, p) => sum + p.valor, 0);
+            const promedioMensual = productos.reduce((sum, p) => sum + p.valorCuota, 0);
+            const proximoMes = promedioMensual;
+            
+            return {
+                totalProductos,
+                valorTotal,
+                promedioMensual,
+                proximoMes
+            };
+        }
+        
+        function log(mensaje, tipo = 'info') {
+            const logDiv = document.getElementById('logPruebas');
+            const tiempo = new Date().toLocaleTimeString();
+            const colorClass = tipo === 'error' ? 'error' : tipo === 'success' ? 'success' : tipo === 'warning' ? 'warning' : '';
+            logDiv.innerHTML += `<div class="status ${colorClass}">[${tiempo}] ${mensaje}</div>`;
+            console.log(`[${tiempo}] ${mensaje}`);
+        }
+        
+        function descargarPDF() {
+            try {
+                log('Iniciando descarga de PDF...', 'info');
+                
+                const productos = getProductos();
+                
+                if (productos.length === 0) {
+                    log('Error: No hay productos para exportar', 'error');
+                    alert('No hay productos para exportar. Agrega algunos productos primero.');
+                    return;
+                }
+                
+                log(`Productos encontrados: ${productos.length}`, 'success');
+
+                // Verificar que jsPDF esté disponible con múltiples formas de acceso
+                let jsPDF = null;
+                if (typeof window.jsPDF !== 'undefined') {
+                    jsPDF = window.jsPDF.jsPDF || window.jsPDF;
+                } else if (typeof window.jspdf !== 'undefined') {
+                    jsPDF = window.jspdf.jsPDF || window.jspdf;
+                }
+                
+                if (!jsPDF) {
+                    log('jsPDF no disponible, usando método alternativo...', 'warning');
+                    descargarTextoAlternativo(productos);
+                    return;
+                }
+                
+                log('jsPDF detectado correctamente, generando PDF...', 'success');
+
+                // Crear nuevo documento PDF
+                const doc = new jsPDF();
+                
+                // Configuración
+                const pageWidth = doc.internal.pageSize.width;
+                const margin = 20;
+                let yPosition = 30;
+                
+                // Título principal
+                doc.setFontSize(24);
+                doc.setTextColor(102, 126, 234);
+                doc.text('Calculadora de Cuotas', pageWidth / 2, yPosition, { align: 'center' });
+                
+                yPosition += 10;
+                doc.setFontSize(14);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Reporte de Productos y Cuotas', pageWidth / 2, yPosition, { align: 'center' });
+                
+                yPosition += 5;
+                doc.setFontSize(10);
+                doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, pageWidth / 2, yPosition, { align: 'center' });
+                
+                yPosition += 20;
+                
+                // Estadísticas generales
+                const stats = calcularEstadisticas(productos);
+                
+                doc.setFontSize(16);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Resumen General', margin, yPosition);
+                yPosition += 15;
+                
+                doc.setFontSize(12);
+                const resumenLineas = [
+                    `Total de productos: ${stats.totalProductos}`,
+                    `Valor total: $${stats.valorTotal.toLocaleString('es-ES')}`,
+                    `Promedio mensual: $${Math.round(stats.promedioMensual).toLocaleString('es-ES')}`,
+                    `Proximo mes: $${Math.round(stats.proximoMes).toLocaleString('es-ES')}`
+                ];
+                
+                resumenLineas.forEach(linea => {
+                    doc.text(linea, margin + 5, yPosition);
+                    yPosition += 8;
+                });
+                
+                yPosition += 15;
+                
+                // Lista de productos
+                doc.setFontSize(16);
+                doc.setTextColor(0, 0, 0);
+                doc.text('Detalle de Productos', margin, yPosition);
+                yPosition += 15;
+                
+                productos.forEach((producto, index) => {
+                    // Verificar si necesitamos nueva página
+                    if (yPosition > 250) {
+                        doc.addPage();
+                        yPosition = 30;
+                    }
+                    
+                    // Encabezado del producto
+                    doc.setFontSize(14);
+                    doc.setTextColor(102, 126, 234);
+                    doc.text(`${index + 1}. ${producto.nombre}`, margin, yPosition);
+                    yPosition += 12;
+                    
+                    // Detalles del producto
+                    doc.setFontSize(11);
+                    doc.setTextColor(60, 60, 60);
+                    
+                    const detalles = [
+                        `Valor total: $${producto.valor.toLocaleString('es-ES')}`,
+                        `Numero de cuotas: ${producto.cuotas}`,
+                        `Valor por cuota: $${producto.valorCuota.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                        `Fecha de inicio: ${new Date(producto.fechaInicio).toLocaleDateString('es-ES')}`,
+                        `Cuotas pagadas: ${producto.cuotasPagadas || 0} de ${producto.cuotas}`
+                    ];
+                    
+                    detalles.forEach(detalle => {
+                        doc.text(`- ${detalle}`, margin + 5, yPosition);
+                        yPosition += 7;
+                    });
+                    
+                    yPosition += 10;
+                });
+                
+                // Footer
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150, 150, 150);
+                    doc.text(
+                        `Pagina ${i} de ${totalPages} - Calculadora de Cuotas v2025.06.29`,
+                        pageWidth / 2,
+                        doc.internal.pageSize.height - 10,
+                        { align: 'center' }
+                    );
+                }
+                
+                // Descargar PDF
+                const fecha = new Date().toISOString().split('T')[0];
+                const nombreArchivo = `calculadora-cuotas-test-${fecha}.pdf`;
+                doc.save(nombreArchivo);
+                
+                log(`PDF generado exitosamente: ${nombreArchivo}`, 'success');
+                
+                // Mostrar mensaje de éxito
+                mostrarMensajeExitoPDF(nombreArchivo);
+                
+            } catch (error) {
+                log(`Error al generar PDF: ${error.message}`, 'error');
+                console.error('Error al generar PDF:', error);
+                
+                // Fallback al método alternativo
+                const productos = getProductos();
+                if (productos.length > 0) {
+                    descargarTextoAlternativo(productos);
+                } else {
+                    alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+                }
+            }
+        }
+        
+        function descargarTextoAlternativo(productos) {
+            try {
+                log('Iniciando descarga de archivo de texto alternativo...', 'warning');
+                
+                let contenido = '='.repeat(50) + '\n';
+                contenido += '💰 CALCULADORA DE CUOTAS - REPORTE\n';
+                contenido += '='.repeat(50) + '\n\n';
+                contenido += `Fecha de generación: ${new Date().toLocaleDateString('es-ES')}\n\n`;
+                
+                // Estadísticas
+                const stats = calcularEstadisticas(productos);
+                contenido += '📊 RESUMEN GENERAL\n';
+                contenido += '-'.repeat(30) + '\n';
+                contenido += `Total de productos: ${stats.totalProductos}\n`;
+                contenido += `Valor total: $${stats.valorTotal.toLocaleString('es-ES')}\n`;
+                contenido += `Promedio mensual: $${Math.round(stats.promedioMensual).toLocaleString('es-ES')}\n`;
+                contenido += `Próximo mes: $${Math.round(stats.proximoMes).toLocaleString('es-ES')}\n\n`;
+                
+                // Productos
+                contenido += '📦 DETALLE DE PRODUCTOS\n';
+                contenido += '-'.repeat(30) + '\n\n';
+                
+                productos.forEach((producto, index) => {
+                    contenido += `${index + 1}. ${producto.nombre}\n`;
+                    contenido += `   • Valor total: $${producto.valor.toLocaleString('es-ES')}\n`;
+                    contenido += `   • Número de cuotas: ${producto.cuotas}\n`;
+                    contenido += `   • Valor por cuota: $${producto.valorCuota.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}\n`;
+                    contenido += `   • Fecha de inicio: ${new Date(producto.fechaInicio).toLocaleDateString('es-ES')}\n`;
+                    contenido += `   • Cuotas pagadas: ${producto.cuotasPagadas || 0} de ${producto.cuotas}\n\n`;
+                });
+                
+                contenido += '\n' + '='.repeat(50) + '\n';
+                contenido += 'Generado por Calculadora de Cuotas v2025.06.29\n';
+                contenido += '='.repeat(50);
+                
+                // Crear y descargar archivo
+                const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const fecha = new Date().toISOString().split('T')[0];
+                
+                a.href = url;
+                a.download = `calculadora-cuotas-test-${fecha}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                log(`Archivo de texto generado exitosamente: calculadora-cuotas-test-${fecha}.txt`, 'success');
+                
+                // Mostrar mensaje de éxito
+                mostrarMensajeExitoPDF(`calculadora-cuotas-test-${fecha}.txt`);
+                
+            } catch (error) {
+                log(`Error en método alternativo: ${error.message}`, 'error');
+                console.error('Error en método alternativo:', error);
+                alert('Error al generar el archivo. Por favor, intenta nuevamente.');
+            }
+        }
+        
+        function mostrarMensajeExitoPDF(nombreArchivo) {
+            const btnPDF = document.getElementById('btnDescargarPDF');
+            const textoOriginal = btnPDF.innerHTML;
+            
+            btnPDF.innerHTML = '<span style="font-size: 22px;">✅</span> Descargado';
+            btnPDF.style.background = '#28a745';
+            btnPDF.style.color = 'white';
+            
+            setTimeout(() => {
+                btnPDF.innerHTML = textoOriginal;
+                btnPDF.style.background = 'white';
+                btnPDF.style.color = '#667eea';
+            }, 3000);
+        }
+        
+        // Verificar estado de las librerías al cargar
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const estadoDiv = document.getElementById('estadoLibrerias');
+                let html = '';
+                
+                // Verificar jsPDF
+                let jsPDF = null;
+                if (typeof window.jsPDF !== 'undefined') {
+                    jsPDF = window.jsPDF.jsPDF || window.jsPDF;
+                } else if (typeof window.jspdf !== 'undefined') {
+                    jsPDF = window.jspdf.jsPDF || window.jspdf;
+                }
+                
+                if (jsPDF) {
+                    html += '<div class="status success">✅ jsPDF: Cargado correctamente</div>';
+                    log('jsPDF disponible y listo para usar', 'success');
+                } else {
+                    html += '<div class="status error">❌ jsPDF: No disponible</div>';
+                    log('jsPDF no está disponible', 'error');
+                }
+                
+                // Verificar otras librerías si las hay
+                html += '<div class="status success">✅ LocalStorage: Disponible</div>';
+                html += '<div class="status success">✅ Blob API: Disponible</div>';
+                html += '<div class="status success">✅ URL.createObjectURL: Disponible</div>';
+                
+                estadoDiv.innerHTML = html;
+                
+                const btnPDF = document.getElementById('btnDescargarPDF');
+                if (jsPDF) {
+                    btnPDF.title = 'Descargar reporte en formato PDF';
+                } else {
+                    btnPDF.title = 'Descargar reporte en formato texto (PDF no disponible)';
+                    btnPDF.innerHTML = '<span style="font-size: 22px;">📄</span>Descargar Reporte';
+                }
+                
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

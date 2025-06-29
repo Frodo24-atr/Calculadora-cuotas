@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Eliminación - Animación Suave</title>
+    <link rel="stylesheet" href="./src/styles/fallback.css">
+    <style>
+        body {
+            padding: 50px;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .test-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Modal Eliminación</h1>
+        <p>Prueba las animaciones suaves del modal de confirmación</p>
+        
+        <button class="test-btn" onclick="openTestModal()">
+            🗑️ Probar Modal Eliminar
+        </button>
+        
+        <div style="margin-top: 30px;">
+            <h3>¿Qué deberías ver?</h3>
+            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <li>✨ Modal aparece con animación suave (escala + movimiento)</li>
+                <li>🌊 Fondo con efecto blur progresivo</li>
+                <li>📱 Elementos internos aparecen escalonados</li>
+                <li>⚡ Botones con efectos hover</li>
+                <li>🔄 Cierre con animación inversa</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal confirm-modal">
+        <div class="modal-content confirm-modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-modal-text">¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="confirm-product-name">Producto de Prueba</strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer confirm-modal-buttons">
+                <button type="button" class="confirm-btn confirm-btn-cancel" onclick="closeTestModal()">Cancelar</button>
+                <button type="button" class="confirm-btn confirm-btn-delete" onclick="closeTestModal()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openTestModal() {
+            const modal = document.getElementById('confirmModal');
+            if (modal) {
+                // Mostrar el modal sin animación primero
+                modal.style.display = 'flex';
+                
+                // Remover clases anteriores de animación
+                modal.classList.remove('closing');
+                
+                // Usar requestAnimationFrame para asegurar que el display se aplique antes de la animación
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        modal.classList.add('show');
+                    });
+                });
+                
+                // Agregar clase al body para prevenir scroll
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeTestModal() {
+            const modal = document.getElementById('confirmModal');
+            if (modal) {
+                // Añadir clase de cierre para animación de salida
+                modal.classList.add('closing');
+                modal.classList.remove('show');
+                
+                // Esperar a que termine la animación antes de ocultar
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modal.classList.remove('closing');
+                    
+                    // Restaurar scroll del body
+                    document.body.style.overflow = '';
+                }, 400); // 400ms coincide con la nueva duración de la transición CSS
+            }
+        }
+
+        // Cerrar modal al hacer click fuera
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                closeTestModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Recordatorios - Calculadora de Cuotas</title>
+    
+    <!-- Librerías -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+        }
+        .test-section h3 {
+            color: #764ba2;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn.whatsapp { background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); }
+        .btn.email { background: linear-gradient(135deg, #ea4335 0%, #c23321 100%); }
+        .btn.calendar { background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%); }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .result.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result.error { background: #f8d7da; color: #721c24; border: 1px solid #f1b0b7; }
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        .config-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Test de Recordatorios</h1>
+            <p>Prueba las funcionalidades de recordatorios antes de implementar</p>
+        </div>
+
+        <div class="config-section">
+            <h3>⚙️ Configuración de Servicios</h3>
+            <div class="config-item">
+                <strong>📧 EmailJS:</strong> Configura tu cuenta en <a href="https://www.emailjs.com/" target="_blank">emailjs.com</a>
+                <br><small>Necesitas: Public Key, Service ID y Template ID</small>
+            </div>
+            <div class="config-item">
+                <strong>📅 Google Calendar:</strong> Configura tu proyecto en <a href="https://console.developers.google.com/" target="_blank">Google Console</a>
+                <br><small>Necesitas: API Key y Client ID</small>
+            </div>
+            <div class="config-item">
+                <strong>💬 WhatsApp:</strong> No requiere configuración adicional
+                <br><small>Solo necesitas un número de teléfono válido</small>
+            </div>
+        </div>
+
+        <!-- Test WhatsApp -->
+        <div class="test-section">
+            <h3>💬 Test WhatsApp</h3>
+            <div class="form-group">
+                <label for="testWhatsappNumber">Número de WhatsApp:</label>
+                <input type="tel" id="testWhatsappNumber" placeholder="+57 300 123 4567">
+            </div>
+            <button class="btn whatsapp" onclick="testWhatsApp()">Probar WhatsApp</button>
+            <div id="whatsappResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test Email -->
+        <div class="test-section">
+            <h3>📧 Test Email</h3>
+            <div class="form-group">
+                <label for="testEmail">Correo electrónico:</label>
+                <input type="email" id="testEmail" placeholder="tu@email.com">
+            </div>
+            <button class="btn email" onclick="testEmail()">Probar Email</button>
+            <div id="emailResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test Google Calendar -->
+        <div class="test-section">
+            <h3>📅 Test Google Calendar</h3>
+            <div class="form-group">
+                <label for="testGoogleEmail">Cuenta de Google:</label>
+                <input type="email" id="testGoogleEmail" placeholder="tu@gmail.com">
+            </div>
+            <button class="btn calendar" onclick="testGoogleCalendar()">Probar Google Calendar</button>
+            <div id="calendarResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Test Completo -->
+        <div class="test-section">
+            <h3>🧪 Test Completo</h3>
+            <p>Prueba todos los servicios con datos de ejemplo</p>
+            <button class="btn" onclick="testAll()">Probar Todos los Servicios</button>
+            <div id="allResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de prueba (reemplaza con tus claves reales)
+        const TEST_CONFIG = {
+            emailJS: {
+                publicKey: 'TU_PUBLIC_KEY', // Reemplazar
+                serviceId: 'TU_SERVICE_ID', // Reemplazar
+                templateId: 'TU_TEMPLATE_ID' // Reemplazar
+            },
+            googleCalendar: {
+                apiKey: 'TU_API_KEY', // Reemplazar
+                clientId: 'TU_CLIENT_ID' // Reemplazar
+            }
+        };
+
+        // Test WhatsApp
+        function testWhatsApp() {
+            const number = document.getElementById('testWhatsappNumber').value;
+            const resultDiv = document.getElementById('whatsappResult');
+            
+            try {
+                if (!number.trim()) {
+                    throw new Error('Número de WhatsApp requerido');
+                }
+
+                const cleanNumber = number.replace(/\s+/g, '').replace(/[^\d+]/g, '');
+                if (!cleanNumber.startsWith('+') || cleanNumber.length < 10) {
+                    throw new Error('Formato de número inválido');
+                }
+
+                const message = encodeURIComponent(
+                    '🔔 *Test de Recordatorio*\n\n' +
+                    '📦 Producto: Test Product\n' +
+                    '💰 Monto: $100,000\n' +
+                    '📅 Fecha de pago: 30/06/2025\n' +
+                    '📊 Cuota: 1/12\n\n' +
+                    '¡Este es un mensaje de prueba! 💪'
+                );
+
+                const whatsappUrl = `https://wa.me/${cleanNumber.replace('+', '')}?text=${message}`;
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ WhatsApp configurado correctamente<br><a href="${whatsappUrl}" target="_blank">Abrir WhatsApp</a>`;
+                resultDiv.style.display = 'block';
+
+                // Abrir WhatsApp automáticamente
+                window.open(whatsappUrl, '_blank');
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // Test Email
+        function testEmail() {
+            const email = document.getElementById('testEmail').value;
+            const resultDiv = document.getElementById('emailResult');
+            
+            try {
+                if (!email || !validateEmail(email)) {
+                    throw new Error('Dirección de email inválida');
+                }
+
+                // Verificar si EmailJS está configurado
+                if (TEST_CONFIG.emailJS.publicKey === 'TU_PUBLIC_KEY') {
+                    throw new Error('EmailJS no configurado. Actualiza TEST_CONFIG con tus claves reales.');
+                }
+
+                // Aquí harías la llamada real a EmailJS
+                // Por ahora solo simulamos
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ Email configurado para: ${email}<br><small>Nota: Configura EmailJS para envío real</small>`;
+                resultDiv.style.display = 'block';
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // Test Google Calendar
+        function testGoogleCalendar() {
+            const email = document.getElementById('testGoogleEmail').value;
+            const resultDiv = document.getElementById('calendarResult');
+            
+            try {
+                if (!email || !validateEmail(email)) {
+                    throw new Error('Email de Google requerido');
+                }
+
+                // Verificar si Google API está configurado
+                if (TEST_CONFIG.googleCalendar.apiKey === 'TU_API_KEY') {
+                    throw new Error('Google Calendar API no configurado. Actualiza TEST_CONFIG con tus claves reales.');
+                }
+
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ Google Calendar configurado para: ${email}<br><small>Nota: Configura Google API para conexión real</small>`;
+                resultDiv.style.display = 'block';
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // Test All
+        function testAll() {
+            const resultDiv = document.getElementById('allResult');
+            
+            try {
+                const results = [];
+                
+                // Verificar WhatsApp
+                const whatsappNum = document.getElementById('testWhatsappNumber').value;
+                if (whatsappNum && whatsappNum.trim()) {
+                    results.push('✅ WhatsApp: Configurado');
+                } else {
+                    results.push('⚠️ WhatsApp: No configurado');
+                }
+
+                // Verificar Email
+                const emailAddr = document.getElementById('testEmail').value;
+                if (emailAddr && validateEmail(emailAddr)) {
+                    results.push('✅ Email: Configurado');
+                } else {
+                    results.push('⚠️ Email: No configurado');
+                }
+
+                // Verificar Google
+                const googleEmail = document.getElementById('testGoogleEmail').value;
+                if (googleEmail && validateEmail(googleEmail)) {
+                    results.push('✅ Google Calendar: Configurado');
+                } else {
+                    results.push('⚠️ Google Calendar: No configurado');
+                }
+
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `<strong>Resumen de Pruebas:</strong><br>${results.join('<br>')}`;
+                resultDiv.style.display = 'block';
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error en prueba completa: ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // Validar email
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Test de Recordatorios iniciado');
+            
+            // Verificar disponibilidad de librerías
+            if (typeof emailjs !== 'undefined') {
+                console.log('✅ EmailJS cargado');
+            } else {
+                console.warn('⚠️ EmailJS no disponible');
+            }
+
+            if (typeof gapi !== 'undefined') {
+                console.log('✅ Google API cargado');
+            } else {
+                console.warn('⚠️ Google API no disponible');
+            }
+        });
+    </script>
+</body>
+</html>

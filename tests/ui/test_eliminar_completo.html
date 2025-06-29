@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Botón Eliminar - Diagnóstico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .producto-item {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .producto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .btn {
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            padding: 5px 10px;
+            margin: 0 2px;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+        .info { color: #0ff; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Diagnóstico del Botón Eliminar</h1>
+
+    <div class="test-section">
+        <h2>📋 Estado de Funciones</h2>
+        <div id="funciones-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Producto de Prueba</h2>
+        <button onclick="crearProductoPrueba()">Crear Producto de Prueba</button>
+        <div id="lista-productos"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📜 Log de Eventos</h2>
+        <div class="log" id="log"></div>
+        <button onclick="limpiarLog()">Limpiar Log</button>
+    </div>
+
+    <!-- Cargar todos los JS de la aplicación -->
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <script>
+        // Log helper
+        function log(mensaje, tipo = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = {
+                'success': '#0f0',
+                'error': '#f00', 
+                'warning': '#ff0',
+                'info': '#0ff'
+            }[tipo] || '#fff';
+            
+            logEl.innerHTML += `<div style="color: ${color}">[${timestamp}] ${mensaje}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function limpiarLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Verificar funciones disponibles
+        function verificarFunciones() {
+            const funciones = [
+                'eliminarProducto',
+                'eliminarProductoDirecto', 
+                'confirmarEliminacion',
+                'abrirModalConfirmacion',
+                'cerrarConfirmacion',
+                'getProductos',
+                'saveProductos',
+                'deleteProducto'
+            ];
+
+            const statusEl = document.getElementById('funciones-status');
+            let html = '<ul>';
+
+            funciones.forEach(func => {
+                const existe = typeof window[func] === 'function';
+                const color = existe ? 'green' : 'red';
+                const icon = existe ? '✅' : '❌';
+                html += `<li style="color: ${color}">${icon} ${func}: ${existe ? 'Disponible' : 'No encontrada'}</li>`;
+                
+                if (!existe) {
+                    log(`Función ${func} no está disponible`, 'error');
+                }
+            });
+
+            html += '</ul>';
+            statusEl.innerHTML = html;
+        }
+
+        // Crear producto de prueba
+        function crearProductoPrueba() {
+            log('Creando producto de prueba...', 'info');
+            
+            const producto = {
+                id: Date.now(),
+                nombre: 'Producto de Prueba',
+                valor: 100000,
+                cuotas: 12,
+                fechaInicio: '2025-01-01',
+                valorCuota: 8333.33,
+                cuotasPagadas: 0
+            };
+
+            // Guardar en storage
+            const productos = getProductos() || [];
+            productos.push(producto);
+            saveProductos(productos);
+
+            log('Producto guardado en storage', 'success');
+            
+            // Mostrar en la lista
+            mostrarProductos();
+        }
+
+        function mostrarProductos() {
+            const productos = getProductos() || [];
+            const lista = document.getElementById('lista-productos');
+
+            if (productos.length === 0) {
+                lista.innerHTML = '<p>No hay productos</p>';
+                return;
+            }
+
+            // Usar la función original para generar HTML
+            if (typeof generarHTMLProducto === 'function') {
+                lista.innerHTML = productos.map(p => generarHTMLProducto(p)).join('');
+                log('Productos mostrados con generarHTMLProducto', 'success');
+            } else {
+                // HTML alternativo si la función no está disponible
+                lista.innerHTML = productos.map(p => `
+                    <div class="producto-item" id="producto-${p.id}">
+                        <div class="producto-header">
+                            <span>${p.nombre}</span>
+                            <div>
+                                <button onclick="testEliminar(${p.id})" class="btn" style="background: #f44336;">🗑️ Test Eliminar</button>
+                                <button onclick="testEliminarDirecto(${p.id})" class="btn" style="background: #d32f2f;">❌ Test Directo</button>
+                            </div>
+                        </div>
+                        <div>Valor: $${p.valor.toLocaleString()} | Cuotas: ${p.cuotas}</div>
+                    </div>
+                `).join('');
+                log('Productos mostrados con HTML alternativo', 'warning');
+            }
+        }
+
+        // Test functions
+        function testEliminar(id) {
+            log(`Test eliminarProducto(${id})`, 'info');
+            try {
+                if (typeof eliminarProducto === 'function') {
+                    eliminarProducto(id);
+                    log('eliminarProducto llamada exitosamente', 'success');
+                } else {
+                    log('eliminarProducto no está disponible', 'error');
+                }
+            } catch (error) {
+                log(`Error en eliminarProducto: ${error.message}`, 'error');
+            }
+        }
+
+        function testEliminarDirecto(id) {
+            log(`Test eliminarProductoDirecto(${id})`, 'info');
+            try {
+                if (typeof eliminarProductoDirecto === 'function') {
+                    eliminarProductoDirecto(id);
+                    log('eliminarProductoDirecto llamada exitosamente', 'success');
+                } else {
+                    log('eliminarProductoDirecto no está disponible', 'error');
+                }
+            } catch (error) {
+                log(`Error en eliminarProductoDirecto: ${error.message}`, 'error');
+            }
+        }
+
+        // Inicializar al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Página cargada, verificando funciones...', 'info');
+            setTimeout(() => {
+                verificarFunciones();
+                mostrarProductos();
+            }, 500);
+        });
+
+        // Override console.log para capturar logs de la aplicación
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            log(args.join(' '), 'info');
+        };
+
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            log(args.join(' '), 'error');
+        };
+    </script>
+</body>
+</html>

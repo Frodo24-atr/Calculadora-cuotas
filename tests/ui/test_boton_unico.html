@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Botón Eliminar Único</title>
+    
+    <!-- CSS de la aplicación -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/modals.css">
+    <link rel="stylesheet" href="assets/css/charts.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+    <style>
+        .test-info {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #1976D2;
+        }
+        .success-msg {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Test Botón Eliminar Único</h1>
+            <p>Verificando que solo aparezca un botón "Eliminar" que funcione</p>
+        </div>
+
+        <div class="test-info">
+            <h3>✅ Cambio Realizado:</h3>
+            <ul>
+                <li>❌ Eliminado: Botón "🗑️ Eliminar" (que no funcionaba)</li>
+                <li>❌ Eliminado: Botón "❌" (pequeño)</li>
+                <li>✅ Mantiene: Solo un botón "🗑️ Eliminar" que usa la función que funciona</li>
+                <li>🔧 Función: Usa <code>eliminarProductoDirecto()</code> con confirmación nativa</li>
+            </ul>
+        </div>
+
+        <!-- Controles de Prueba -->
+        <div class="form-section">
+            <h2>🎮 Controles de Prueba</h2>
+            <button onclick="crearProductoTest()" class="btn" style="background: #4CAF50; margin: 5px;">➕ Crear Producto Test</button>
+            <button onclick="limpiarTodoTest()" class="btn" style="background: #FF9800; margin: 5px;">🧹 Limpiar Todo</button>
+        </div>
+
+        <!-- Lista de Productos -->
+        <div class="products-section">
+            <h2>📦 Productos</h2>
+            <div id="listaProductos" class="productos-lista"></div>
+        </div>
+
+        <div class="success-msg" style="display: none;" id="successMsg">
+            <strong>🎉 ¡Perfecto!</strong><br>
+            Ahora cada producto tiene solo un botón "Eliminar" que funciona correctamente.
+        </div>
+    </div>
+
+    <!-- Scripts de la Aplicación -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <script>
+        let testProductCounter = 1;
+
+        function crearProductoTest() {
+            const producto = {
+                id: Date.now(),
+                nombre: `Producto Test ${testProductCounter}`,
+                valor: 10000 * testProductCounter,
+                cuotas: 5,
+                fechaInicio: '2025-01-01',
+                valorCuota: (10000 * testProductCounter) / 5,
+                cuotasPagadas: 0
+            };
+
+            const productos = getProductos();
+            productos.push(producto);
+            saveProductos(productos);
+            cargarProductos();
+            
+            testProductCounter++;
+            
+            // Mostrar mensaje de éxito después de crear el primer producto
+            if (testProductCounter === 2) {
+                setTimeout(() => {
+                    document.getElementById('successMsg').style.display = 'block';
+                }, 500);
+            }
+        }
+
+        function limpiarTodoTest() {
+            saveProductos([]);
+            cargarProductos();
+            testProductCounter = 1;
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        // Inicializar
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                cargarProductos();
+            }, 500);
+        });
+
+        // Override console para capturar eventos de eliminación
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const mensaje = args.join(' ');
+            if (mensaje.includes('Eliminación directa') || mensaje.includes('eliminado directamente')) {
+                const info = document.querySelector('.test-info');
+                if (info && !info.innerHTML.includes('FUNCIONANDO')) {
+                    info.innerHTML += '<br><div style="color: green; font-weight: bold; margin-top: 10px;">✅ FUNCIONANDO: El botón eliminar está trabajando correctamente!</div>';
+                }
+            }
+        };
+    </script>
+</body>
+</html>

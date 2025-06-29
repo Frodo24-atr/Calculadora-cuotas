@@ -67,6 +67,14 @@ export class CalculadoraCuotas {
     // Inicializar gestor de gráficos
     chartManager.initialize('gastosChart');
 
+    // Inicializar sistema de recordatorios
+    if (typeof (window as any).RemindersManager !== 'undefined') {
+      (window as any).remindersManager = new (window as any).RemindersManager();
+      console.log('✅ Sistema de recordatorios inicializado');
+    } else {
+      console.warn('⚠️ Sistema de recordatorios no disponible');
+    }
+
     // Configurar listener para cambios en productos
     productManager.addListener((products) => {
       this.onProductsChanged(products);
@@ -184,6 +192,12 @@ export class CalculadoraCuotas {
   private onProductsChanged(products: Product[]): void {
     this.state.products = products;
     this.updateUI();
+    
+    // Actualizar recordatorios si el sistema está disponible
+    if ((window as any).remindersManager) {
+      (window as any).remindersManager.generateReminders(products);
+      console.log('📅 Recordatorios actualizados con los nuevos productos');
+    }
   }
 
   /**

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal de Eliminación - Limpio</title>
+    <link rel="stylesheet" href="./src/styles/fallback.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .test-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px;
+            transition: background 0.3s ease;
+        }
+        .test-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Modal de Eliminación - Limpio</h1>
+        <p>Haz clic en el botón para probar el modal de confirmación de eliminación limpio y profesional</p>
+        
+        <button class="test-btn" onclick="showConfirmModal()">🗑️ Probar Modal de Eliminación</button>
+        
+        <div style="margin-top: 20px;">
+            <small style="color: #666; font-style: italic;">
+                ℹ️ Modal de eliminación profesional sin efectos especiales.<br>
+                Diseño limpio y sobrio sin distracciones visuales o sonoras.
+            </small>
+        </div>
+        
+        <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+            <h3>✅ Características del modal profesional:</h3>
+            <ul style="text-align: left; max-width: 500px; margin: 0 auto;">
+                <li><strong>Fondo gris translúcido</strong> profesional</li>
+                <li><strong>Borde sutil</strong> alrededor del modal</li>
+                <li><strong>Header con fondo gris claro</strong> y texto oscuro</li>
+                <li><strong>Sombra suave</strong> para dar profundidad</li>
+                <li><strong>Sin animaciones</strong> que distraigan</li>
+                <li><strong>Sin sonidos</strong> molestos</li>
+                <li><strong>Botones estilizados</strong> con efectos hover discretos</li>
+                <li><strong>Completamente limpio</strong> y libre de distracciones</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p class="confirm-modal-text">¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="confirm-product-name">Producto de Prueba</strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="confirm-btn confirm-btn-cancel" onclick="hideConfirmModal()">Cancelar</button>
+                <button type="button" class="confirm-btn confirm-btn-delete" onclick="hideConfirmModal()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'flex';
+        }
+        
+        function hideConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'none';
+        }
+        
+        // Cerrar modal al hacer clic fuera de él
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideConfirmModal();
+            }
+        });
+    </script>
+</body>
+</html>

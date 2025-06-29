@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Botones Simple</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-buttons { margin: 20px 0; }
+        button { margin: 5px; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-delete { background: #f44336; color: white; }
+        .btn-delete-direct { background: #d32f2f; color: white; }
+        .log { background: #000; color: #0f0; padding: 15px; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%; }
+        #resultado { margin: 20px 0; padding: 15px; min-height: 50px; border: 2px dashed #ccc; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Botones Eliminar - Simple</h1>
+    
+    <div class="test-buttons">
+        <button class="btn-primary" onclick="window.agregarProductoTest()">➕ Agregar Producto Test</button>
+        <button onclick="window.location.reload()">🔄 Recargar Página</button>
+    </div>
+    
+    <div id="resultado"></div>
+    <div id="listaProductos"></div>
+    
+    <div class="log" id="log">Inicializando...\n</div>
+
+    <!-- Campos ocultos para el formulario -->
+    <input type="hidden" id="nombreProducto" value="Producto Test">
+    <input type="hidden" id="valorTotalProducto" value="1000000">
+    <input type="hidden" id="numeroCuotas" value="12">
+    <input type="hidden" id="fechaInicio">
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ Confirmar Eliminación</h3>
+            <p>¿Estás seguro de que deseas eliminar este producto?</p>
+            <p><strong id="confirm-product-name">Nombre del producto</strong></p>
+            <div style="margin-top: 20px;">
+                <button onclick="cerrarConfirmacion()" style="background: #6c757d; color: white; margin-right: 10px;">Cancelar</button>
+                <button onclick="confirmarEliminacion()" style="background: #dc3545; color: white;">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <script>
+        function log(mensaje) {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.textContent += `[${timestamp}] ${mensaje}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // Interceptar errores
+        window.onerror = function(mensaje, archivo, linea, columna, error) {
+            log(`❌ ERROR: ${mensaje} en ${archivo}:${linea}`);
+            return false;
+        };
+
+        // Función para agregar producto de prueba
+        window.agregarProductoTest = function() {
+            log('🚀 Agregando producto de prueba...');
+            
+            // Establecer fecha
+            const fechaEl = document.getElementById('fechaInicio');
+            fechaEl.value = new Date().toISOString().split('T')[0];
+            
+            try {
+                if (typeof window.agregarProducto === 'function') {
+                    window.agregarProducto();
+                    log('✅ Producto agregado exitosamente');
+                    
+                    // Recargar lista después de un momento
+                    setTimeout(() => {
+                        if (typeof window.cargarProductos === 'function') {
+                            window.cargarProductos();
+                            log('🔄 Lista de productos recargada');
+                        }
+                    }, 500);
+                } else {
+                    log('❌ Función agregarProducto no disponible');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`);
+            }
+        };
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            log('✅ DOM cargado');
+            
+            // Verificar funciones críticas
+            const funciones = ['agregarProducto', 'eliminarProducto', 'eliminarProductoDirecto', 'abrirModalConfirmacion', 'cerrarConfirmacion', 'confirmarEliminacion'];
+            
+            setTimeout(() => {
+                funciones.forEach(nombre => {
+                    if (typeof window[nombre] === 'function') {
+                        log(`✅ ${nombre}: DISPONIBLE`);
+                    } else {
+                        log(`❌ ${nombre}: NO DISPONIBLE`);
+                    }
+                });
+                
+                // Cargar productos existentes
+                if (typeof window.cargarProductos === 'function') {
+                    window.cargarProductos();
+                    log('🔄 Productos cargados');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Específico - Botones de Rango de Tiempo</title>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <link rel="stylesheet" href="../../assets/css/layout.css">
+    <link rel="stylesheet" href="../../assets/css/components.css">
+    <link rel="stylesheet" href="../../assets/css/responsive.css">
+    
+    <style>
+        body {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        
+        /* Fix adicional específico para este test */
+        .chart-controls button.time-range-btn {
+            color: var(--primary-color) !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            text-indent: 0 !important;
+            letter-spacing: normal !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .chart-controls button.time-range-btn:hover,
+        .chart-controls button.time-range-btn.active {
+            color: white !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            text-indent: 0 !important;
+            letter-spacing: normal !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test de Botones de Rango de Tiempo</h1>
+        <p>Este test verifica que el texto de los botones sea siempre visible.</p>
+        
+        <div class="test-section">
+            <h3>Test 1: Botones Normales con CSS Original</h3>
+            <div class="chart-controls">
+                <button class="time-range-btn active" data-range="all">Todo</button>
+                <button class="time-range-btn" data-range="6">6 Meses</button>
+                <button class="time-range-btn" data-range="12">1 Año</button>
+                <button class="time-range-btn" data-range="24">2 Años</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 2: Botones con Estilos Inline Forzados</h3>
+            <div class="chart-controls">
+                <button class="time-range-btn active" data-range="all" style="color: white !important; font-size: 14px !important;">Todo</button>
+                <button class="time-range-btn" data-range="6" style="color: #667eea !important; font-size: 14px !important;">6 Meses</button>
+                <button class="time-range-btn" data-range="12" style="color: #667eea !important; font-size: 14px !important;">1 Año</button>
+                <button class="time-range-btn" data-range="24" style="color: #667eea !important; font-size: 14px !important;">2 Años</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 3: Texto Plano de Referencia</h3>
+            <div style="text-align: center;">
+                <span style="color: #667eea; font-size: 14px; font-weight: 600;">Todo</span> | 
+                <span style="color: #667eea; font-size: 14px; font-weight: 600;">6 Meses</span> | 
+                <span style="color: #667eea; font-size: 14px; font-weight: 600;">1 Año</span> | 
+                <span style="color: #667eea; font-size: 14px; font-weight: 600;">2 Años</span>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 4: Inspección de Computed Styles</h3>
+            <button id="inspectBtn" class="time-range-btn" onclick="inspectStyles()">Inspeccionar Estilos</button>
+            <div id="inspectionResult" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
+        </div>
+    </div>
+    
+    <script>
+        function inspectStyles() {
+            const btn = document.getElementById('inspectBtn');
+            const computed = window.getComputedStyle(btn);
+            const result = document.getElementById('inspectionResult');
+            
+            result.innerHTML = `
+                <strong>Computed Styles:</strong><br>
+                color: ${computed.color}<br>
+                font-size: ${computed.fontSize}<br>
+                font-weight: ${computed.fontWeight}<br>
+                opacity: ${computed.opacity}<br>
+                visibility: ${computed.visibility}<br>
+                text-indent: ${computed.textIndent}<br>
+                letter-spacing: ${computed.letterSpacing}<br>
+                line-height: ${computed.lineHeight}<br>
+            `;
+        }
+        
+        // Auto-inspeccionar al cargar
+        window.addEventListener('load', () => {
+            setTimeout(inspectStyles, 500);
+        });
+    </script>
+</body>
+</html>
