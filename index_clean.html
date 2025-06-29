@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Cuotas - v2025.06.29</title>
+    <link rel="icon" href="data:,">
+    
+    <!-- Hojas de Estilo -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/layout.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/modals.css">
+    <link rel="stylesheet" href="assets/css/charts.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    
+    <!-- Librerías Externas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💰 Calculadora de Cuotas</h1>
+            <p>Gestiona tus productos y pagos de forma inteligente</p>
+            <small style="opacity: 0.7; font-size: 12px;">Versión actualizada con gráficos y estadísticas - 29/06/2025</small>
+        </div>
+
+        <!-- Indicador de Carga -->
+        <div id="loadingIndicator" class="loading-indicator">
+            <div style="text-align: center;">
+                <div style="border: 4px solid #f3f3f3; border-top: 4px solid #4CAF50; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p style="color: #333; font-size: 18px; margin: 0;">Cargando Calculadora de Cuotas...</p>
+                <p style="color: #666; font-size: 14px; margin: 5px 0 0 0;">Preparando recursos...</p>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div id="mainContent" style="display: block;" class="main-content">
+            
+            <!-- Sección del Formulario -->
+            <div class="form-section">
+                <h2>📝 Agregar Nuevo Producto</h2>
+                <div class="form-group">
+                    <label for="nombreProducto">Nombre del Producto:</label>
+                    <input type="text" id="nombreProducto" placeholder="Ej: Smartphone Samsung">
+                </div>
+                <div class="form-group">
+                    <label for="valorTotalProducto">Valor Total ($):</label>
+                    <input type="number" id="valorTotalProducto" placeholder="Ej: 500000" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="numeroCuotas">Número de Cuotas:</label>
+                    <input type="number" id="numeroCuotas" placeholder="Ej: 12" min="1" max="60">
+                </div>
+                <div class="form-group">
+                    <label for="fechaInicio">Fecha de Inicio:</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-primary" onclick="agregarProducto()">✅ Agregar Producto</button>
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">🧹 Limpiar</button>
+                </div>
+                <div id="resultado" style="margin-top: 20px;"></div>
+            </div>
+
+            <!-- Sección de Productos -->
+            <div class="products-section">
+                <h2>📦 Productos Registrados</h2>
+                <div id="statsSection" style="display: block;">
+                    <!-- Controles de Rango de Tiempo -->
+                    <div class="time-range-controls">
+                        <button class="range-btn active" data-range="all" onclick="cambiarRango('all')">Todo</button>
+                        <button class="range-btn" data-range="6m" onclick="cambiarRango('6m')">6 Meses</button>
+                        <button class="range-btn" data-range="3m" onclick="cambiarRango('3m')">3 Meses</button>
+                        <button class="range-btn" data-range="1m" onclick="cambiarRango('1m')">1 Mes</button>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="statistics-cards">
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Total Productos</div>
+                                <div class="stat-value" id="totalProductos">0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Valor Total</div>
+                                <div class="stat-value" id="valorTotal">$0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Cuota Mensual Promedio</div>
+                                <div class="stat-value" id="cuotaPromedio">$0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-content">
+                                <div class="stat-label">Tiempo Promedio (meses)</div>
+                                <div class="stat-value" id="tiempoPromedio">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico -->
+                    <div class="chart-container">
+                        <h3>📈 Distribución de Gastos por Producto</h3>
+                        <canvas id="gastosChart" width="400" height="200"></canvas>
+                        <div id="chartMessage" class="chart-message">
+                            <p>📊 No hay productos registrados para mostrar estadísticas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Productos -->
+                <div id="productosLista" class="productos-lista">
+                    <p class="no-products">No hay productos registrados. ¡Agrega tu primer producto arriba! 🚀</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición -->
+    <div id="modalEditar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Producto</h3>
+                <span class="close" onclick="cerrarModalEditar()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editNombre">Nombre del Producto:</label>
+                    <input type="text" id="editNombre">
+                </div>
+                <div class="form-group">
+                    <label for="editValor">Valor Total ($):</label>
+                    <input type="number" id="editValor" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="editCuotas">Número de Cuotas:</label>
+                    <input type="number" id="editCuotas" min="1" max="60">
+                </div>
+                <div class="form-group">
+                    <label for="editFecha">Fecha de Inicio:</label>
+                    <input type="date" id="editFecha">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalEditar()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarEdicion()">💾 Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="modalConfirmar" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h3>⚠️ Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="nombreProductoEliminar"></strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="confirm-btn confirm-btn-cancel" onclick="cerrarConfirmacion()">Cancelar</button>
+                <button type="button" class="confirm-btn confirm-btn-delete" onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de la Aplicación -->
+    <!-- Orden de carga importante: utilidades -> almacenamiento -> módulos específicos -> app principal -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/statistics.js"></script>
+    <script src="assets/js/charts.js"></script>
+    <script src="assets/js/modals.js"></script>
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

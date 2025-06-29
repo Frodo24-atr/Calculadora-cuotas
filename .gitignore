@@ -1,0 +1,33 @@
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+
+# Archivos de backup
+*_backup.*
+*_old.*
+*_copy.*
+
+# Archivos de prueba específicos
+test_*.html
+debug_*.html
+
+# Node modules (si se usa npm en el futuro)
+node_modules/
+npm-debug.log*
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Carpetas temporales
+temp/
+tmp/
