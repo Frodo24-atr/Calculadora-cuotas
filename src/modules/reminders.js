@@ -75,6 +75,12 @@ class RemindersManager {
     // Inicializar EmailJS
     if (typeof emailjs !== 'undefined') {
       try {
+        // Verificar configuración completa
+        if (!config.emailJS.publicKey || !config.emailJS.serviceId || !config.emailJS.templateId) {
+          console.warn('⚠️ Configuración de EmailJS incompleta. Revisa src/config/services.js');
+          return;
+        }
+
         emailjs.init({
           publicKey: config.emailJS.publicKey,
           blockHeadless: true,
@@ -83,12 +89,12 @@ class RemindersManager {
             throttle: 10000,
           },
         });
-        console.log('✅ EmailJS inicializado');
+        console.log('✅ EmailJS inicializado correctamente');
       } catch (error) {
         console.warn('⚠️ Error inicializando EmailJS:', error.message);
       }
     } else {
-      console.warn('⚠️ EmailJS no disponible');
+      console.warn('⚠️ EmailJS no disponible - se usará solo WhatsApp');
     }
 
     // Inicializar Google API
@@ -99,19 +105,47 @@ class RemindersManager {
   async initGoogleAPI() {
     if (typeof gapi === 'undefined') {
       console.warn('⚠️ Google API no disponible');
-      return;
+      return false;
     }
 
     if (typeof window.SERVICES_CONFIG === 'undefined') {
       console.warn('⚠️ Configuración de Google no encontrada');
-      return;
+      return false;
     }
 
     const config = window.SERVICES_CONFIG.googleCalendar;
 
+    // Verificar que las claves estén configuradas
+    if (!config.apiKey || !config.clientId) {
+      console.warn('⚠️ API Key o Client ID de Google no configurados');
+      return false;
+    }
+
+    // Verificar si estamos en localhost o archivo local
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isFile = window.location.protocol === 'file:';
+    
+    if (isLocalhost || isFile) {
+      console.warn('⚠️ Google Calendar no funciona desde localhost o archivos locales por restricciones de seguridad');
+      console.warn('📝 Para usar Google Calendar necesitas:');
+      console.warn('   1. Un dominio público (ej: mi-app.github.io)');
+      console.warn('   2. Registrar ese dominio en Google Cloud Console');
+      console.warn('   3. Usar HTTPS');
+      console.warn('💡 Recomendación: Usa WhatsApp o Email que funcionan perfectamente');
+      return false;
+    }
+
     try {
-      await new Promise((resolve) => {
-        gapi.load('client:auth2', resolve);
+      console.log('🔄 Inicializando Google API...');
+      
+      await new Promise((resolve, reject) => {
+        gapi.load('client:auth2', {
+          callback: resolve,
+          onerror: (error) => {
+            console.error('Error cargando Google API:', error);
+            reject(new Error('Error cargando Google API: ' + JSON.stringify(error)));
+          }
+        });
       });
 
       await gapi.client.init({
@@ -121,9 +155,21 @@ class RemindersManager {
         scope: config.scopes
       });
 
-      console.log('✅ Google Calendar API inicializado');
+      console.log('✅ Google Calendar API inicializado correctamente');
+      return true;
     } catch (error) {
-      console.warn('⚠️ Error inicializando Google API:', error.message);
+      console.warn('⚠️ Error inicializando Google API:', error.message || error);
+      
+      // Mostrar mensaje específico basado en el error
+      if (error.details && error.details.includes('Not a valid origin')) {
+        console.warn('🚫 Origen no válido para Google Calendar. Esto es normal en desarrollo local.');
+        console.warn('📝 Para solucionarlo necesitas:');
+        console.warn('   1. Ir a Google Cloud Console');
+        console.warn('   2. Configurar "Orígenes autorizados"');
+        console.warn('   3. Agregar tu dominio público');
+      }
+      
+      return false;
     }
   }
 
@@ -161,6 +207,22 @@ class RemindersManager {
     }
 
     const emailConfig = window.SERVICES_CONFIG.emailJS;
+    
+    // Verificar que todas las claves estén configuradas
+    if (!emailConfig.publicKey || !emailConfig.serviceId || !emailConfig.templateId) {
+      throw new Error('Configuración de EmailJS incompleta. Verifica que tengas configurado publicKey, serviceId y templateId en config/services.js');
+    }
+
+    // Verificar que EmailJS esté disponible
+    if (typeof emailjs === 'undefined') {
+      throw new Error('EmailJS no está disponible. Verifica que esté incluido en el HTML');
+    }
+
+    // Verificar si estamos ejecutando desde archivo local
+    if (window.location.protocol === 'file:') {
+      console.warn('⚠️ EmailJS puede no funcionar desde archivos locales debido a CORS. Se recomienda usar un servidor local.');
+    }
+
     this.config.email = {
       enabled: true,
       address: address,
@@ -180,11 +242,61 @@ class RemindersManager {
       throw new Error('Email de Google requerido');
     }
 
+    // Verificar si estamos en un entorno compatible
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isFile = window.location.protocol === 'file:';
+    
+    if (isLocalhost || isFile) {
+      throw new Error(
+        'Google Calendar no funciona desde localhost o archivos locales.\n\n' +
+        '📝 Para usar Google Calendar necesitas:\n' +
+        '• Un dominio público (ej: mi-app.github.io)\n' +
+        '• Registrar ese dominio en Google Cloud Console\n' +
+        '• Usar HTTPS\n\n' +
+        '💡 Usa WhatsApp o Email que funcionan perfectamente'
+      );
+    }
+
     try {
+      // Verificar que Google API esté disponible
+      if (typeof gapi === 'undefined') {
+        throw new Error('Google API no está disponible. Verifica tu conexión a internet.');
+      }
+
+      // Verificar configuración
+      if (typeof window.SERVICES_CONFIG === 'undefined') {
+        throw new Error('Configuración de servicios no encontrada. Revisa el archivo config/services.js');
+      }
+
+      const config = window.SERVICES_CONFIG.googleCalendar;
+      
+      // Verificar que las claves estén configuradas
+      if (!config.clientId || !config.apiKey) {
+        throw new Error('Configuración de Google Calendar incompleta. Verifica clientId y apiKey en config/services.js');
+      }
+
+      // Reinicializar Google API si es necesario
+      const initialized = await this.initGoogleAPI();
+      if (!initialized) {
+        throw new Error('No se pudo inicializar Google Calendar API');
+      }
+
+      // Verificar que auth2 esté disponible
+      if (typeof gapi.auth2 === 'undefined' || !gapi.auth2.getAuthInstance()) {
+        throw new Error('Google Auth no se pudo inicializar. Verifica tu configuración de API.');
+      }
+
       // Autenticar con Google
       const authInstance = gapi.auth2.getAuthInstance();
+      
       if (!authInstance.isSignedIn.get()) {
+        console.log('🔐 Iniciando autenticación con Google...');
         await authInstance.signIn();
+      }
+
+      // Verificar que el usuario esté autenticado
+      if (!authInstance.isSignedIn.get()) {
+        throw new Error('No se pudo autenticar con Google. Por favor intenta de nuevo.');
       }
 
       this.config.calendar = {
@@ -194,8 +306,10 @@ class RemindersManager {
       };
 
       this.saveConfig();
+      console.log('✅ Google Calendar configurado correctamente');
       return true;
     } catch (error) {
+      console.error('❌ Error configurando Google Calendar:', error);
       throw new Error('Error al conectar con Google Calendar: ' + error.message);
     }
   }
@@ -381,6 +495,16 @@ class RemindersManager {
       throw new Error('EmailJS no está disponible');
     }
 
+    // Verificar configuración
+    if (!this.config.email.serviceId || !this.config.email.templateId) {
+      throw new Error('Configuración de email incompleta');
+    }
+
+    // Si estamos en archivo local, mostrar advertencia pero intentar enviar
+    if (window.location.protocol === 'file:') {
+      console.warn('⚠️ Intentando enviar email desde archivo local - puede fallar por CORS');
+    }
+
     const templateParams = {
       to_email: this.config.email.address,
       product_name: reminder.product,
@@ -392,14 +516,27 @@ class RemindersManager {
     };
 
     try {
-      await emailjs.send(
+      const response = await emailjs.send(
         this.config.email.serviceId,
         this.config.email.templateId,
         templateParams
       );
+      
+      console.log('✅ Email enviado correctamente:', response);
+      
+      // Mostrar notificación de éxito
+      this.showReminderNotification('Email', reminder);
+      
       return true;
     } catch (error) {
-      throw new Error('Error enviando email: ' + error.message);
+      console.error('❌ Error detallado enviando email:', error);
+      
+      // Si es error de CORS, sugerir alternativa
+      if (error.message && error.message.includes('CORS')) {
+        throw new Error('Error de CORS: Para usar email, ejecuta la aplicación desde un servidor web (no archivo local)');
+      }
+      
+      throw new Error('Error enviando email: ' + (error.message || 'Error desconocido'));
     }
   }
 
@@ -477,6 +614,12 @@ class RemindersManager {
       this.config.calendar.enabled ? `Conectado (${this.config.calendar.email})` : 'No configurado';
     document.getElementById('calendarStatus').className = 
       `status-text ${this.config.calendar.enabled ? 'active' : ''}`;
+
+    // Mostrar advertencia de CORS para email si es necesario
+    const emailWarning = document.getElementById('emailWarning');
+    if (emailWarning && window.location.protocol === 'file:') {
+      emailWarning.style.display = 'block';
+    }
 
     // Actualizar próximos recordatorios
     this.updateNextReminders();
@@ -562,21 +705,41 @@ class RemindersManager {
 
   // Enviar recordatorio programado
   async sendScheduledReminder(reminder, reminderId) {
-    switch (reminder.type) {
-      case 'whatsapp':
-        await this.sendWhatsAppReminder(reminder);
-        break;
-      case 'email':
-        await this.sendEmailReminder(reminder);
-        break;
-      case 'calendar':
-        // Los eventos de calendario se crean una sola vez
-        break;
-    }
+    try {
+      switch (reminder.type) {
+        case 'whatsapp':
+          await this.sendWhatsAppReminder(reminder);
+          break;
+        case 'email':
+          await this.sendEmailReminder(reminder);
+          break;
+        case 'calendar':
+          // Los eventos de calendario se crean una sola vez
+          break;
+      }
 
-    // Marcar como enviado
-    this.sentReminders.add(reminderId);
-    this.saveSentReminders();
+      // Marcar como enviado solo si no hubo errores
+      this.sentReminders.add(reminderId);
+      this.saveSentReminders();
+      
+    } catch (error) {
+      console.error(`❌ Error enviando recordatorio ${reminder.type}:`, error.message);
+      
+      // Si falla el email, intentar con WhatsApp como respaldo (si está configurado)
+      if (reminder.type === 'email' && this.config.whatsapp.enabled) {
+        console.log('📱 Intentando enviar por WhatsApp como respaldo...');
+        try {
+          await this.sendWhatsAppReminder(reminder);
+          this.sentReminders.add(reminderId);
+          this.saveSentReminders();
+        } catch (whatsappError) {
+          console.error('❌ También falló WhatsApp:', whatsappError.message);
+          throw error; // Lanzar el error original del email
+        }
+      } else {
+        throw error;
+      }
+    }
   }
 
   // Verificar y enviar recordatorios pendientes
@@ -661,6 +824,12 @@ window.setupCalendarReminder = async function() {
     if (!window.remindersManager) {
       throw new Error('Sistema de recordatorios no inicializado');
     }
+    
+    // Verificar primero si Google API está disponible
+    if (typeof gapi === 'undefined') {
+      throw new Error('Google API no está disponible. Verifica tu conexión a internet y recarga la página.');
+    }
+    
     await window.remindersManager.setupGoogleCalendar(email, type);
     alert('✅ Google Calendar conectado correctamente');
     
@@ -671,7 +840,24 @@ window.setupCalendarReminder = async function() {
       alert(`📅 Se crearon ${successful} eventos en tu calendario`);
     }
   } catch (error) {
-    alert('❌ Error: ' + error.message);
+    console.error('❌ Error Google Calendar:', error);
+    
+    // Mensaje más informativo basado en el tipo de error
+    let message = '❌ Error conectando con Google Calendar:\n\n';
+    
+    if (error.message.includes('API no está disponible')) {
+      message += '• Google API no se pudo cargar\n• Verifica tu conexión a internet\n• Recarga la página e intenta de nuevo';
+    } else if (error.message.includes('no se pudo inicializar')) {
+      message += '• Las credenciales de Google pueden ser inválidas\n• Verifica tu API Key y Client ID en la configuración';
+    } else if (error.message.includes('incompleta')) {
+      message += '• Faltan credenciales de Google Calendar\n• Contacta al administrador para configurar las claves';
+    } else {
+      message += error.message;
+    }
+    
+    message += '\n\n💡 Recomendación: Usa WhatsApp o Email como alternativa, funcionan perfectamente.';
+    
+    alert(message);
   }
 };
 
@@ -687,6 +873,59 @@ window.testReminders = async function() {
   alert('✅ Verificación de recordatorios completada. Revisa la consola para más detalles.');
 };
 
+// Función para probar Google Calendar específicamente
+window.testGoogleCalendar = async function() {
+  if (!window.remindersManager) {
+    alert('❌ Sistema de recordatorios no inicializado');
+    return;
+  }
+  
+  try {
+    console.log('🧪 Probando Google Calendar API...');
+    
+    // Verificar si estamos en un entorno compatible
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isFile = window.location.protocol === 'file:';
+    
+    if (isLocalhost || isFile) {
+      alert(
+        '⚠️ Google Calendar no funciona en desarrollo local\n\n' +
+        '📝 Esto es normal. Google Calendar requiere:\n' +
+        '• Un dominio público (no localhost)\n' +
+        '• HTTPS\n' +
+        '• Configuración en Google Cloud Console\n\n' +
+        '✅ WhatsApp y Email funcionan perfectamente\n' +
+        'Son la mejor opción para desarrollo y uso personal'
+      );
+      return;
+    }
+    
+    // Verificar configuración
+    if (typeof window.SERVICES_CONFIG === 'undefined') {
+      throw new Error('Configuración de servicios no encontrada');
+    }
+    
+    const config = window.SERVICES_CONFIG.googleCalendar;
+    console.log('📋 Configuración Google:', {
+      apiKey: config.apiKey ? '✅ Configurada' : '❌ Falta',
+      clientId: config.clientId ? '✅ Configurada' : '❌ Falta',
+      scopes: config.scopes
+    });
+    
+    // Intentar inicializar
+    const initialized = await window.remindersManager.initGoogleAPI();
+    
+    if (initialized) {
+      alert('✅ Google Calendar API inicializada correctamente. Puedes intentar conectar.');
+    } else {
+      alert('❌ Error inicializando Google Calendar API. Revisa la consola para más detalles.');
+    }
+  } catch (error) {
+    console.error('❌ Error probando Google Calendar:', error);
+    alert('❌ Error: ' + error.message);
+  }
+};
+
 // Exportar para uso en otros módulos
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = RemindersManager;
@@ -694,3 +933,29 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Hacer disponible globalmente
 window.RemindersManager = RemindersManager;
+
+// Mostrar advertencias según el entorno al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  // Mostrar advertencia de CORS para email
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isFile = window.location.protocol === 'file:';
+  
+  if (isLocalhost || isFile) {
+    // Advertencia para Google Calendar
+    const calendarWarning = document.getElementById('calendarLocalWarning');
+    if (calendarWarning) {
+      calendarWarning.style.display = 'block';
+    }
+    
+    // Advertencia para Email si existe
+    const emailWarning = document.getElementById('emailWarning');
+    if (emailWarning) {
+      emailWarning.style.display = 'block';
+    }
+    
+    console.log('📍 Detectado entorno de desarrollo local');
+    console.log('✅ WhatsApp: Funciona perfectamente');
+    console.log('⚠️ Email: Puede fallar por CORS');
+    console.log('❌ Google Calendar: No funciona en localhost');
+  }
+});

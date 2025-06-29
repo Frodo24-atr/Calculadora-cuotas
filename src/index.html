@@ -172,6 +172,9 @@
                     <button class="recordatorio-btn email-btn" onclick="setupEmailReminder()">
                         Configurar Email
                     </button>
+                    <div id="emailWarning" class="config-warning" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; font-size: 12px; color: #856404;">
+                        ⚠️ <strong>Aviso:</strong> Para usar emails desde archivo local, ejecuta <code>start-server.bat</code> y abre <code>http://localhost:8000/src/</code>
+                    </div>
                 </div>
 
                 <!-- Google Calendar Reminder -->
@@ -179,6 +182,13 @@
                     <div class="recordatorio-icon">📅</div>
                     <h4>Google Calendar</h4>
                     <p>Agrega eventos automáticamente al calendario</p>
+                    
+                    <!-- Advertencia para desarrollo local -->
+                    <div id="calendarLocalWarning" style="background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 8px; border-radius: 5px; margin: 10px 0; font-size: 12px; display: none;">
+                        ⚠️ <strong>Google Calendar no funciona en localhost</strong><br>
+                        Requiere dominio público y HTTPS. Usa WhatsApp o Email.
+                    </div>
+                    
                     <div class="recordatorio-input-group">
                         <label for="googleEmail">Cuenta de Google:</label>
                         <input type="email" id="googleEmail" placeholder="tu@gmail.com" class="recordatorio-input">
@@ -194,6 +204,9 @@
                     </div>
                     <button class="recordatorio-btn calendar-btn" onclick="setupCalendarReminder()">
                         Conectar con Google
+                    </button>
+                    <button class="recordatorio-btn test-btn" onclick="testGoogleCalendar()" style="background: #6c757d; border-color: #6c757d; margin-top: 5px; font-size: 12px;">
+                        🧪 Probar Google API
                     </button>
                 </div>
             </div>
@@ -222,11 +235,14 @@
                     </div>
                 </div>
                 <div class="test-reminders" style="margin-top: 15px; text-align: center;">
-                    <button class="recordatorio-btn test-btn" onclick="testReminders()" style="background: #28a745; border-color: #28a745;">
+                    <button class="recordatorio-btn test-btn" onclick="testReminders()" style="background: #28a745; border-color: #28a745; margin-right: 10px;">
                         🧪 Probar Recordatorios
                     </button>
+                    <button class="recordatorio-btn test-btn" onclick="testGoogleCalendar()" style="background: #17a2b8; border-color: #17a2b8;">
+                        🔧 Probar Google API
+                    </button>
                     <small style="display: block; margin-top: 5px; color: #666;">
-                        Haz clic para verificar si hay recordatorios pendientes hoy
+                        Haz clic para verificar recordatorios pendientes o probar Google Calendar
                     </small>
                 </div>
             </div>
