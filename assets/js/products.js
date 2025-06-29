@@ -579,10 +579,6 @@ function setProductoEditandoId(id) {
     productoEditandoId = id;
 }
 
-function setProductoEliminandoId(id) {
-    productoEliminandoId = id;
-}
-
 /**
  * Elimina un producto directamente sin modal de confirmación
  * @param {number} id - ID del producto a eliminar
@@ -628,3 +624,22 @@ function eliminarProductoDirecto(id) {
         }
     }
 }
+
+// ========================================
+// EXPORTAR FUNCIONES AL ÁMBITO GLOBAL
+// ========================================
+
+// Funciones principales
+window.agregarProducto = agregarProducto;
+window.eliminarProducto = eliminarProducto;
+window.eliminarProductoDirecto = eliminarProductoDirecto;
+window.confirmarEliminacion = confirmarEliminacion;
+window.limpiarFormulario = limpiarFormulario;
+window.cargarProductos = cargarProductos;
+window.limpiarTodosProductos = limpiarTodosProductos;
+
+// Funciones de utilidad
+window.editarProducto = editarProducto;
+window.guardarEdicion = guardarEdicion;
+
+console.log('📦 Products.js: Funciones exportadas al ámbito global');

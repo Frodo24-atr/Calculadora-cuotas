@@ -313,3 +313,17 @@ function hayModalActivo() {
         return modal && modal.classList.contains('active');
     });
 }
+
+// ========================================
+// EXPORTAR FUNCIONES AL ÁMBITO GLOBAL
+// ========================================
+
+// Funciones de modales
+window.abrirModalEditar = abrirModalEditar;
+window.cerrarModalEditar = cerrarModalEditar;
+window.abrirModalConfirmacion = abrirModalConfirmacion;
+window.cerrarConfirmacion = cerrarConfirmacion;
+window.mostrarModalGenerico = mostrarModalGenerico;
+window.cerrarModalGenerico = cerrarModalGenerico;
+
+console.log('🖼️ Modals.js: Funciones exportadas al ámbito global');

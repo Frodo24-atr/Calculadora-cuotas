@@ -481,3 +481,15 @@ window.AppMain = {
     mostrarNotificacion,
     updateStatus
 };
+
+// ========================================
+// EXPORTAR FUNCIONES AL ÁMBITO GLOBAL
+// ========================================
+
+// Funciones de gestión de IDs
+window.setProductoEditandoId = setProductoEditandoId;
+window.getProductoEditandoId = getProductoEditandoId;
+window.setProductoEliminandoId = setProductoEliminandoId;
+window.getProductoEliminandoId = getProductoEliminandoId;
+
+console.log('🚀 App.js: Funciones principales exportadas al ámbito global');
