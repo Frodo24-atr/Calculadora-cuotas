@@ -60,6 +60,7 @@
                 <div class="form-buttons">
                     <button type="button" class="btn btn-primary" onclick="agregarProducto()">✅ Agregar Producto</button>
                     <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">🧹 Limpiar</button>
+                    <button type="button" id="btnBorrarTodo" class="btn btn-warning" onclick="limpiarTodosProductos()" style="background: #ff9800; border-color: #ff9800; display: none;">🗑️ Borrar Todo</button>
                 </div>
                 <div id="resultado" style="margin-top: 20px;"></div>
             </div>
@@ -96,14 +97,14 @@
                             <div class="stat-icon">📅</div>
                             <div class="stat-content">
                                 <div class="stat-label">Cuota Mensual Promedio</div>
-                                <div class="stat-value" id="cuotaPromedio">$0</div>
+                                <div class="stat-value" id="promedioMensual">$0</div>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon">⏱️</div>
                             <div class="stat-content">
-                                <div class="stat-label">Tiempo Promedio (meses)</div>
-                                <div class="stat-value" id="tiempoPromedio">0</div>
+                                <div class="stat-label">Próximo Mes</div>
+                                <div class="stat-value" id="proximoMes">$0</div>
                             </div>
                         </div>
                     </div>
@@ -119,7 +120,7 @@
                 </div>
 
                 <!-- Lista de Productos -->
-                <div id="productosLista" class="productos-lista">
+                <div id="listaProductos" class="productos-lista">
                     <p class="no-products">No hay productos registrados. ¡Agrega tu primer producto arriba! 🚀</p>
                 </div>
             </div>
@@ -127,7 +128,7 @@
     </div>
 
     <!-- Modal de Edición -->
-    <div id="modalEditar" class="modal">
+    <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>✏️ Editar Producto</h3>
@@ -135,20 +136,20 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="editNombre">Nombre del Producto:</label>
-                    <input type="text" id="editNombre">
+                    <label for="modal-nombre">Nombre del Producto:</label>
+                    <input type="text" id="modal-nombre">
                 </div>
                 <div class="form-group">
-                    <label for="editValor">Valor Total ($):</label>
-                    <input type="number" id="editValor" step="0.01">
+                    <label for="modal-valor">Valor Total ($):</label>
+                    <input type="number" id="modal-valor" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label for="editCuotas">Número de Cuotas:</label>
-                    <input type="number" id="editCuotas" min="1" max="60">
+                    <label for="modal-cuotas">Número de Cuotas:</label>
+                    <input type="number" id="modal-cuotas" min="1" max="60">
                 </div>
                 <div class="form-group">
-                    <label for="editFecha">Fecha de Inicio:</label>
-                    <input type="date" id="editFecha">
+                    <label for="modal-fecha">Fecha de Inicio:</label>
+                    <input type="date" id="modal-fecha">
                 </div>
             </div>
             <div class="modal-footer">
@@ -159,19 +160,36 @@
     </div>
 
     <!-- Modal de Confirmación -->
-    <div id="modalConfirmar" class="modal">
+    <div id="confirmModal" class="modal">
         <div class="modal-content confirm-modal">
             <div class="modal-header">
                 <h3>⚠️ Confirmar Eliminación</h3>
             </div>
             <div class="modal-body">
                 <p>¿Estás seguro de que deseas eliminar este producto?</p>
-                <p><strong id="nombreProductoEliminar"></strong></p>
+                <p><strong id="confirm-product-name"></strong></p>
                 <p>Esta acción no se puede deshacer.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="confirm-btn confirm-btn-cancel" onclick="cerrarConfirmacion()">Cancelar</button>
                 <button type="button" class="confirm-btn confirm-btn-delete" onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Genérico -->
+    <div id="modalGenerico" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalGenerico-titulo">Título</h3>
+                <span class="close" onclick="cerrarModalGenerico()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modalGenerico-contenido">Contenido</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="modalGenerico-cancelar" onclick="cerrarModalGenerico()">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="modalGenerico-confirmar">Confirmar</button>
             </div>
         </div>
     </div>

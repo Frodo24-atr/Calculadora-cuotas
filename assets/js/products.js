@@ -378,15 +378,39 @@ function guardarEdicionModal() {
  * @param {Object} producto - Producto agregado
  */
 function mostrarMensajeExito(producto) {
-    // Mostrar mensaje temporal
-    const resultadoEl = document.getElementById('resultado');
-    if (resultadoEl) {
+    console.log('🎯 Mostrando mensaje de éxito para:', producto.nombre);
+    
+    try {
+        // Mostrar mensaje temporal
+        const resultadoEl = document.getElementById('resultado');
+        console.log('🔍 Elemento resultado encontrado:', !!resultadoEl);
+        
+        if (!resultadoEl) {
+            console.error('❌ No se encontró el elemento con id="resultado"');
+            // Buscar elementos alternativos
+            const alternativas = ['resultado', 'resultados', 'messages', 'notifications'];
+            for (const id of alternativas) {
+                const el = document.getElementById(id);
+                if (el) {
+                    console.log(`✅ Encontrado elemento alternativo: ${id}`);
+                    break;
+                }
+            }
+            return;
+        }
+        
+        if (!producto || !producto.nombre || !producto.cuotas || !producto.valorCuota) {
+            console.error('❌ Datos del producto inválidos:', producto);
+            return;
+        }
+        
         resultadoEl.innerHTML = `
             <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; border: 1px solid #c3e6cb; margin-top: 15px; transform: translateY(-10px); opacity: 0; transition: all 0.3s ease;">
                 <strong>✅ Producto agregado exitosamente!</strong><br>
                 <em>${producto.nombre}</em> con ${producto.cuotas} cuotas de $${producto.valorCuota.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} cada una.
             </div>
         `;
+        console.log('✅ Mensaje de éxito insertado en el DOM');
         
         // Animar la entrada del mensaje
         setTimeout(() => {
@@ -394,6 +418,7 @@ function mostrarMensajeExito(producto) {
             if (mensaje) {
                 mensaje.style.transform = 'translateY(0)';
                 mensaje.style.opacity = '1';
+                console.log('✅ Animación de entrada aplicada');
             }
         }, 100);
         
@@ -404,15 +429,25 @@ function mostrarMensajeExito(producto) {
                 mensaje.style.transform = 'translateY(-10px)';
                 mensaje.style.opacity = '0';
                 setTimeout(() => {
-                    resultadoEl.innerHTML = '';
+                    if (resultadoEl) {
+                        resultadoEl.innerHTML = '';
+                        console.log('✅ Mensaje de éxito limpiado');
+                    }
                 }, 300);
             }
         }, 5000);
+        
+    } catch (error) {
+        console.error('❌ Error en mostrarMensajeExito:', error);
     }
     
     // Destacar el producto recién agregado
     setTimeout(() => {
-        destacarProductoRecienAgregado(producto.id);
+        try {
+            destacarProductoRecienAgregado(producto.id);
+        } catch (error) {
+            console.error('❌ Error al destacar producto:', error);
+        }
     }, 500);
 }
 
@@ -461,21 +496,31 @@ function limpiarTodosProductos() {
             actualizarGrafico();
             
             // Mostrar mensaje de confirmación
-            const resultadoEl = document.getElementById('resultado');
-            if (resultadoEl) {
-                resultadoEl.innerHTML = `
-                    <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; border: 1px solid #c3e6cb; margin-top: 15px;">
-                        <strong>✅ Todos los productos han sido eliminados</strong><br>
-                        <em>La página está lista para nuevos productos.</em>
-                    </div>
-                `;
+            try {
+                const resultadoEl = document.getElementById('resultado');
+                console.log('🔍 Elemento resultado encontrado para borrar todo:', !!resultadoEl);
                 
-                // Ocultar mensaje después de 3 segundos
-                setTimeout(() => {
-                    if (resultadoEl.innerHTML.includes('productos han sido eliminados')) {
-                        resultadoEl.innerHTML = '';
-                    }
-                }, 3000);
+                if (resultadoEl) {
+                    resultadoEl.innerHTML = `
+                        <div style="background: #d4edda; color: #155724; padding: 15px; border-radius: 8px; border: 1px solid #c3e6cb; margin-top: 15px;">
+                            <strong>✅ Todos los productos han sido eliminados</strong><br>
+                            <em>La página está lista para nuevos productos.</em>
+                        </div>
+                    `;
+                    console.log('✅ Mensaje de confirmación insertado');
+                    
+                    // Ocultar mensaje después de 3 segundos
+                    setTimeout(() => {
+                        if (resultadoEl && resultadoEl.innerHTML.includes('productos han sido eliminados')) {
+                            resultadoEl.innerHTML = '';
+                            console.log('✅ Mensaje de confirmación limpiado');
+                        }
+                    }, 3000);
+                } else {
+                    console.error('❌ No se encontró el elemento resultado para mostrar confirmación');
+                }
+            } catch (error) {
+                console.error('❌ Error al mostrar mensaje de confirmación:', error);
             }
             
             console.log('✅ Todos los productos eliminados');
