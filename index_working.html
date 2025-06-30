@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Calculadora de Cuotas v2.0</title>
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="./src/styles/fallback.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-calculator"></i>
+                <span>Calculadora de Cuotas</span>
+            </div>
+            
+            <!-- Menú Desktop -->
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#products" class="nav-link">
+                        <i class="fas fa-box"></i>
+                        <span>Productos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#statistics" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Estadísticas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#reminders" class="nav-link">
+                        <i class="fas fa-bell"></i>
+                        <span>Recordatorios</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#export" class="nav-link">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Exportar</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Hamburger Menu -->
+            <div class="hamburger">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </div>
+        
+        <!-- Overlay para mobile -->
+        <div class="nav-overlay"></div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        
+        <!-- Sección de Productos -->
+        <section id="products" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-box"></i> Gestión de Productos</h2>
+                    <p>Agrega y administra tus productos financiados</p>
+                </div>
+                
+                <!-- Formulario -->
+                <div class="form-section">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="nombreProducto">
+                                <i class="fas fa-tag"></i>
+                                Nombre del Producto
+                            </label>
+                            <input type="text" id="nombreProducto" placeholder="Ej: Smartphone Samsung">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="valorTotalProducto">
+                                <i class="fas fa-dollar-sign"></i>
+                                Valor Total
+                            </label>
+                            <input type="text" id="valorTotalProducto" placeholder="Ej: 500000 o 500.000,50">
+                            <small class="input-help">Puedes usar punto o coma como separador decimal</small>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="numeroCuotas">
+                                <i class="fas fa-list-ol"></i>
+                                Número de Cuotas
+                            </label>
+                            <input type="number" id="numeroCuotas" placeholder="Ej: 12" min="1" max="60">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="fechaInicio">
+                                <i class="fas fa-calendar-alt"></i>
+                                Fecha de Inicio
+                            </label>
+                            <input type="date" id="fechaInicio">
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button type="button" class="btn btn-primary" id="btnAgregarProducto">
+                            <i class="fas fa-plus"></i>
+                            Agregar Producto
+                        </button>
+                        <button type="button" id="btnBorrarTodo" class="btn btn-danger" style="display: none; margin-left: 15px;">
+                            <i class="fas fa-trash-alt"></i>
+                            Borrar Todo
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Lista de Productos -->
+                <div class="products-list">
+                    <div class="list-header">
+                        <h3><i class="fas fa-list"></i> Productos Registrados</h3>
+                    </div>
+                    <div id="listaProductos" class="lista-productos">
+                        <p class="no-products">No hay productos registrados. ¡Agrega tu primer producto arriba! 🚀</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Estadísticas -->
+        <section id="statistics" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> Estadísticas y Análisis</h2>
+                    <p>Visualiza el comportamiento de tus cuotas y pagos</p>
+                </div>
+                
+                <!-- Estadísticas Generales -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalProductos">0</h3>
+                            <p>Productos Activos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="valorTotal">$0</h3>
+                            <p>Valor Total</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="promedioMensual">$0</h3>
+                            <p>Promedio Mensual</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="proximoMes">$0</h3>
+                            <p>Próximo Mes</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráficos -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-bar"></i> Visualización de Cuotas</h3>
+                        <div class="time-range-controls">
+                            <button class="time-range-btn active" data-range="all">
+                                <i class="fas fa-infinity"></i>
+                                Todo
+                            </button>
+                            <button class="time-range-btn" data-range="6">
+                                <i class="fas fa-calendar"></i>
+                                6 Meses
+                            </button>
+                            <button class="time-range-btn" data-range="12">
+                                <i class="fas fa-calendar-alt"></i>
+                                1 Año
+                            </button>
+                            <button class="time-range-btn" data-range="24">
+                                <i class="fas fa-calendar-week"></i>
+                                2 Años
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="gastosChart"></canvas>
+                    </div>
+                    
+                    <div id="chartMessage" class="chart-empty-message" style="display: none;">
+                        <div class="empty-chart-content">
+                            <i class="fas fa-chart-line"></i>
+                            <h4>No hay datos para mostrar</h4>
+                            <p>Agrega algunos productos para ver las estadísticas y gráficos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Recordatorios -->
+        <section id="reminders" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-bell"></i> Recordatorios de Pagos</h2>
+                    <p>Configura notificaciones por email para tus cuotas</p>
+                </div>
+                
+                <!-- Configuración de Email -->
+                <div class="recordatorios-grid">
+                    <div class="recordatorio-card">
+                        <div class="recordatorio-icon">
+                            <i class="fas fa-envelope" style="color: #667eea;"></i>
+                        </div>
+                        <h4>Recordatorios por Email</h4>
+                        <p>Recibe notificaciones en tu correo electrónico</p>
+                        
+                        <div class="recordatorio-config">
+                            <div class="recordatorio-input-group">
+                                <label>Email para notificaciones:</label>
+                                <input type="email" class="recordatorio-input" id="emailAddress" 
+                                       placeholder="tu@email.com">
+                            </div>
+                            
+                            <div class="recordatorio-input-group">
+                                <label>Días de anticipación:</label>
+                                <select class="recordatorio-select" id="emailDays">
+                                    <option value="1">1 día antes</option>
+                                    <option value="3" selected>3 días antes</option>
+                                    <option value="7">7 días antes</option>
+                                    <option value="15">15 días antes</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button class="recordatorio-btn email-btn" onclick="toggleEmailReminders()">
+                            <i class="fas fa-power-off"></i>
+                            <span id="emailStatus">Activar Email</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Estado y Próximos Recordatorios -->
+                <div class="recordatorios-status">
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <i class="fas fa-envelope status-icon" style="color: #667eea;"></i>
+                            <span class="status-text" id="emailStatusText">Email: Desactivado</span>
+                        </div>
+                        <div class="status-item">
+                            <i class="fas fa-clock status-icon" style="color: #26de81;"></i>
+                            <span class="status-text" id="nextReminderText">Próximo: No programado</span>
+                        </div>
+                    </div>
+                    
+                    <div class="next-reminders">
+                        <h5><i class="fas fa-calendar-check"></i> Próximos Recordatorios</h5>
+                        <div id="nextReminders" class="reminders-list">
+                            <p>No hay recordatorios programados</p>
+                        </div>
+                    </div>
+                    
+                    <div class="reminders-controls" id="remindersControls" style="display: none;">
+                        <button class="btn btn-success send-full-report-btn" onclick="sendFullReportEmail()" title="Envía un reporte completo con todos los productos y cuotas">
+                            <i class="fas fa-file-alt"></i>
+                            Enviar Reporte Completo
+                        </button>
+                        <button class="btn btn-info test-email-btn" onclick="testEmailReminder()" title="Envía un email de prueba con datos de ejemplo">
+                            <i class="fas fa-paper-plane"></i>
+                            Probar Email
+                        </button>
+                        <button class="btn btn-danger delete-all-btn" onclick="deleteAllReminders()">
+                            <i class="fas fa-trash-alt"></i>
+                            Eliminar Todos los Recordatorios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Exportación -->
+        <section id="export" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-pdf"></i> Exportar Reportes</h2>
+                    <p>Descarga reportes detallados en formato PDF</p>
+                </div>
+                
+                <div class="pdf-download-section">
+                    <div class="pdf-download-background"></div>
+                    <div class="pdf-download-content">
+                        <div class="pdf-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h3>Reporte Completo de Cuotas</h3>
+                        <p>Descarga un documento profesional con todos tus productos, estadísticas y cronogramas de pago</p>
+                        
+                        <ul class="pdf-features">
+                            <li><i class="fas fa-check"></i> Listado completo de productos</li>
+                            <li><i class="fas fa-check"></i> Gráficos estadísticos</li>
+                            <li><i class="fas fa-check"></i> Cronograma de pagos mensual</li>
+                            <li><i class="fas fa-check"></i> Resumen ejecutivo</li>
+                        </ul>
+                        
+                        <button id="btnDescargarPDF" class="pdf-download-btn">
+                            <i class="fas fa-download"></i>
+                            Descargar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modales -->
+    
+    <!-- Modal de Edición -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Editar Producto</h3>
+                <span class="close" id="closeEditModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modal-nombre">Nombre del Producto:</label>
+                    <input type="text" id="modal-nombre">
+                </div>
+                <div class="form-group">
+                    <label for="modal-valor">Valor Total ($):</label>
+                    <input type="text" id="modal-valor">
+                    <small class="input-help">Puedes usar punto o coma como separador decimal</small>
+                </div>
+                <div class="form-group">
+                    <label for="modal-cuotas">Número de Cuotas:</label>
+                    <input type="number" id="modal-cuotas" min="1" max="60">
+                </div>
+                <div class="form-group">
+                    <label for="modal-fecha">Fecha de Inicio:</label>
+                    <input type="date" id="modal-fecha">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelEdit">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSaveEdit">
+                    <i class="fas fa-save"></i>
+                    Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este producto?</p>
+                <p><strong id="confirm-product-name"></strong></p>
+                <p>Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelDelete">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+                    <i class="fas fa-trash"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor de Notificaciones -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Overlay de Loading -->
+    <div id="loadingIndicator" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Cargando aplicación...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./config/services.js"></script>
+    <script src="./src/modules/reminders.js"></script>
+    <script src="./src/scripts/app.js"></script>
+    
+    <!-- Timeout de emergencia para evitar cuelgues -->
+    <script>
+        // Timeout de emergencia - fuerza ocultar loading después de 2 segundos
+        setTimeout(() => {
+            console.log('🚨 TIMEOUT DE EMERGENCIA - Forzando ocultado de loading');
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) {
+                loading.style.display = 'none';
+                console.log('✅ Loading forzadamente ocultado');
+            }
+        }, 2000);
+        
+        // Mostrar loading inicialmente
+        document.addEventListener('DOMContentLoaded', () => {
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) {
+                loading.style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -531,5 +531,33 @@
             });
         });
     </script>
+    
+    <!-- Timeout de emergencia para evitar cuelgues -->
+    <script>
+        // Timeout de emergencia - fuerza ocultar loading después de 2 segundos
+        setTimeout(() => {
+            console.log('🚨 TIMEOUT DE EMERGENCIA - Forzando ocultado de loading');
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) {
+                loading.style.display = 'none';
+                console.log('✅ Loading forzadamente ocultado por timeout de emergencia');
+            }
+        }, 2000);
+        
+        // Inicialización inmediata del loading
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔄 DOM cargado - Inicializando timeout de loading');
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) {
+                // Ocultar loading después de 1 segundo si no se ha ocultado ya
+                setTimeout(() => {
+                    if (loading.style.display !== 'none') {
+                        loading.style.display = 'none';
+                        console.log('✅ Loading ocultado por timeout DOM');
+                    }
+                }, 1000);
+            }
+        });
+    </script>
 </body>
 </html>
