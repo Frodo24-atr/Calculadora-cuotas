@@ -14,8 +14,8 @@ const SERVICES_CONFIG = {
   // Configuración de EmailJS
   emailJS: {
     publicKey: '8c4l-rq7DsQF8ibja', // Tu Public Key de EmailJS ✅
-    serviceId: 'service_srur1ha', // Tu Service ID ✅  
-    templateId: 'template_z83t6tg' // Tu Template ID ✅ ACTUALIZADO
+    serviceId: 'service_srur1ha', // Tu nuevo Service ID ✅  
+    templateId: 'template_z83t6tg' // 👈 Nuevo TEMPLATE ID actualizado
   },
   
   // Configuración de WhatsApp (no requiere claves)
