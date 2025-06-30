@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test EmailJS - Calculadora de Cuotas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #0056b3; }
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test EmailJS - Calculadora de Cuotas</h1>
+        <p>Esta página te permite probar la configuración de EmailJS paso a paso.</p>
+
+        <div id="status-container">
+            <div id="emailjs-status" class="status info">
+                ⏳ Verificando EmailJS...
+            </div>
+            <div id="config-status" class="status info">
+                ⏳ Verificando configuración...
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="test-email">Email de prueba:</label>
+            <input type="email" id="test-email" placeholder="tu@email.com" value="">
+        </div>
+
+        <div class="form-group">
+            <label for="service-id">Service ID (opcional - para probar otro):</label>
+            <input type="text" id="service-id" placeholder="service_xxxxxxx" value="">
+            <small>Deja vacío para usar el de la configuración</small>
+        </div>
+
+        <div class="form-group">
+            <label for="template-id">Template ID (opcional - para probar otro):</label>
+            <input type="text" id="template-id" placeholder="template_xxxxxxx" value="">
+            <small>Deja vacío para usar el de la configuración</small>
+        </div>
+
+        <div>
+            <button onclick="checkEmailJS()">🔍 Verificar EmailJS</button>
+            <button onclick="checkConfig()">⚙️ Verificar Configuración</button>
+            <button onclick="sendTestEmail()">📧 Enviar Email de Prueba</button>
+            <button onclick="showTemplateGuide()">📋 Guía del Template</button>
+            <button onclick="clearLog()">🗑️ Limpiar Log</button>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <!-- Librerías necesarias -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="./src/config/services.js"></script>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function logMessage(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'color: red' : type === 'success' ? 'color: green' : 'color: blue';
+            log.innerHTML += `<div style="${className}">[${timestamp}] ${message}</div>`;
+            log.scrollTop = log.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function clearLog() {
+            log.innerHTML = '';
+        }
+
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        function checkEmailJS() {
+            logMessage('🔍 Verificando disponibilidad de EmailJS...', 'info');
+            
+            if (typeof emailjs === 'undefined') {
+                logMessage('❌ EmailJS no disponible', 'error');
+                updateStatus('emailjs-status', '❌ EmailJS no disponible', 'error');
+                return false;
+            }
+            
+            logMessage('✅ EmailJS disponible', 'success');
+            logMessage(`📦 Versión EmailJS: ${emailjs.version || 'Desconocida'}`, 'info');
+            updateStatus('emailjs-status', '✅ EmailJS disponible', 'success');
+            return true;
+        }
+
+        function checkConfig() {
+            logMessage('⚙️ Verificando configuración de servicios...', 'info');
+            
+            if (typeof window.SERVICES_CONFIG === 'undefined') {
+                logMessage('❌ Configuración no disponible', 'error');
+                updateStatus('config-status', '❌ Configuración no disponible', 'error');
+                return false;
+            }
+            
+            const config = window.SERVICES_CONFIG.emailJS;
+            logMessage('✅ Configuración disponible', 'success');
+            logMessage(`🔑 Public Key: ${config.publicKey ? config.publicKey.substring(0, 8) + '...' : 'NO DEFINIDA'}`, config.publicKey ? 'success' : 'error');
+            logMessage(`🏷️ Service ID: ${config.serviceId || 'NO DEFINIDO'}`, config.serviceId ? 'success' : 'error');
+            logMessage(`📋 Template ID: ${config.templateId || 'NO DEFINIDO'}`, config.templateId ? 'success' : 'error');
+            
+            if (config.publicKey && config.serviceId && config.templateId) {
+                updateStatus('config-status', '✅ Configuración completa', 'success');
+                
+                // Inicializar EmailJS
+                try {
+                    emailjs.init(config.publicKey);
+                    logMessage('✅ EmailJS inicializado correctamente', 'success');
+                } catch (error) {
+                    logMessage(`❌ Error inicializando EmailJS: ${error.message}`, 'error');
+                }
+                
+                return true;
+            } else {
+                updateStatus('config-status', '❌ Configuración incompleta', 'error');
+                return false;
+            }
+        }
+
+        async function sendTestEmail() {
+            logMessage('📧 Iniciando prueba de envío de email...', 'info');
+            
+            const email = document.getElementById('test-email').value;
+            if (!email) {
+                logMessage('❌ Por favor ingresa un email de prueba', 'error');
+                return;
+            }
+            
+            if (!checkEmailJS() || !checkConfig()) {
+                logMessage('❌ Verificaciones fallaron, no se puede enviar email', 'error');
+                return;
+            }
+            
+            const config = window.SERVICES_CONFIG.emailJS;
+            
+            // Permitir override de Service ID y Template ID para testing
+            const serviceIdOverride = document.getElementById('service-id').value;
+            const templateIdOverride = document.getElementById('template-id').value;
+            
+            const serviceId = serviceIdOverride || config.serviceId;
+            const templateId = templateIdOverride || config.templateId;
+            
+            const templateParams = {
+                to_email: email,
+                to_name: email.split('@')[0],
+                user_name: email.split('@')[0],
+                from_name: 'Calculadora de Cuotas',
+                reply_to: email,
+                product_name: 'Producto de Prueba',
+                payment_amount: '50.000',
+                payment_date: 'lunes, 1 de julio de 2025',
+                installment_current: 1,
+                installment_total: 12,
+                days_ahead: 3,
+                installments_list: '1. lunes, 1 de julio de 2025 - $50.000\n2. martes, 1 de agosto de 2025 - $50.000',
+                total_installments: 12,
+                paid_installments: 0,
+                pending_installments: 12,
+                total_amount: '600.000',
+                pending_amount: '600.000',
+                email_date: new Date().toLocaleDateString('es-ES', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                // Campos adicionales comunes para templates de EmailJS
+                to: email,
+                email: email,
+                user_email: email,
+                recipient_email: email
+            };
+            
+            logMessage('📤 Enviando email de prueba...', 'info');
+            logMessage(`📋 Service ID: ${serviceId}`, 'info');
+            logMessage(`📋 Template ID: ${templateId}`, 'info');
+            logMessage(`📧 Email destino: ${email}`, 'info');
+            logMessage(`📋 Parámetros del template:`, 'info');
+            logMessage(`   to_email: ${templateParams.to_email}`, 'info');
+            logMessage(`   to: ${templateParams.to}`, 'info');
+            logMessage(`   user_name: ${templateParams.user_name}`, 'info');
+            logMessage(`   product_name: ${templateParams.product_name}`, 'info');
+            
+            if (serviceIdOverride) {
+                logMessage(`🔧 Usando Service ID personalizado: ${serviceIdOverride}`, 'info');
+            }
+            if (templateIdOverride) {
+                logMessage(`🔧 Usando Template ID personalizado: ${templateIdOverride}`, 'info');
+            }
+            
+            try {
+                const response = await emailjs.send(
+                    serviceId,
+                    templateId,
+                    templateParams
+                );
+                
+                logMessage('✅ Email enviado correctamente!', 'success');
+                logMessage(`📬 ID de respuesta: ${response.status} - ${response.text}`, 'success');
+                alert('✅ Email de prueba enviado correctamente! Revisa tu bandeja de entrada.');
+                
+            } catch (error) {
+                logMessage(`❌ Error enviando email: ${error.message || error}`, 'error');
+                logMessage(`🔍 Detalles del error: ${JSON.stringify(error)}`, 'error');
+                logMessage(`🔍 Status: ${error.status}`, 'error');
+                logMessage(`🔍 Text: ${error.text}`, 'error');
+                
+                // Mensajes de ayuda específicos según el error
+                if (error.status === 400) {
+                    if (error.text.includes('service ID not found')) {
+                        logMessage('💡 SOLUCIÓN: El Service ID no existe. Ve a https://dashboard.emailjs.com/admin y verifica el Service ID correcto', 'info');
+                    } else if (error.text.includes('template ID not found')) {
+                        logMessage('💡 SOLUCIÓN: El Template ID no existe. Ve a https://dashboard.emailjs.com/admin y verifica el Template ID correcto', 'info');
+                    }
+                } else if (error.status === 401) {
+                    logMessage('💡 SOLUCIÓN: Problema de autenticación. Verifica tu Public Key', 'info');
+                } else if (error.status === 402) {
+                    logMessage('💡 SOLUCIÓN: Límite de emails alcanzado. Verifica tu plan de EmailJS', 'info');
+                }
+                
+                alert(`❌ Error enviando email: ${error.message || error}`);
+            }
+        }
+
+        function showTemplateGuide() {
+            logMessage('📋 GUÍA PARA CONFIGURAR TU TEMPLATE EN EMAILJS:', 'info');
+            logMessage('', 'info');
+            logMessage('1. Ve a https://dashboard.emailjs.com/admin/templates', 'info');
+            logMessage('2. Edita tu template o crea uno nuevo', 'info');
+            logMessage('3. En el campo "To Email" del template, usa: {{to_email}}', 'info');
+            logMessage('4. Template de ejemplo:', 'info');
+            logMessage('', 'info');
+            logMessage('--- CONFIGURACIÓN DEL TEMPLATE ---', 'info');
+            logMessage('To Email: {{to_email}}', 'info');
+            logMessage('From Name: Calculadora de Cuotas', 'info');
+            logMessage('Subject: Recordatorio de Pago - {{product_name}}', 'info');
+            logMessage('', 'info');
+            logMessage('--- CONTENIDO DEL MENSAJE ---', 'info');
+            logMessage('Hola {{user_name}},', 'info');
+            logMessage('', 'info');
+            logMessage('Te recordamos que tienes un pago pendiente:', 'info');
+            logMessage('', 'info');
+            logMessage('📦 Producto: {{product_name}}', 'info');
+            logMessage('💰 Monto: ${{payment_amount}}', 'info');
+            logMessage('📅 Fecha de pago: {{payment_date}}', 'info');
+            logMessage('📊 Cuota: {{installment_current}} de {{installment_total}}', 'info');
+            logMessage('', 'info');
+            logMessage('Detalle de cuotas:', 'info');
+            logMessage('{{installments_list}}', 'info');
+            logMessage('', 'info');
+            logMessage('Saludos,', 'info');
+            logMessage('Calculadora de Cuotas', 'info');
+            logMessage('--- FIN DEL TEMPLATE ---', 'info');
+        }
+
+        // Verificaciones automáticas al cargar
+        window.addEventListener('load', () => {
+            logMessage('🚀 Página de test cargada', 'info');
+            setTimeout(() => {
+                checkEmailJS();
+                checkConfig();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

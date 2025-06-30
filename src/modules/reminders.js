@@ -101,20 +101,20 @@ class RemindersManager {
           return;
         }
 
-        emailjs.init({
-          publicKey: config.emailJS.publicKey,
-          blockHeadless: true,
-          limitRate: {
-            id: 'app',
-            throttle: 10000,
-          },
-        });
+        // Inicializar EmailJS con la Public Key
+        emailjs.init(config.emailJS.publicKey);
+        
         console.log('✅ EmailJS inicializado correctamente');
+        console.log('🔧 Configuración:', {
+          publicKey: config.emailJS.publicKey.substring(0, 8) + '...',
+          serviceId: config.emailJS.serviceId,
+          templateId: config.emailJS.templateId
+        });
       } catch (error) {
         console.warn('⚠️ Error inicializando EmailJS:', error.message);
       }
     } else {
-      console.warn('⚠️ EmailJS no disponible - se usará solo WhatsApp');
+      console.warn('⚠️ EmailJS no disponible - librería no cargada');
     }
   }
 
@@ -425,7 +425,13 @@ class RemindersManager {
 
     const templateParams = {
       to_email: this.config.email.address,
+      to: this.config.email.address,
+      user_email: this.config.email.address,
+      recipient_email: this.config.email.address,
       user_name: this.config.email.address.split('@')[0], // Usar la parte antes del @ como nombre
+      to_name: this.config.email.address.split('@')[0],
+      from_name: 'Calculadora de Cuotas',
+      reply_to: this.config.email.address,
       product_name: reminder.product,
       payment_amount: Math.round(reminder.amount).toLocaleString('es-ES'),
       payment_date: reminder.paymentDate.toLocaleDateString('es-ES', { 
@@ -458,6 +464,22 @@ class RemindersManager {
     };
 
     try {
+      // Verificar que EmailJS esté disponible
+      if (typeof emailjs === 'undefined') {
+        throw new Error('EmailJS no está disponible. Verifica que la librería esté cargada.');
+      }
+
+      // Verificar configuración
+      if (!this.config.email.serviceId || !this.config.email.templateId) {
+        throw new Error('Configuración de email incompleta. Verifica serviceId y templateId.');
+      }
+
+      console.log('📧 Enviando email con configuración:', {
+        serviceId: this.config.email.serviceId,
+        templateId: this.config.email.templateId,
+        to_email: templateParams.to_email
+      });
+
       const response = await emailjs.send(
         this.config.email.serviceId,
         this.config.email.templateId,
@@ -1107,6 +1129,27 @@ window.deleteAllReminders = function() {
 
 // Función global para probar envío de email
 window.testEmailReminder = async function() {
+  console.log('🧪 Iniciando prueba de email...');
+  
+  // Verificar que EmailJS esté disponible
+  if (typeof emailjs === 'undefined') {
+    const errorMsg = 'EmailJS no está disponible. Verifica que la librería esté cargada.';
+    console.error('❌', errorMsg);
+    alert('❌ ' + errorMsg);
+    return;
+  }
+  
+  // Verificar configuración
+  if (typeof window.SERVICES_CONFIG === 'undefined') {
+    const errorMsg = 'Configuración de servicios no encontrada. Verifica que services.js esté cargado.';
+    console.error('❌', errorMsg);
+    alert('❌ ' + errorMsg);
+    return;
+  }
+  
+  console.log('🔧 EmailJS disponible:', typeof emailjs);
+  console.log('🔧 Configuración disponible:', window.SERVICES_CONFIG);
+  
   if (!window.remindersManager) {
     try {
       window.remindersManager = new RemindersManager();
