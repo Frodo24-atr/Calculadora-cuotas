@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Cuotas</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3f51b5">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="service-worker" href="service-worker.js">
+  <link rel="manifest" href="manifest.json">
+  <meta name="description" content="Calculadora de cuotas para productos con pagos mensuales
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      padding: 10rem;
+      color: #333;
+    }
+    .card {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group input, .form-group button {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    h1, h2, h3 {
+      color: #3f51b5;
+    }
+    ul {
+      padding-left: 1rem;
+    }
+    .delete-btn {
+      color: red;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button.export {
+      background: #3f51b5;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calculadora de Cuotas</h1>
+
+  <div class="card">
+    <form id="form-producto">
+      <div class="form-group">
+        <label>Nombre del producto:<br><input type="text" id="nombre" required></label>
+      </div>
+      <div class="form-group">
+        <label>Fecha de inicio:<br><input type="date" id="fecha" required></label>
+      </div>
+      <div class="form-group">
+        <label>Precio total:<br><input type="number" id="precio" required></label>
+      </div>
+      <div class="form-group">
+        <label>Cantidad de cuotas:<br><input type="number" id="cuotas" required></label>
+      </div>
+      <div class="form-group">
+        <button type="submit">Agregar producto</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Resumen de productos</h2>
+    <div id="lista-productos"></div>
+  </div>
+
+  <div class="card">
+    <h3>Resumen mensual</h3>
+    <ul id="resumen-mensual"></ul>
+    <button class="export" onclick="exportarCSV()">Exportar CSV</button>
+  </div>
+
+  <script>
+    let productos = JSON.parse(localStorage.getItem('productos')) || [];
+
+    document.getElementById('form-producto').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('nombre').value;
+      const fecha = new Date(document.getElementById('fecha').value);
+      const precio = parseFloat(document.getElementById('precio').value);
+      const cuotas = parseInt(document.getElementById('cuotas').value);
+      const mensualidad = +(precio / cuotas).toFixed(2);
+
+      productos.push({ nombre, fecha: fecha.toISOString(), precio, cuotas, mensualidad });
+      localStorage.setItem('productos', JSON.stringify(productos));
+      document.getElementById('form-producto').reset();
+      mostrarProductos();
+      calcularPagosMensuales();
+    });
+
+    function mostrarProductos() {
+      const contenedor = document.getElementById('lista-productos');
+      contenedor.innerHTML = '';
+      productos.forEach((prod, index) => {
+        const fechaInicio = new Date(prod.fecha);
+        const fin = new Date(fechaInicio);
+        fin.setMonth(fin.getMonth() + prod.cuotas - 1);
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <strong>${prod.nombre}</strong><br>
+          Precio: $${prod.precio}<br>
+          Cuotas: ${prod.cuotas} x $${prod.mensualidad}<br>
+          Fecha inicio: ${fechaInicio.toISOString().split('T')[0]}<br>
+          Termina: ${fin.toISOString().split('T')[0]}<br>
+          <span class="delete-btn" onclick="eliminarProducto(${index})">Eliminar</span>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    function calcularPagosMensuales() {
+      const resumenMensual = {};
+      productos.forEach(prod => {
+        let fecha = new Date(prod.fecha);
+        for (let i = 0; i < prod.cuotas; i++) {
+          const clave = `${fecha.getFullYear()}-${(fecha.getMonth()+1).toString().padStart(2, '0')}`;
+          resumenMensual[clave] = (resumenMensual[clave] || 0) + prod.mensualidad;
+          fecha.setMonth(fecha.getMonth() + 1);
+        }
+      });
+      const resumen = document.getElementById('resumen-mensual');
+      resumen.innerHTML = '';
+      const ordenado = Object.keys(resumenMensual).sort();
+      ordenado.forEach(mes => {
+        resumen.innerHTML += `<li><strong>${mes}</strong>: $${resumenMensual[mes].toFixed(2)}</li>`;
+      });
+    }
+
+    function eliminarProducto(index) {
+      productos.splice(index, 1);
+      localStorage.setItem('productos', JSON.stringify(productos));
+      mostrarProductos();
+      calcularPagosMensuales();
+    }
+
+    function exportarCSV() {
+      let csv = 'Mes,Total Mensual\n';
+      let pagos = {};
+      productos.forEach(prod => {
+        let fecha = new Date(prod.fecha);
+        for (let i = 0; i < prod.cuotas; i++) {
+          const clave = `${fecha.getFullYear()}-${(fecha.getMonth()+1).toString().padStart(2, '0')}`;
+          pagos[clave] = (pagos[clave] || 0) + prod.mensualidad;
+          fecha.setMonth(fecha.getMonth() + 1);
+        }
+      });
+      Object.keys(pagos).sort().forEach(k => {
+        csv += `${k},${pagos[k].toFixed(2)}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resumen_mensual.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').then(() => {
+        console.log('Service Worker registrado');
+      });
+    }
+
+    mostrarProductos();
+    calcularPagosMensuales();
+  </script>
+</body>
+</html>

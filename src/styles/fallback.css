@@ -92,6 +92,16 @@ body {
   transform: translateY(-2px);
 }
 
+.btn-info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-info:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -600,6 +610,43 @@ body {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+/* ================================================= */
+/* MEJORAS PARA INPUTS DE FORMATO LATINOAMERICANO */
+/* ================================================= */
+
+.input-help {
+  display: block;
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 4px;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.input-group input:focus + .input-help {
+  color: #667eea;
+  opacity: 1;
+}
+
+.input-group input.error + .input-help {
+  color: #dc3545;
+}
+
+.input-group input.valid + .input-help {
+  color: #28a745;
+}
+
+/* Indicador visual de validación en tiempo real */
+.input-group input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.input-group input.valid {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
 /* ===== BOTONES ===== */
 .btn {
   display: inline-flex;
@@ -621,6 +668,16 @@ body {
 }
 
 .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-info:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
@@ -1262,28 +1319,39 @@ body {
 }
 
 .reminders-controls {
-  text-align: center;
-  padding: 20px;
-  border-top: 2px solid #e9ecef;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.test-email-btn {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.test-email-btn:hover {
+  background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
+}
+
+.send-full-report-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.send-full-report-btn:hover {
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
 }
 
 .delete-all-btn {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.delete-all-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
 }
 
 /* ===== PDF EXPORT ===== */

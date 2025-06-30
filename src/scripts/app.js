@@ -1,11 +1,14 @@
 // Aplicación principal - Calculadora de Cuotas - Versión JavaScript
-console.log('🚀 Iniciando Calculadora de Cuotas v2025.06.29 (JS)');
+console.log('� INICIO: app.js se está ejecutando...');
+console.log('�🚀 Iniciando Calculadora de Cuotas v2025.06.29 (JS)');
 
 /**
  * Calculadora de Cuotas - Versión JavaScript pura
  */
 class CalculadoraCuotas {
   constructor() {
+    console.log('🚀 Iniciando constructor CalculadoraCuotas...');
+    
     this.state = {
       products: [],
       currentTimeRange: 'all',
@@ -16,6 +19,8 @@ class CalculadoraCuotas {
     
     this.chartInstance = null;
     this.remindersManager = null;
+    
+    console.log('📊 Estado inicial creado, llamando initialize...');
     this.initialize();
   }
 
@@ -24,22 +29,39 @@ class CalculadoraCuotas {
       console.log('🔧 Inicializando aplicación...');
       
       // Mostrar loading
+      console.log('📱 Mostrando indicador de carga...');
       this.showLoading();
       
+      // Timeout de emergencia para evitar que se cuelgue
+      const emergencyTimeout = setTimeout(() => {
+        console.warn('⚠️ Timeout de emergencia - Forzando inicialización');
+        this.hideLoading();
+        this.renderProducts();
+        this.updateStats();
+        this.state.isLoading = false;
+      }, 5000);
+      
       // Esperar que las librerías externas se carguen
+      console.log('📚 Esperando librerías...');
       await this.waitForLibraries();
       
       // Configurar eventos básicos
+      console.log('🎯 Configurando eventos básicos...');
       this.setupBasicEventListeners();
       
       // Inicializar sistema de recordatorios
+      console.log('🔔 Inicializando recordatorios...');
       await this.initializeReminders();
       
       // Cargar datos del localStorage
+      console.log('💾 Cargando datos guardados...');
       this.loadStoredProducts();
       
       // Simular carga y luego ocultar loading
+      console.log('⏳ Finalizando inicialización...');
       setTimeout(() => {
+        console.log('🎨 Ocultando carga y renderizando...');
+        clearTimeout(emergencyTimeout); // Cancelar timeout de emergencia
         this.hideLoading();
         
         // Renderizar productos DESPUÉS de ocultar loading
@@ -47,11 +69,14 @@ class CalculadoraCuotas {
         this.updateStats();
         this.updateChart(); // Asegurar que el gráfico esté sincronizado
         console.log('✅ Aplicación inicializada correctamente');
+        this.state.isLoading = false;
       }, 1000);
       
     } catch (error) {
       console.error('❌ Error inicializando aplicación:', error);
-      this.showError('Error al inicializar la aplicación');
+      this.hideLoading(); // Asegurar que se oculte el loading en caso de error
+      this.showError('Error al inicializar la aplicación: ' + error.message);
+      this.state.isLoading = false;
     }
   }
 
@@ -59,24 +84,44 @@ class CalculadoraCuotas {
   async waitForLibraries() {
     console.log('⏳ Esperando librerías externas...');
     
+    // Timeout máximo de 5 segundos
+    const maxWaitTime = 5000;
+    const startTime = Date.now();
+    
     // Esperar Chart.js
     let chartRetries = 0;
-    while (!window.Chart && chartRetries < 10) {
+    while (!window.Chart && chartRetries < 50 && (Date.now() - startTime) < maxWaitTime) {
       await new Promise(resolve => setTimeout(resolve, 100));
       chartRetries++;
     }
     
-    // Esperar jsPDF
+    // Esperar jsPDF (puede estar en diferentes lugares)
     let pdfRetries = 0;
-    while (!window.jsPDF && pdfRetries < 10) {
+    while (!window.jsPDF && !window.jspdf && pdfRetries < 50 && (Date.now() - startTime) < maxWaitTime) {
       await new Promise(resolve => setTimeout(resolve, 100));
       pdfRetries++;
     }
     
-    console.log('✅ Librerías cargadas:', {
-      'Chart.js': !!window.Chart,
-      'jsPDF': !!window.jsPDF
+    // Verificar que tengamos las librerías básicas
+    const hasChart = !!window.Chart;
+    const hasPDF = !!(window.jsPDF || window.jspdf);
+    
+    console.log('📊 Estado de librerías:', {
+      'Chart.js': hasChart ? '✅' : '❌',
+      'jsPDF': hasPDF ? '✅' : '❌',
+      'EmailJS': !!window.emailjs ? '✅' : '❌',
+      'Tiempo de espera': `${Date.now() - startTime}ms`
     });
+    
+    // Si no tenemos Chart.js, advertir pero continuar
+    if (!hasChart) {
+      console.warn('⚠️ Chart.js no se cargó - los gráficos no funcionarán');
+    }
+    
+    // Si no tenemos jsPDF, advertir pero continuar
+    if (!hasPDF) {
+      console.warn('⚠️ jsPDF no se cargó - la exportación PDF no funcionará');
+    }
   }
 
   setupBasicEventListeners() {
@@ -124,6 +169,9 @@ class CalculadoraCuotas {
 
     // Modal eventos
     this.setupModalEvents();
+    
+    // Validación en tiempo real para inputs numéricos
+    this.setupNumberInputValidation();
   }
 
   setupModalEvents() {
@@ -178,12 +226,25 @@ class CalculadoraCuotas {
 
   handleAddProduct() {
     const nombre = document.getElementById('nombreProducto')?.value;
-    const valor = parseFloat(document.getElementById('valorTotalProducto')?.value || '0');
+    const valorStr = document.getElementById('valorTotalProducto')?.value || '0';
     const cuotas = parseInt(document.getElementById('numeroCuotas')?.value || '0');
     const fecha = document.getElementById('fechaInicio')?.value;
 
-    if (!nombre || !valor || !cuotas || !fecha) {
-      this.showNotification('error', 'Error', 'Por favor completa todos los campos');
+    // Usar la nueva función de parseo latinoamericano
+    const valor = this.parseLatinNumber(valorStr);
+
+    if (!nombre || !this.isValidNumber(valorStr) || !cuotas || !fecha) {
+      this.showNotification('error', 'Error de validación', 'Por favor completa todos los campos con valores válidos');
+      return;
+    }
+
+    if (valor <= 0) {
+      this.showNotification('error', 'Valor inválido', 'El valor del producto debe ser mayor a 0');
+      return;
+    }
+
+    if (cuotas <= 0) {
+      this.showNotification('error', 'Cuotas inválidas', 'El número de cuotas debe ser mayor a 0');
       return;
     }
 
@@ -207,8 +268,9 @@ class CalculadoraCuotas {
     this.clearForm();
     this.updateStats();
     
-    // Mostrar notificación de éxito
-    this.showNotification('success', '¡Producto agregado!', `"${nombre}" se ha agregado correctamente`);
+    // Mostrar notificación de éxito con valor formateado
+    this.showNotification('success', '¡Producto agregado!', 
+      `"${nombre}" por $${this.formatLatinNumber(valor)} se ha agregado correctamente`);
     
     // Generar recordatorios automáticamente
     this.generateReminders();
@@ -303,9 +365,9 @@ class CalculadoraCuotas {
           </div>
         </div>
         <div class="product-details">
-          <p><strong>Valor Total:</strong> $${product.totalValue.toLocaleString()}</p>
+          <p><strong>Valor Total:</strong> $${this.formatLatinNumber(product.totalValue)}</p>
           <p><strong>Cuotas:</strong> ${product.installments}</p>
-          <p><strong>Cuota Mensual:</strong> $${product.monthlyPayment.toLocaleString()}</p>
+          <p><strong>Cuota Mensual:</strong> $${this.formatLatinNumber(product.monthlyPayment)}</p>
           <p><strong>Inicio:</strong> ${product.startDate.toLocaleDateString()}</p>
           <p><strong>Fin:</strong> ${product.endDate.toLocaleDateString()}</p>
         </div>
@@ -342,9 +404,9 @@ class CalculadoraCuotas {
     console.log(`📊 Stats: ${totalProducts} productos, $${totalValue} total, $${monthlyAverage} mensual`);
 
     document.getElementById('totalProductos').textContent = totalProducts.toString();
-    document.getElementById('valorTotal').textContent = `$${totalValue.toLocaleString()}`;
-    document.getElementById('promedioMensual').textContent = `$${monthlyAverage.toLocaleString()}`;
-    document.getElementById('proximoMes').textContent = `$${monthlyAverage.toLocaleString()}`;
+    document.getElementById('valorTotal').textContent = `$${this.formatLatinNumber(totalValue)}`;
+    document.getElementById('promedioMensual').textContent = `$${this.formatLatinNumber(monthlyAverage)}`;
+    document.getElementById('proximoMes').textContent = `$${this.formatLatinNumber(monthlyAverage)}`;
 
     // Actualizar gráfico
     this.updateChart();
@@ -1065,9 +1127,9 @@ class CalculadoraCuotas {
     const product = this.state.products.find(p => p.id === id);
     if (!product) return;
 
-    // Cargar datos en el modal
+    // Cargar datos en el modal con formato latinoamericano
     document.getElementById('modal-nombre').value = product.name;
-    document.getElementById('modal-valor').value = product.totalValue;
+    document.getElementById('modal-valor').value = this.formatLatinNumber(product.totalValue);
     document.getElementById('modal-cuotas').value = product.installments;
     document.getElementById('modal-fecha').value = product.startDate.toISOString().split('T')[0];
 
@@ -1082,12 +1144,25 @@ class CalculadoraCuotas {
     if (!this.currentEditingId) return;
 
     const nombre = document.getElementById('modal-nombre').value;
-    const valor = parseFloat(document.getElementById('modal-valor').value);
+    const valorStr = document.getElementById('modal-valor').value;
     const cuotas = parseInt(document.getElementById('modal-cuotas').value);
     const fecha = document.getElementById('modal-fecha').value;
 
-    if (!nombre || !valor || !cuotas || !fecha) {
-      this.showNotification('error', 'Error', 'Por favor completa todos los campos');
+    // Usar la nueva función de parseo latinoamericano
+    const valor = this.parseLatinNumber(valorStr);
+
+    if (!nombre || !this.isValidNumber(valorStr) || !cuotas || !fecha) {
+      this.showNotification('error', 'Error de validación', 'Por favor completa todos los campos con valores válidos');
+      return;
+    }
+
+    if (valor <= 0) {
+      this.showNotification('error', 'Valor inválido', 'El valor del producto debe ser mayor a 0');
+      return;
+    }
+
+    if (cuotas <= 0) {
+      this.showNotification('error', 'Cuotas inválidas', 'El número de cuotas debe ser mayor a 0');
       return;
     }
 
@@ -1114,8 +1189,9 @@ class CalculadoraCuotas {
     this.closeModal('editModal');
     this.currentEditingId = null;
     
-    // Mostrar notificación de éxito
-    this.showNotification('success', '¡Producto actualizado!', `"${nombre}" se ha modificado correctamente`);
+    // Mostrar notificación de éxito con valor formateado
+    this.showNotification('success', '¡Producto actualizado!', 
+      `"${nombre}" por $${this.formatLatinNumber(valor)} se ha modificado correctamente`);
   }
 
   deleteProduct(id) {
@@ -1315,19 +1391,201 @@ class CalculadoraCuotas {
     try {
       console.log('🔔 Inicializando sistema de recordatorios...');
       
-      // El módulo ya está cargado globalmente
-      if (typeof RemindersManager !== 'undefined') {
-        this.remindersManager = new RemindersManager();
-        
-        // Hacer disponible globalmente
-        window.remindersManager = this.remindersManager;
-        
-        console.log('✅ Sistema de recordatorios inicializado');
-      } else {
-        console.warn('⚠️ RemindersManager no encontrado');
+      // Verificar que el módulo esté disponible
+      if (typeof RemindersManager === 'undefined') {
+        console.warn('⚠️ RemindersManager no encontrado - continuando sin recordatorios');
+        return;
       }
+      
+      console.log('📋 Creando instancia de RemindersManager...');
+      this.remindersManager = new RemindersManager();
+      
+      // Hacer disponible globalmente
+      window.remindersManager = this.remindersManager;
+      
+      console.log('✅ Sistema de recordatorios inicializado correctamente');
     } catch (error) {
       console.error('❌ Error inicializando recordatorios:', error);
+      console.warn('⚠️ Continuando sin sistema de recordatorios');
+      // No lanzar el error para que la app continúe funcionando
+    }
+  }
+
+  // ===================================================
+  // UTILIDADES PARA NÚMEROS EN FORMATO LATINOAMERICANO
+  // ===================================================
+
+  /**
+   * Parsea un número en formato latinoamericano
+   * Acepta: 1.500,75 / 1,500.75 / 1500.75 / 1500,75 / 1500
+   */
+  parseLatinNumber(value) {
+    if (!value || typeof value !== 'string') return 0;
+    
+    // Limpiar espacios y validar que contiene solo números, puntos y comas
+    const cleanValue = value.trim().replace(/\s+/g, '');
+    if (!/^[\d.,]+$/.test(cleanValue)) return 0;
+    
+    // Contar puntos y comas
+    const dotCount = (cleanValue.match(/\./g) || []).length;
+    const commaCount = (cleanValue.match(/,/g) || []).length;
+    
+    let result;
+    
+    if (dotCount === 0 && commaCount === 0) {
+      // Solo números: 1500
+      result = parseFloat(cleanValue);
+    } else if (dotCount === 1 && commaCount === 0) {
+      // Solo punto: 1500.75 (formato US) o 1.500 (separador de miles EU)
+      const parts = cleanValue.split('.');
+      if (parts[1] && parts[1].length <= 2) {
+        // Decimal: 1500.75
+        result = parseFloat(cleanValue);
+      } else {
+        // Miles: 1.500 -> 1500
+        result = parseFloat(cleanValue.replace('.', ''));
+      }
+    } else if (dotCount === 0 && commaCount === 1) {
+      // Solo coma: 1500,75 (decimal EU) o 1,500 (separador de miles US poco común)
+      const parts = cleanValue.split(',');
+      if (parts[1] && parts[1].length <= 2) {
+        // Decimal: 1500,75 -> 1500.75
+        result = parseFloat(cleanValue.replace(',', '.'));
+      } else {
+        // Miles: 1,500 -> 1500
+        result = parseFloat(cleanValue.replace(',', ''));
+      }
+    } else if (dotCount > 0 && commaCount === 1) {
+      // Formato mixto: 1.500,75 (EU) o 1,500.75 (US)
+      const lastDotIndex = cleanValue.lastIndexOf('.');
+      const lastCommaIndex = cleanValue.lastIndexOf(',');
+      
+      if (lastCommaIndex > lastDotIndex) {
+        // Formato EU: 1.500,75
+        result = parseFloat(cleanValue.replace(/\./g, '').replace(',', '.'));
+      } else {
+        // Formato US: 1,500.75
+        result = parseFloat(cleanValue.replace(/,/g, ''));
+      }
+    } else {
+      // Casos complejos: múltiples separadores
+      // Asumir que el último es decimal
+      if (cleanValue.endsWith('.') || cleanValue.endsWith(',')) {
+        // Termina en separador, remover
+        result = parseFloat(cleanValue.slice(0, -1).replace(/[.,]/g, ''));
+      } else {
+        // Tomar los últimos 1-2 dígitos como decimales
+        const lastSeparatorIndex = Math.max(
+          cleanValue.lastIndexOf('.'),
+          cleanValue.lastIndexOf(',')
+        );
+        const beforeDecimal = cleanValue.substring(0, lastSeparatorIndex).replace(/[.,]/g, '');
+        const afterDecimal = cleanValue.substring(lastSeparatorIndex + 1);
+        
+        if (afterDecimal.length <= 2) {
+          result = parseFloat(`${beforeDecimal}.${afterDecimal}`);
+        } else {
+          result = parseFloat(beforeDecimal + afterDecimal);
+        }
+      }
+    }
+    
+    return isNaN(result) ? 0 : result;
+  }
+
+  /**
+   * Formatea un número al formato latinoamericano preferido
+   * Usa punto para miles y coma para decimales: 1.500,75
+   */
+  formatLatinNumber(number, decimals = 2) {
+    if (!number || isNaN(number)) return '0,00';
+    
+    const parts = number.toFixed(decimals).split('.');
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const decimalPart = parts[1];
+    
+    return decimals > 0 ? `${integerPart},${decimalPart}` : integerPart;
+  }
+
+  /**
+   * Valida si un string puede ser parseado como número
+   */
+  isValidNumber(value) {
+    if (!value || typeof value !== 'string') return false;
+    const cleanValue = value.trim().replace(/\s+/g, '');
+    return /^[\d.,]+$/.test(cleanValue) && this.parseLatinNumber(cleanValue) >= 0;
+  }
+
+  /**
+   * Configura validación en tiempo real para inputs numéricos
+   */
+  setupNumberInputValidation() {
+    const numberInputs = [
+      document.getElementById('valorTotalProducto'),
+      document.getElementById('modal-valor')
+    ];
+
+    numberInputs.forEach(input => {
+      if (!input) return;
+
+      // Validación en tiempo real mientras el usuario escribe
+      input.addEventListener('input', (e) => {
+        this.validateNumberInput(e.target);
+      });
+
+      // Validación al perder el foco
+      input.addEventListener('blur', (e) => {
+        this.validateNumberInput(e.target, true);
+      });
+
+      // Formatear valor al perder el foco
+      input.addEventListener('blur', (e) => {
+        const value = this.parseLatinNumber(e.target.value);
+        if (value > 0) {
+          e.target.value = this.formatLatinNumber(value);
+        }
+      });
+    });
+  }
+
+  /**
+   * Valida un input numérico y aplica clases CSS
+   */
+  validateNumberInput(input, strict = false) {
+    const value = input.value.trim();
+    const helpText = input.nextElementSibling;
+    
+    // Limpiar clases anteriores
+    input.classList.remove('error', 'valid');
+    
+    if (!value) {
+      if (strict) {
+        input.classList.add('error');
+        if (helpText && helpText.classList.contains('input-help')) {
+          helpText.textContent = 'Este campo es obligatorio';
+          helpText.style.color = '#dc3545';
+        }
+      }
+      return false;
+    }
+
+    const isValid = this.isValidNumber(value);
+    const numericValue = this.parseLatinNumber(value);
+    
+    if (!isValid || numericValue <= 0) {
+      input.classList.add('error');
+      if (helpText && helpText.classList.contains('input-help')) {
+        helpText.textContent = 'Formato inválido. Ej: 1.500,75 o 1,500.75';
+        helpText.style.color = '#dc3545';
+      }
+      return false;
+    } else {
+      input.classList.add('valid');
+      if (helpText && helpText.classList.contains('input-help')) {
+        helpText.textContent = `Valor: $${this.formatLatinNumber(numericValue)}`;
+        helpText.style.color = '#28a745';
+      }
+      return true;
     }
   }
 }
@@ -1336,9 +1594,59 @@ class CalculadoraCuotas {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     console.log('🟢 DOM cargado, creando aplicación JS...');
-    window.app = new CalculadoraCuotas();
+    setTimeout(() => {
+      try {
+        window.app = new CalculadoraCuotas();
+      } catch (error) {
+        console.error('❌ Error crítico inicializando aplicación:', error);
+        // Mostrar mensaje de error al usuario
+        const loading = document.getElementById('loadingIndicator');
+        if (loading) {
+          loading.innerHTML = `
+            <div style="text-align: center; color: #dc3545;">
+              <h3>❌ Error de Inicialización</h3>
+              <p>No se pudo cargar la aplicación correctamente.</p>
+              <p style="font-size: 14px; opacity: 0.8;">Error: ${error.message}</p>
+              <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                🔄 Recargar Página
+              </button>
+            </div>
+          `;
+        }
+      }
+    }, 100);
   });
 } else {
   console.log('🟢 DOM ya está cargado, creando aplicación JS...');
-  window.app = new CalculadoraCuotas();
+  setTimeout(() => {
+    try {
+      window.app = new CalculadoraCuotas();
+    } catch (error) {
+      console.error('❌ Error crítico inicializando aplicación:', error);
+      // Mostrar mensaje de error al usuario
+      const loading = document.getElementById('loadingIndicator');
+      if (loading) {
+        loading.innerHTML = `
+          <div style="text-align: center; color: #dc3545;">
+            <h3>❌ Error de Inicialización</h3>
+            <p>No se pudo cargar la aplicación correctamente.</p>
+            <p style="font-size: 14px; opacity: 0.8;">Error: ${error.message}</p>
+            <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+              🔄 Recargar Página
+            </button>
+          </div>
+        `;
+      }
+    }
+  }, 100);
 }
+
+// Timeout de emergencia global - Fuerza ocultar loading después de 3 segundos
+setTimeout(() => {
+  console.log('🚨 TIMEOUT DE EMERGENCIA - Forzando ocultado de loading');
+  const loading = document.getElementById('loadingIndicator');
+  if (loading && loading.style.display !== 'none') {
+    loading.style.display = 'none';
+    console.log('✅ Loading forzadamente ocultado por timeout de emergencia');
+  }
+}, 3000);
