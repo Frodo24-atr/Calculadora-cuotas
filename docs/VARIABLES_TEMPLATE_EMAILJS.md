@@ -60,11 +60,6 @@ Calculadora de Cuotas
 - **From Name:** `Calculadora de Cuotas`
 - **Subject:** `Recordatorio de Pago - {{product_name}}`
 
-### **IDs de Configuración Actuales:**
-- **Public Key:** `8c4l-rq7DsQF8ibja`
-- **Service ID:** `service_srur1ha`
-- **Template ID:** `template_z83t6tg` ✅
-
 ### **Contenido (HTML):**
 ```html
 <!DOCTYPE html>

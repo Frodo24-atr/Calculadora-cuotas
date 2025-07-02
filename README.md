@@ -1,110 +1,223 @@
-# 💰 Calculadora de Cuotas v2.0
+# 📊 Calculadora de Cuotas
 
-Una aplicación web moderna para gestionar productos y calcular cuotas con sistema de recordatorios automáticos.
+> **Aplicación web moderna para gestión inteligente de pagos mensuales con exportación PDF y recordatorios automáticos**
 
-## 🚀 Funcionalidades Principales
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Frodo24-atr/calculadora-cuotas)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](tsconfig.json)
+[![Vite](https://img.shields.io/badge/Vite-Powered-646CFF.svg)](vite.config.ts)
 
-### ✅ Gestión de Productos
-- ➕ Agregar productos con valor total y número de cuotas
-- ✏️ Editar productos existentes
+## 🚀 **Características Principales**
+
+### ✨ **Gestión de Productos**
+- ➕ Agregar productos con cuotas personalizadas
+- ✏️ Editar información de productos existentes
 - 🗑️ Eliminar productos con confirmación
-- 📊 Estadísticas y gráficos en tiempo real
+- 💾 Persistencia automática en localStorage
 
-### 🔔 Sistema de Recordatorios
-- **💬 WhatsApp**: Recordatorios automáticos por WhatsApp Web
-- **📧 Email**: Envío de recordatorios por correo electrónico
-- ⏰ Configuración personalizable (1, 3 o 7 días de anticipación)
-- 🗑️ Eliminación individual de recordatorios
-- 🗑️ Eliminación masiva de todos los recordatorios
-- 🤖 Verificación automática cada hora
+### 📊 **Visualización de Datos**
+- 📈 Gráficos interactivos con Chart.js
+- 📋 Estadísticas en tiempo real
+- 🎨 Diseño moderno y responsive
+- 🌈 Paleta de colores elegante
 
-### 📄 Exportación PDF
-- 📝 Resumen profesional con estadísticas
-- 📊 Gráfico de cuotas incluido
-- 🗂️ Desglose mensual detallado por tarjetas
-- 🎨 Colores consistentes con la interfaz
+### 📄 **Exportación PDF**
+- 🎨 Diseño minimalista y profesional
+- 📊 Reportes financieros detallados
+- 🗓️ Cronogramas de pagos mensuales
+- 💡 Consejos financieros inteligentes
 
-## 🛠️ Tecnologías Utilizadas
+### 📧 **Sistema de Recordatorios**
+- 📅 Recordatorios automáticos por email
+- ⚙️ Configuración personalizada de fechas
+- 📬 Integración con EmailJS
+- 🔔 Notificaciones inteligentes
 
-- **Frontend**: JavaScript ES6+, HTML5, CSS3
-- **Herramientas**: Vite, TypeScript, ESLint, Prettier
-- **Librerías**: Chart.js, jsPDF, EmailJS
-- **Estilos**: SCSS con variables y mixins
+## 🛠️ **Tecnologías Utilizadas**
 
-## 📁 Estructura del Proyecto
+### **Frontend**
+- **JavaScript/TypeScript** - Lógica de aplicación
+- **HTML5 + CSS3** - Estructura y estilos
+- **Vite** - Build tool y desarrollo
+- **Chart.js** - Gráficos interactivos
 
-```
-📦 calculadora-cuotas/
-├── 📂 src/                    # Código fuente principal
-│   ├── 📄 index.html         # Aplicación principal
-│   ├── 📂 config/            # Configuraciones
-│   ├── 📂 modules/           # Módulos JavaScript
-│   ├── 📂 scripts/           # Scripts principales
-│   └── 📂 styles/            # Estilos SCSS/CSS
-├── 📂 docs/                   # Documentación del proyecto
-├── 📂 tests/                  # Tests y archivos de desarrollo
-├── 📂 archive/                # Versiones anteriores
-├── 📂 legacy-backup/          # Respaldos legacy
-├── 📄 package.json           # Dependencias npm
-├── 📄 vite.config.ts         # Configuración Vite
-└── 📄 start-server.bat       # Servidor local para CORS
-```
+### **Funcionalidades**
+- **jsPDF** - Generación de documentos PDF
+- **EmailJS** - Envío de emails sin backend
+- **PWA Ready** - Instalable como aplicación
 
-## 🚀 Inicio Rápido
+### **Desarrollo**
+- **ESLint + Prettier** - Calidad de código
+- **SASS/SCSS** - Preprocesador CSS
+- **Express** - Servidor de desarrollo
 
-### Opción 1: Archivo Local (Recomendado para WhatsApp)
+## 📦 **Instalación y Uso**
+
+### **Prerrequisitos**
+- Node.js 16+ 
+- npm o yarn
+
+### **Instalación**
 ```bash
-# Abrir directamente
-./src/index.html
-```
+# Clonar el repositorio
+git clone https://github.com/Frodo24-atr/calculadora-cuotas.git
 
-### Opción 2: Servidor Local (Necesario para Email)
-```bash
-# Windows
-./start-server.bat
+# Navegar al directorio
+cd calculadora-cuotas
 
-# O manualmente
-python -m http.server 8000
-# Luego abrir: http://localhost:8000/src/
-```
-
-### Opción 3: Desarrollo con Vite
-```bash
+# Instalar dependencias
 npm install
-npm run dev
+
+# Configurar EmailJS (opcional)
+# Editar src/scripts/app.js con tus credenciales
 ```
 
-## ⚙️ Configuración de Recordatorios
+### **Desarrollo**
+```bash
+# Servidor de desarrollo
+npm run dev
+# Acceder a http://localhost:3000
 
-### 📧 Para usar Email (EmailJS):
-1. Crear cuenta en [emailjs.com](https://www.emailjs.com/)
-2. Configurar servicio y plantilla
-3. Completar `src/config/services.js`
+# Build para producción
+npm run build
 
-### 💬 Para WhatsApp:
-- ✅ Funciona inmediatamente
-- Solo requiere número con código de país
+# Preview del build
+npm run preview
+```
 
-## 🤝 Contribuir
+### **Uso Directo**
+Simplemente abre `index.html` en tu navegador para usar la aplicación sin servidor.
+
+## 🎯 **Cómo Usar**
+
+### 1. **Agregar Productos**
+```
+📱 Completa el formulario:
+   • Nombre del producto
+   • Valor total
+   • Número de cuotas
+   • Fecha de inicio
+```
+
+### 2. **Visualizar Datos**
+```
+📊 Dashboard automático:
+   • Estadísticas en tiempo real
+   • Gráficos interactivos
+   • Lista de productos activos
+```
+
+### 3. **Exportar PDF**
+```
+📄 Reporte completo:
+   • Portada con estadísticas
+   • Análisis de gráficos
+   • Cronograma mensual
+   • Consejos financieros
+```
+
+### 4. **Configurar Recordatorios**
+```
+📧 Email automático:
+   • Seleccionar productos
+   • Configurar frecuencia
+   • Personalizar mensaje
+```
+
+## 📁 **Estructura del Proyecto**
+
+```
+calculadora-cuotas/
+├── 📄 index.html                 # Página principal
+├── 📄 package.json              # Configuración npm
+├── 📄 vite.config.ts            # Configuración Vite
+├── 📄 tsconfig.json             # Configuración TypeScript
+├── 📁 src/                      # Código fuente
+│   ├── 📄 index.html            # HTML principal
+│   ├── 📁 scripts/              # JavaScript/TypeScript
+│   │   └── 📄 app.js           # Lógica principal
+│   ├── 📁 styles/              # Estilos SCSS
+│   └── 📁 assets/              # Recursos estáticos
+├── 📁 docs/                    # Documentación
+├── 📁 tests/                   # Archivos de prueba
+└── 📁 backup/                  # Copias de seguridad
+```
+
+## 🎨 **Capturas de Pantalla**
+
+### Dashboard Principal
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Exportación PDF
+![PDF Export](docs/screenshots/pdf-export.png)
+
+### Configuración de Recordatorios
+![Email Setup](docs/screenshots/email-setup.png)
+
+## ⚙️ **Configuración**
+
+### **EmailJS** (Para recordatorios)
+```javascript
+// En src/scripts/app.js
+const emailConfig = {
+  serviceId: 'TU_SERVICE_ID',
+  templateId: 'TU_TEMPLATE_ID', 
+  publicKey: 'TU_PUBLIC_KEY'
+};
+```
+
+### **Personalización**
+- Colores en `src/styles/variables.scss`
+- Plantillas PDF en `generatePDF()` 
+- Templates de email en EmailJS dashboard
+
+## 🔧 **Scripts Disponibles**
+
+```bash
+npm run dev      # Servidor de desarrollo
+npm run build    # Build para producción
+npm run preview  # Preview del build
+npm run lint     # Verificar código
+npm run format   # Formatear código
+npm start        # Servidor Express
+```
+
+## 🤝 **Contribuir**
 
 1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abrir Pull Request
+2. Crea tu rama (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-## 📝 Licencia
+## 📝 **Changelog**
 
-Este proyecto está bajo la Licencia MIT - ver [LICENSE](LICENSE) para detalles.
+### v1.0.0 (2025-07-01)
+- ✅ Versión inicial estable
+- ✅ Gestión completa de productos
+- ✅ Exportación PDF minimalista
+- ✅ Sistema de recordatorios por email
+- ✅ Gráficos interactivos
+- ✅ Diseño responsive moderno
 
-## 🏆 Características Destacadas
+## 📄 **Licencia**
 
-- 🎨 **Interfaz Moderna**: Diseño responsivo y profesional
-- ⚡ **Alto Rendimiento**: Carga rápida y operaciones optimizadas  
-- 🔒 **Datos Locales**: Toda la información se guarda en el navegador
-- 📱 **Móvil Friendly**: Funciona perfectamente en dispositivos móviles
-- 🌐 **Sin Servidor**: No requiere backend, funciona completamente en frontend
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+
+## 👤 **Autor**
+
+**Frodo24-atr**
+- GitHub: [@Frodo24-atr](https://github.com/Frodo24-atr)
+
+## 🙏 **Agradecimientos**
+
+- Chart.js por los gráficos increíbles
+- jsPDF por la generación de documentos
+- EmailJS por el sistema de emails
+- Vite por la experiencia de desarrollo
 
 ---
 
-**Desarrollado con ❤️ para simplificar la gestión de cuotas y pagos**
+⭐ **¡Dale una estrella si este proyecto te fue útil!**
+
+📧 **¿Tienes preguntas?** Abre un [issue](https://github.com/Frodo24-atr/calculadora-cuotas/issues)

@@ -311,14 +311,10 @@
                         </div>
                     </div>
                     
-                    <div class="reminders-controls" id="remindersControls" style="display: none;">
+                    <div class="reminders-controls" id="remindersControls" style="display: block;">
                         <button class="btn btn-success send-full-report-btn" onclick="sendFullReportEmail()" title="Envía un reporte completo con todos los productos y cuotas">
                             <i class="fas fa-file-alt"></i>
                             Enviar Reporte Completo
-                        </button>
-                        <button class="btn btn-info test-email-btn" onclick="testEmailReminder()" title="Envía un email de prueba con datos de ejemplo">
-                            <i class="fas fa-paper-plane"></i>
-                            Probar Email
                         </button>
                         <button class="btn btn-danger delete-all-btn" onclick="deleteAllReminders()">
                             <i class="fas fa-trash-alt"></i>
@@ -442,9 +438,12 @@
     <div id="notificationContainer" class="notification-container"></div>
 
     <!-- Scripts JavaScript -->
+    <!-- Cargar configuración de servicios primero -->
     <script src="./config/services.js"></script>
+    
+    <!-- Cargar scripts principales directamente -->
     <script src="./modules/reminders.js"></script>
-    <script type="module" src="./scripts/app.js"></script>
+    <script src="./scripts/app.js"></script>
     
     <!-- Script de navegación -->
     <script>
@@ -536,20 +535,17 @@
     <script>
         // Timeout de emergencia - fuerza ocultar loading después de 2 segundos
         setTimeout(() => {
-            console.log('🚨 TIMEOUT DE EMERGENCIA - Forzando ocultado de loading');
             const loading = document.getElementById('loadingIndicator');
-            if (loading) {
+            if (loading && loading.style.display !== 'none') {
                 loading.style.display = 'none';
-                console.log('✅ Loading forzadamente ocultado por timeout de emergencia');
+                console.log('✅ Loading ocultado por timeout de emergencia');
             }
         }, 2000);
         
         // Inicialización inmediata del loading
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🔄 DOM cargado - Inicializando timeout de loading');
             const loading = document.getElementById('loadingIndicator');
             if (loading) {
-                // Ocultar loading después de 1 segundo si no se ha ocultado ya
                 setTimeout(() => {
                     if (loading.style.display !== 'none') {
                         loading.style.display = 'none';

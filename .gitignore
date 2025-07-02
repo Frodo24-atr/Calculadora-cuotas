@@ -11,22 +11,25 @@ desktop.ini
 # Node modules y dependencias
 node_modules/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 dist/
+build/
+.vite/
 
 # IDEs y editores
-.vscode/settings.json
+.vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Carpetas de desarrollo (opcional - comentar si quieres incluirlas)
-# tests/development/
-# archive/
-
 # Archivos de configuración local
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Carpetas temporales
 temp/
@@ -34,3 +37,25 @@ tmp/
 
 # Archivos generados
 *.map
+*.tsbuildinfo
+
+# Coverage y testing
+coverage/
+.nyc_output/
+
+# Archivos de backup y desarrollo
+*.bak
+*.backup
+*_backup.*
+
+# Scripts temporales de desarrollo
+fix_*.js
+remove_*.js
+test_*.html
+debug_*.html
+
+# Logs
+logs/
+*.pid
+*.seed
+*.pid.lock

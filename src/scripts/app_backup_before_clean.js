@@ -780,7 +780,7 @@ class CalculadoraCuotas {
     // Subtítulo elegante
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
-    doc.text('Reporte Financiero Inteligente', 20, 48);
+    doc.text('� Reporte Financiero Inteligente', 20, 48);
     
     // Fecha estilizada
     doc.setFontSize(10);
@@ -791,7 +791,7 @@ class CalculadoraCuotas {
       month: 'long', 
       day: 'numeric' 
     });
-    doc.text(`Generado el ${dateStr}`, 20, 58);
+    doc.text(`�️ Generado el ${dateStr}`, 20, 58);
     
     // === VERIFICACIÓN DE PRODUCTOS ===
     if (this.state.products.length === 0) {
@@ -801,7 +801,7 @@ class CalculadoraCuotas {
       doc.setTextColor(...slate);
       doc.setFontSize(16);
       doc.setFont('helvetica', 'normal');
-      doc.text('No hay productos registrados', 25, 95);
+      doc.text('� No hay productos registrados', 25, 95);
       
       doc.setFontSize(11);
       doc.setTextColor(...silver);
@@ -811,7 +811,7 @@ class CalculadoraCuotas {
     
     // === MENSAJE DE BIENVENIDA PERSONALIZADO ===
     doc.setFillColor(...cream);
-    doc.rect(15, 75, 180, 20, 'F');
+    this.drawRoundedRect(doc, 15, 75, 180, 20, 6, 'F');
     
     doc.setTextColor(...charcoal);
     doc.setFontSize(11);
@@ -829,7 +829,7 @@ class CalculadoraCuotas {
     doc.setFontSize(15);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...navy);
-    doc.text('Panorama Financiero', 20, 110);
+    doc.text('� Panorama Financiero', 20, 110);
     
     // Línea decorativa
     doc.setDrawColor(...teal);
@@ -840,28 +840,28 @@ class CalculadoraCuotas {
     // Tarjetas de estadísticas modernas
     const stats = [
       { 
-        icon: 'PRODUCTOS',
+        emoji: '🏪',
         label: 'Productos activos', 
         value: this.state.products.length.toString(), 
         color: teal,
         unit: 'items'
       },
       { 
-        icon: 'INVERSIÓN',
+        emoji: '💎',
         label: 'Inversión total', 
         value: `$${totalValue.toLocaleString('es-CO')}`, 
         color: emerald,
         unit: 'COP'
       },
       { 
-        icon: 'MENSUAL',
+        emoji: '�',
         label: 'Compromiso mensual', 
         value: `$${Math.round(monthlyTotal).toLocaleString('es-CO')}`, 
         color: amber,
         unit: 'COP/mes'
       },
       { 
-        icon: 'PROMEDIO',
+        emoji: '�',
         label: 'Valor promedio', 
         value: `$${avgValue.toLocaleString('es-CO')}`, 
         color: violet,
@@ -881,7 +881,7 @@ class CalculadoraCuotas {
       // Borde colorido premium
       doc.setDrawColor(...stat.color);
       doc.setLineWidth(1.2);
-      doc.rect(x, y, 85, 32, 'S');
+      doc.rect(x, y, 85, 32);
       doc.setLineWidth(0.2);
       
       // Acento de color superior
@@ -891,9 +891,7 @@ class CalculadoraCuotas {
       // Emoji grande
       doc.setTextColor(...charcoal);
       doc.setFontSize(16);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'bold');
-      doc.text(stat.icon, x + 6, y + 15);
+      doc.text(stat.emoji, x + 6, y + 15);
       
       // Etiqueta descriptiva
       doc.setFontSize(7);
@@ -919,7 +917,7 @@ class CalculadoraCuotas {
     doc.setFontSize(15);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...navy);
-    doc.text('Cartera de Productos', 20, yPos);
+    doc.text('🛍️ Cartera de Productos', 20, yPos);
     
     // Línea decorativa
     doc.setDrawColor(...emerald);
@@ -933,7 +931,7 @@ class CalculadoraCuotas {
       if (yPos > 270) return;
       
       // Determinar emoji según el tipo de producto
-      let productType = this.getProductType(product.name);
+      let productEmoji = this.getProductEmoji(product.name);
       
       // Paleta de colores rotativos para productos
       const productColors = [teal, emerald, amber, coral, violet];
@@ -951,7 +949,7 @@ class CalculadoraCuotas {
       doc.setTextColor(...charcoal);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text(product.name, 28, yPos + 6);
+      doc.text(`${productEmoji} ${product.name}`, 28, yPos + 6);
       
       // Detalles financieros con colores específicos
       doc.setFontSize(8);
@@ -959,11 +957,11 @@ class CalculadoraCuotas {
       
       // Valor total
       doc.setTextColor(...emerald);
-      doc.text(`${product.totalValue.toLocaleString('es-CO')}`, 28, yPos + 10);
+      doc.text(`💰 $${product.totalValue.toLocaleString('es-CO')}`, 28, yPos + 10);
       
       // Cuotas
       doc.setTextColor(...amber);
-      doc.text(`${product.installments} pagos`, 85, yPos + 10);
+      doc.text(`📅 ${product.installments} pagos`, 85, yPos + 10);
       
       // Pago mensual
       doc.setTextColor(...coral);
@@ -984,7 +982,7 @@ class CalculadoraCuotas {
       doc.setTextColor(255, 255, 255);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.text('Consejo Inteligente:', 20, yPos + 6);
+      doc.text('💡 Consejo Inteligente:', 20, yPos + 6);
       
       doc.setFont('helvetica', 'normal');
       doc.text(`Reserva $${Math.round(monthlyTotal * 0.15).toLocaleString('es-CO')} mensuales para emergencias (15% de tus compromisos)`, 20, yPos + 11);
@@ -992,48 +990,48 @@ class CalculadoraCuotas {
   }
   
   // Función auxiliar para determinar emoji de producto
-  getProductType(productName) {
+  getProductEmoji(productName) {
     const name = productName.toLowerCase();
     
     // Tecnología
-    if (name.includes('laptop') || name.includes('computador') || name.includes('pc') || name.includes('macbook')) return 'TECH';
-    if (name.includes('celular') || name.includes('phone') || name.includes('móvil') || name.includes('iphone') || name.includes('samsung')) return 'PHONE';
-    if (name.includes('tablet') || name.includes('ipad')) return 'PHONE';
-    if (name.includes('tv') || name.includes('televisor') || name.includes('smart tv') || name.includes('pantalla')) return 'TV';
-    if (name.includes('playstation') || name.includes('xbox') || name.includes('gaming') || name.includes('nintendo')) return 'GAME';
-    if (name.includes('auriculares') || name.includes('headphones') || name.includes('audífonos')) return 'AUDIO';
-    if (name.includes('cámara') || name.includes('camera') || name.includes('gopro')) return 'CAMERA';
+    if (name.includes('laptop') || name.includes('computador') || name.includes('pc') || name.includes('macbook')) return '💻';
+    if (name.includes('celular') || name.includes('phone') || name.includes('móvil') || name.includes('iphone') || name.includes('samsung')) return '📱';
+    if (name.includes('tablet') || name.includes('ipad')) return '📱';
+    if (name.includes('tv') || name.includes('televisor') || name.includes('smart tv') || name.includes('pantalla')) return '📺';
+    if (name.includes('playstation') || name.includes('xbox') || name.includes('gaming') || name.includes('nintendo')) return '🎮';
+    if (name.includes('auriculares') || name.includes('headphones') || name.includes('audífonos')) return '🎧';
+    if (name.includes('cámara') || name.includes('camera') || name.includes('gopro')) return '📷';
     
     // Vehículos
-    if (name.includes('carro') || name.includes('auto') || name.includes('vehículo') || name.includes('toyota') || name.includes('chevrolet') || name.includes('ford')) return 'AUTO';
-    if (name.includes('moto') || name.includes('motocicleta') || name.includes('yamaha') || name.includes('honda')) return 'MOTO';
-    if (name.includes('bicicleta') || name.includes('bike')) return 'BIKE';
+    if (name.includes('carro') || name.includes('auto') || name.includes('vehículo') || name.includes('toyota') || name.includes('chevrolet') || name.includes('ford')) return '🚗';
+    if (name.includes('moto') || name.includes('motocicleta') || name.includes('yamaha') || name.includes('honda')) return '🏍️';
+    if (name.includes('bicicleta') || name.includes('bike')) return '�';
     
     // Hogar
-    if (name.includes('casa') || name.includes('apartamento') || name.includes('vivienda') || name.includes('inmueble')) return 'HOME';
-    if (name.includes('refrigerador') || name.includes('nevera') || name.includes('heladera')) return 'FRIDGE';
-    if (name.includes('lavadora') || name.includes('secadora')) return 'WASH';
-    if (name.includes('horno') || name.includes('microondas') || name.includes('estufa')) return 'COOK';
-    if (name.includes('sofá') || name.includes('mueble') || name.includes('cama')) return 'FURNITURE';
+    if (name.includes('casa') || name.includes('apartamento') || name.includes('vivienda') || name.includes('inmueble')) return '🏠';
+    if (name.includes('refrigerador') || name.includes('nevera') || name.includes('heladera')) return '🧊';
+    if (name.includes('lavadora') || name.includes('secadora')) return '🧺';
+    if (name.includes('horno') || name.includes('microondas') || name.includes('estufa')) return '🔥';
+    if (name.includes('sofá') || name.includes('mueble') || name.includes('cama')) return '🛋️';
     
     // Educación y trabajo
-    if (name.includes('curso') || name.includes('educación') || name.includes('capacitación') || name.includes('universidad')) return 'EDU';
-    if (name.includes('libro') || name.includes('manual')) return 'BOOK';
+    if (name.includes('curso') || name.includes('educación') || name.includes('capacitación') || name.includes('universidad')) return '🎓';
+    if (name.includes('libro') || name.includes('manual')) return '📚';
     
     // Salud y deporte
-    if (name.includes('bicicleta') || name.includes('gimnasio') || name.includes('deporte')) return 'SPORT';
-    if (name.includes('médico') || name.includes('salud') || name.includes('dental')) return 'HEALTH';
+    if (name.includes('bicicleta') || name.includes('gimnasio') || name.includes('deporte')) return '🏋️';
+    if (name.includes('médico') || name.includes('salud') || name.includes('dental')) return '🏥';
     
     // Viajes
-    if (name.includes('viaje') || name.includes('vacaciones') || name.includes('vuelo')) return 'TRAVEL';
-    if (name.includes('hotel') || name.includes('hospedaje')) return 'HOTEL';
+    if (name.includes('viaje') || name.includes('vacaciones') || name.includes('vuelo')) return '✈️';
+    if (name.includes('hotel') || name.includes('hospedaje')) return '🏨';
     
     // Servicios
-    if (name.includes('seguro') || name.includes('póliza')) return 'INSUR';
-    if (name.includes('internet') || name.includes('wifi') || name.includes('plan')) return 'NET';
+    if (name.includes('seguro') || name.includes('póliza')) return '🛡️';
+    if (name.includes('internet') || name.includes('wifi') || name.includes('plan')) return '🌐';
     
     // Default
-    return 'ITEM';
+    return '📦';
   }
 
   async generatePDFChartPage(doc) {
@@ -1052,11 +1050,11 @@ class CalculadoraCuotas {
     // === HEADER MODERNO ===
     // Fondo principal con esquinas redondeadas
     doc.setFillColor(...navy);
-    doc.rect(0, 0, 210, 50, 'F');
+    this.drawRoundedRect(doc, 0, 0, 210, 50, 8, 'F');
     
     // Acento decorativo superior
     doc.setFillColor(...teal);
-    doc.rect(0, 0, 210, 6, 'F');
+    this.drawRoundedRect(doc, 0, 0, 210, 6, 8, 'F');
     
     // Título principal
     doc.setTextColor(255, 255, 255);
@@ -1080,17 +1078,17 @@ class CalculadoraCuotas {
         
         // Marco elegante para el gráfico con esquinas redondeadas
         doc.setFillColor(...cream);
-        doc.rect(10, 60, 190, 125, 'F');
+        this.drawRoundedRect(doc, 10, 60, 190, 125, 6, 'F');
         
         // Borde decorativo con degradado simulado
         doc.setDrawColor(...teal);
         doc.setLineWidth(2);
-        doc.rect(10, 60, 190, 125, 'S');
+        this.drawRoundedRect(doc, 10, 60, 190, 125, 6, 'S');
         
         // Borde interno más sutil
         doc.setDrawColor(...silver);
         doc.setLineWidth(0.5);
-        doc.rect(15, 65, 180, 115, 'S');
+        this.drawRoundedRect(doc, 15, 65, 180, 115, 4, 'S');
         doc.setLineWidth(0.2);
         
         // Añadir imagen del gráfico
@@ -1098,7 +1096,7 @@ class CalculadoraCuotas {
         
         // === INFORMACIÓN CONTEXTUAL ===
         doc.setFillColor(...teal);
-        doc.rect(15, 190, 180, 8, 'F');
+        this.drawRoundedRect(doc, 15, 190, 180, 8, 4, 'F');
         
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(9);
@@ -1110,11 +1108,11 @@ class CalculadoraCuotas {
         
         // Diseño de error elegante con esquinas redondeadas
         doc.setFillColor(...cream);
-        doc.rect(15, 70, 180, 80, 'F');
+        this.drawRoundedRect(doc, 15, 70, 180, 80, 6, 'F');
         
         doc.setDrawColor(...coral);
         doc.setLineWidth(1.5);
-        doc.rect(15, 70, 180, 80, 'S');
+        this.drawRoundedRect(doc, 15, 70, 180, 80, 6, 'S');
         doc.setLineWidth(0.2);
         
         doc.setTextColor(...coral);
@@ -1130,7 +1128,7 @@ class CalculadoraCuotas {
         
         // Consejo útil con esquinas redondeadas
         doc.setFillColor(...amber);
-        doc.rect(25, 135, 150, 10, 'F');
+        this.drawRoundedRect(doc, 25, 135, 150, 10, 4, 'F');
         
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(8);
@@ -1140,11 +1138,11 @@ class CalculadoraCuotas {
     } else {
       // Diseño cuando no hay gráfico con esquinas redondeadas
       doc.setFillColor(...cream);
-      doc.rect(15, 70, 180, 80, 'F');
+      this.drawRoundedRect(doc, 15, 70, 180, 80, 6, 'F');
       
       doc.setDrawColor(...silver);
       doc.setLineWidth(1);
-      doc.rect(15, 70, 180, 80, 'S');
+      this.drawRoundedRect(doc, 15, 70, 180, 80, 6, 'S');
       doc.setLineWidth(0.2);
       
       doc.setTextColor(...slate);
@@ -1163,7 +1161,7 @@ class CalculadoraCuotas {
     
     // Título de insights con esquinas redondeadas
     doc.setFillColor(...violet);
-    doc.rect(15, yPos, 180, 12, 'F');
+    this.drawRoundedRect(doc, 15, yPos, 180, 12, 6, 'F');
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(12);
@@ -1214,11 +1212,11 @@ class CalculadoraCuotas {
     // === NOTA DE NAVEGACIÓN ===
     yPos += 40;
     doc.setFillColor(...cream);
-    doc.rect(15, yPos, 180, 15, 'F');
+    this.drawRoundedRect(doc, 15, yPos, 180, 15, 6, 'F');
     
     doc.setDrawColor(...teal);
     doc.setLineWidth(0.8);
-    doc.rect(15, yPos, 180, 15, 'S');
+    this.drawRoundedRect(doc, 15, yPos, 180, 15, 6, 'S');
     doc.setLineWidth(0.2);
     
     doc.setTextColor(...teal);
@@ -1259,7 +1257,7 @@ class CalculadoraCuotas {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);
     doc.setFont('helvetica', 'light');
-    doc.text('Cronograma Financiero', 20, 25);
+    doc.text('📅 Cronograma Financiero', 20, 25);
     
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -1284,7 +1282,7 @@ class CalculadoraCuotas {
       
       doc.setDrawColor(...emerald);
       doc.setLineWidth(1);
-      doc.rect(15, yPos, 180, 25, 'S');
+      doc.rect(15, yPos, 180, 25);
       doc.setLineWidth(0.2);
       
       // Línea superior decorativa
@@ -1294,20 +1292,20 @@ class CalculadoraCuotas {
       doc.setTextColor(...charcoal);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text('Resumen del Cronograma', 20, yPos + 10);
+      doc.text('📊 Resumen del Cronograma', 20, yPos + 10);
       
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...slate);
       
       // Estadísticas en línea
-      doc.text(`${totalMonths} meses programados`, 20, yPos + 16);
-      doc.text(`Promedio: ${Math.round(avgMonthly).toLocaleString('es-CO')}`, 65, yPos + 16);
-      doc.text(`Máximo: ${Math.round(maxMonth).toLocaleString('es-CO')}`, 120, yPos + 16);
-      doc.text(`Mínimo: ${Math.round(minMonth).toLocaleString('es-CO')}`, 170, yPos + 16);
+      doc.text(`📈 ${totalMonths} meses programados`, 20, yPos + 16);
+      doc.text(`� Promedio: $${Math.round(avgMonthly).toLocaleString('es-CO')}`, 65, yPos + 16);
+      doc.text(`⬆️ Máximo: $${Math.round(maxMonth).toLocaleString('es-CO')}`, 120, yPos + 16);
+      doc.text(`⬇️ Mínimo: $${Math.round(minMonth).toLocaleString('es-CO')}`, 170, yPos + 16);
       
       doc.setTextColor(...emerald);
-      doc.text(`Organización inteligente para ${totalMonths} meses de compromisos`, 20, yPos + 21);
+      doc.text(`🎯 Organización inteligente para ${totalMonths} meses de compromisos`, 20, yPos + 21);
       
       yPos += 35;
     }
@@ -1327,7 +1325,7 @@ class CalculadoraCuotas {
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(14);
         doc.setFont('helvetica', 'normal');
-        doc.text(`Cronograma - Página ${currentPage}`, 20, 16);
+        doc.text(`📅 Cronograma - Página ${currentPage}`, 20, 16);
         
         doc.setTextColor(...charcoal);
         yPos = 35;
@@ -1345,7 +1343,7 @@ class CalculadoraCuotas {
       
       doc.setDrawColor(...silver);
       doc.setLineWidth(1);
-      doc.rect(15, yPos, 180, 50, 'S');
+      doc.rect(15, yPos, 180, 50);
       doc.setLineWidth(0.2);
       
       doc.setTextColor(...slate);
@@ -1398,7 +1396,7 @@ class CalculadoraCuotas {
     // === BORDE MODERNO ===
     doc.setDrawColor(...cardColor);
     doc.setLineWidth(0.8);
-    doc.rect(x, y, cardWidth, cardHeight, 'S');
+    doc.rect(x, y, cardWidth, cardHeight);
     doc.setLineWidth(0.2);
     
     // === BANDA LATERAL COLORIDA ===
@@ -1420,8 +1418,7 @@ class CalculadoraCuotas {
     doc.setTextColor(...charcoal);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text('FECHA', x + 8, y + 11);
+    doc.text('📅', x + 12, y + 11);
     doc.text(monthName, x + 20, y + 11);
     
     // Total del mes con estilo destacado
@@ -1443,8 +1440,8 @@ class CalculadoraCuotas {
     for (let i = 0; i < maxProducts; i++) {
       const product = monthData.products[i];
       
-      // Tipo del producto usando la función auxiliar
-      const productType = this.getProductType(product.name);
+      // Emoji del producto usando la función auxiliar
+      const emoji = this.getProductEmoji(product.name);
       
       // Nombre del producto (optimizado)
       const maxLength = 28;
@@ -1453,7 +1450,7 @@ class CalculadoraCuotas {
       
       // Información del producto
       doc.setTextColor(...charcoal);
-      doc.text(productName, x + 12, productY);
+      doc.text(`${emoji} ${productName}`, x + 12, productY);
       
       // Detalles financieros con colores
       doc.setTextColor(...silver);
@@ -1531,7 +1528,7 @@ class CalculadoraCuotas {
     
     doc.setDrawColor(...violet);
     doc.setLineWidth(1);
-    doc.rect(15, yPos, 180, 30, 'S');
+    doc.rect(15, yPos, 180, 30);
     doc.setLineWidth(0.2);
     
     // Línea superior decorativa
@@ -1551,7 +1548,7 @@ class CalculadoraCuotas {
     doc.text(`💰 Compromiso mensual promedio: $${Math.round(totalMonthly).toLocaleString('es-CO')}`, 20, yPos + 19);
     doc.text(`📦 ${totalProducts} productos en tu portafolio`, 20, yPos + 25);
     doc.text(`💎 Inversión total: $${totalInvestment.toLocaleString('es-CO')}`, 110, yPos + 19);
-    doc.text(`${monthlyData.length} meses de planificación`, 110, yPos + 25);
+    doc.text(`📅 ${monthlyData.length} meses de planificación`, 110, yPos + 25);
     
     yPos += 40;
     
@@ -1618,7 +1615,7 @@ class CalculadoraCuotas {
       // Borde colorido
       doc.setDrawColor(...tip.color);
       doc.setLineWidth(1);
-      doc.rect(x, y, 85, 28, 'S');
+      doc.rect(x, y, 85, 28);
       doc.setLineWidth(0.2);
       
       // Acento lateral
@@ -1677,7 +1674,7 @@ class CalculadoraCuotas {
     
     doc.setDrawColor(...teal);
     doc.setLineWidth(0.5);
-    doc.rect(15, yPos, 180, 20, 'S');
+    doc.rect(15, yPos, 180, 20);
     doc.setLineWidth(0.2);
     
     doc.setTextColor(...teal);
@@ -1737,7 +1734,7 @@ class CalculadoraCuotas {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`💰 Pago mensual promedio: $${Math.round(totalMonthly).toLocaleString('es-CO')}`, 20, yPos + 18);
-    doc.text(`Meses con pagos: ${monthlyData.length}`, 110, yPos + 18);
+    doc.text(`📅 Meses con pagos: ${monthlyData.length}`, 110, yPos + 18);
     
     yPos += 35;
     
@@ -1773,7 +1770,7 @@ class CalculadoraCuotas {
       // Borde sutil colorido
       doc.setDrawColor(...tip.color);
       doc.setLineWidth(0.8);
-      doc.rect(15, yPos, 180, 20, 'S');
+      doc.rect(15, yPos, 180, 20);
       doc.setLineWidth(0.2);
       
       // Emoji y título
@@ -2644,11 +2641,11 @@ class CalculadoraCuotas {
         doc.roundedRect(x, y, width, height, radius, radius, style);
       } else {
         // Fallback: dibujar rectángulo normal
-        this.drawRoundedRect(doc, x, y, width, height, style, 4, 'S');
+        doc.rect(x, y, width, height, style);
       }
     } catch (error) {
       // Si hay error, usar rectángulo normal
-      this.drawRoundedRect(doc, x, y, width, height, style, 4, 'S');
+      doc.rect(x, y, width, height, style);
     }
   }
   
