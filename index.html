@@ -1,191 +1,559 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora de Cuotas</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#3f51b5">
-  <link rel="icon" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="service-worker" href="service-worker.js">
-  <link rel="manifest" href="manifest.json">
-  <meta name="description" content="Calculadora de cuotas para productos con pagos mensuales
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #f5f5f5;
-      padding: 10rem;
-      color: #333;
-    }
-    .card {
-      background: white;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    .form-group input, .form-group button {
-      width: 100%;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    h1, h2, h3 {
-      color: #3f51b5;
-    }
-    ul {
-      padding-left: 1rem;
-    }
-    .delete-btn {
-      color: red;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    button.export {
-      background: #3f51b5;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 0.5rem 1rem;
-      margin-top: 1rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Calculadora de Cuotas v2.0</title>
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="./src/styles/fallback.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-  <h1>Calculadora de Cuotas</h1>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-calculator"></i>
+                <span>Calculadora de Cuotas</span>
+            </div>
+            
+            <!-- Menú Desktop -->
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#products" class="nav-link">
+                        <i class="fas fa-box"></i>
+                        <span>Productos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#statistics" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Estadísticas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#reminders" class="nav-link">
+                        <i class="fas fa-bell"></i>
+                        <span>Recordatorios</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#export" class="nav-link">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Exportar</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Hamburger Menu -->
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
 
-  <div class="card">
-    <form id="form-producto">
-      <div class="form-group">
-        <label>Nombre del producto:<br><input type="text" id="nombre" required></label>
-      </div>
-      <div class="form-group">
-        <label>Fecha de inicio:<br><input type="date" id="fecha" required></label>
-      </div>
-      <div class="form-group">
-        <label>Precio total:<br><input type="number" id="precio" required></label>
-      </div>
-      <div class="form-group">
-        <label>Cantidad de cuotas:<br><input type="number" id="cuotas" required></label>
-      </div>
-      <div class="form-group">
-        <button type="submit">Agregar producto</button>
-      </div>
-    </form>
-  </div>
+    <!-- Overlay para móvil -->
+    <div class="nav-overlay"></div>
 
-  <div class="card">
-    <h2>Resumen de productos</h2>
-    <div id="lista-productos"></div>
-  </div>
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Cargando aplicación...</p>
+        </div>
+    </div>
 
-  <div class="card">
-    <h3>Resumen mensual</h3>
-    <ul id="resumen-mensual"></ul>
-    <button class="export" onclick="exportarCSV()">Exportar CSV</button>
-  </div>
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Sección: Agregar Productos -->
+        <section id="products" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-plus-circle"></i> Agregar Producto</h2>
+                    <p>Gestiona tus productos y cuotas de manera sencilla</p>
+                </div>
+                
+                <div class="form-section">
+                    <form id="productForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="nombreProducto">
+                                    <i class="fas fa-tag"></i>
+                                    Nombre del Producto
+                                </label>
+                                <input type="text" id="nombreProducto" placeholder="Ej: Laptop, Celular, etc." required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="valorTotalProducto">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    Valor Total
+                                </label>
+                                <input type="text" id="valorTotalProducto" placeholder="ej: 1.500,75 o 1,500.75" required>
+                                <small class="input-help">Acepta formato con punto o coma decimal</small>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="numeroCuotas">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Número de Cuotas
+                                </label>
+                                <input type="number" id="numeroCuotas" placeholder="12" min="1" max="60" required>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="fechaInicio">
+                                    <i class="fas fa-calendar-day"></i>
+                                    Fecha de Inicio
+                                </label>
+                                <input type="date" id="fechaInicio" required>
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="btnAgregarProducto" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Agregar Producto
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Lista de Productos -->
+                <div class="products-list">
+                    <div class="list-header">
+                        <h3><i class="fas fa-list"></i> Productos Registrados</h3>
+                        <button id="btnBorrarTodo" class="btn btn-danger" style="display: none;">
+                            <i class="fas fa-trash-alt"></i>
+                            Eliminar Todos
+                        </button>
+                    </div>
+                    <div id="listaProductos" class="lista-productos">
+                        <p class="no-products">No hay productos registrados. ¡Agrega tu primer producto arriba! 🚀</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-  <script>
-    let productos = JSON.parse(localStorage.getItem('productos')) || [];
+        <!-- Sección: Estadísticas -->
+        <section id="statistics" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> Estadísticas y Gráficos</h2>
+                    <p>Visualiza el progreso de tus pagos y estadísticas</p>
+                </div>
+                
+                <!-- Estadísticas Rápidas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalProductos">0</h3>
+                            <p>Total Productos</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="valorTotal">$0</h3>
+                            <p>Valor Total</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-week"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="promedioMensual">$0</h3>
+                            <p>Promedio Mensual</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="proximoMes">$0</h3>
+                            <p>Próximo Mes</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfico -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-bar"></i> Gráfico de Cuotas</h3>
+                        <div class="chart-controls">
+                            <!-- Controles de tipo de gráfico -->
+                            <div class="chart-type-controls">
+                                <button class="chart-type-btn active" data-type="bar" title="Gráfico de Barras">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                                <button class="chart-type-btn" data-type="line" title="Gráfico de Líneas">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                                <button class="chart-type-btn" data-type="area" title="Gráfico de Área">
+                                    <i class="fas fa-chart-area"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Controles de tiempo -->
+                            <div class="time-range-controls">
+                                <button class="time-range-btn active" data-range="all">
+                                    <i class="fas fa-globe"></i>
+                                    Todo
+                                </button>
+                                <button class="time-range-btn" data-range="6m">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    6 Meses
+                                </button>
+                                <button class="time-range-btn" data-range="3m">
+                                    <i class="fas fa-calendar"></i>
+                                    3 Meses
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <!-- Mensaje cuando no hay productos -->
+                        <div id="chartMessage" class="chart-empty-message">
+                            <div class="empty-chart-content">
+                                <i class="fas fa-chart-pie"></i>
+                                <h4>📊 ¡Agrega un producto para visualizar el gráfico!</h4>
+                                <p>Una vez que agregues productos, podrás ver aquí el análisis de tus cuotas mensuales</p>
+                            </div>
+                        </div>
+                        <canvas id="gastosChart" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    document.getElementById('form-producto').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const nombre = document.getElementById('nombre').value;
-      const fecha = new Date(document.getElementById('fecha').value);
-      const precio = parseFloat(document.getElementById('precio').value);
-      const cuotas = parseInt(document.getElementById('cuotas').value);
-      const mensualidad = +(precio / cuotas).toFixed(2);
+        <!-- Sección: Recordatorios -->
+        <section id="reminders" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-bell"></i> Sistema de Recordatorios</h2>
+                    <p>Configura recordatorios automáticos por email</p>
+                </div>
+                
+                <!-- Configuración de Email -->
+                <div class="recordatorios-grid">
+                    <div class="recordatorio-card email-card">
+                        <div class="recordatorio-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h4>Recordatorios por Email</h4>
+                        <p>Recibe notificaciones automáticas en tu correo</p>
+                        
+                        <div class="recordatorio-input-group">
+                            <label for="emailAddress">
+                                <i class="fas fa-at"></i>
+                                Correo electrónico:
+                            </label>
+                            <input type="email" id="emailAddress" placeholder="tu@email.com" class="recordatorio-input">
+                        </div>
+                        
+                        <div class="recordatorio-config">
+                            <label for="emailDays">
+                                <i class="fas fa-clock"></i>
+                                Recordar con:
+                            </label>
+                            <select id="emailDays" class="recordatorio-select">
+                                <option value="1">1 día de anticipación</option>
+                                <option value="3" selected>3 días de anticipación</option>
+                                <option value="7">1 semana de anticipación</option>
+                            </select>
+                        </div>
+                        
+                        <button class="recordatorio-btn email-btn" onclick="setupEmailReminder()">
+                            <i class="fas fa-check"></i>
+                            Configurar Email
+                        </button>
+                    </div>
+                </div>
 
-      productos.push({ nombre, fecha: fecha.toISOString(), precio, cuotas, mensualidad });
-      localStorage.setItem('productos', JSON.stringify(productos));
-      document.getElementById('form-producto').reset();
-      mostrarProductos();
-      calcularPagosMensuales();
-    });
+                <!-- Estado de Recordatorios -->
+                <div class="recordatorios-status">
+                    <h4><i class="fas fa-info-circle"></i> Estado de Configuración</h4>
+                    <div class="status-grid">
+                        <div class="status-item email-status">
+                            <span class="status-icon">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <span class="status-text" id="emailStatus">No configurado</span>
+                        </div>
+                    </div>
+                    
+                    <div class="next-reminders">
+                        <h5><i class="fas fa-calendar-check"></i> Próximos recordatorios:</h5>
+                        <div id="nextReminders" class="reminders-list">
+                            <p>No hay recordatorios programados</p>
+                        </div>
+                    </div>
+                    
+                    <div class="reminders-controls" id="remindersControls" style="display: block;">
+                        <button class="btn btn-success send-full-report-btn" onclick="sendFullReportEmail()" title="Envía un reporte completo con todos los productos y cuotas">
+                            <i class="fas fa-file-alt"></i>
+                            Enviar Reporte Completo
+                        </button>
+                        <button class="btn btn-danger delete-all-btn" onclick="deleteAllReminders()">
+                            <i class="fas fa-trash-alt"></i>
+                            Eliminar Todos los Recordatorios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    function mostrarProductos() {
-      const contenedor = document.getElementById('lista-productos');
-      contenedor.innerHTML = '';
-      productos.forEach((prod, index) => {
-        const fechaInicio = new Date(prod.fecha);
-        const fin = new Date(fechaInicio);
-        fin.setMonth(fin.getMonth() + prod.cuotas - 1);
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <strong>${prod.nombre}</strong><br>
-          Precio: $${prod.precio}<br>
-          Cuotas: ${prod.cuotas} x $${prod.mensualidad}<br>
-          Fecha inicio: ${fechaInicio.toISOString().split('T')[0]}<br>
-          Termina: ${fin.toISOString().split('T')[0]}<br>
-          <span class="delete-btn" onclick="eliminarProducto(${index})">Eliminar</span>
-        `;
-        contenedor.appendChild(div);
-      });
-    }
+        <!-- Sección: Exportar PDF -->
+        <section id="export" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-pdf"></i> Exportar Reporte</h2>
+                    <p>Descarga un resumen completo en formato PDF</p>
+                </div>
+                
+                <div class="pdf-download-section">
+                    <div class="pdf-download-background"></div>
+                    <div class="pdf-download-content">
+                        <div class="pdf-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <h3>Reporte PDF Completo</h3>
+                        <p>Incluye estadísticas, gráficos y desglose mensual detallado</p>
+                        <ul class="pdf-features">
+                            <li><i class="fas fa-check"></i> Resumen de todos los productos</li>
+                            <li><i class="fas fa-check"></i> Gráfico de cuotas mensuales</li>
+                            <li><i class="fas fa-check"></i> Estadísticas detalladas</li>
+                            <li><i class="fas fa-check"></i> Desglose por tarjetas mensuales</li>
+                        </ul>
+                        <button id="btnDescargarPDF" class="btn btn-success pdf-download-btn">
+                            <i class="fas fa-download"></i>
+                            Descargar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    function calcularPagosMensuales() {
-      const resumenMensual = {};
-      productos.forEach(prod => {
-        let fecha = new Date(prod.fecha);
-        for (let i = 0; i < prod.cuotas; i++) {
-          const clave = `${fecha.getFullYear()}-${(fecha.getMonth()+1).toString().padStart(2, '0')}`;
-          resumenMensual[clave] = (resumenMensual[clave] || 0) + prod.mensualidad;
-          fecha.setMonth(fecha.getMonth() + 1);
-        }
-      });
-      const resumen = document.getElementById('resumen-mensual');
-      resumen.innerHTML = '';
-      const ordenado = Object.keys(resumenMensual).sort();
-      ordenado.forEach(mes => {
-        resumen.innerHTML += `<li><strong>${mes}</strong>: $${resumenMensual[mes].toFixed(2)}</li>`;
-      });
-    }
+    <!-- Mensaje de resultado -->
+    <div id="resultado" class="resultado"></div>
 
-    function eliminarProducto(index) {
-      productos.splice(index, 1);
-      localStorage.setItem('productos', JSON.stringify(productos));
-      mostrarProductos();
-      calcularPagosMensuales();
-    }
+    <!-- Modal de Edición -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> Editar Producto</h3>
+                <span id="closeEditModal" class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="modal-nombre">
+                        <i class="fas fa-tag"></i>
+                        Nombre del Producto:
+                    </label>
+                    <input type="text" id="modal-nombre" required>
+                </div>
+                <div class="input-group">
+                    <label for="modal-valor">
+                        <i class="fas fa-dollar-sign"></i>
+                        Valor Total:
+                    </label>
+                    <input type="text" id="modal-valor" placeholder="ej: 1.500,75 o 1,500.75" required>
+                    <small class="input-help">Acepta formato con punto o coma decimal</small>
+                </div>
+                <div class="input-group">
+                    <label for="modal-cuotas">
+                        <i class="fas fa-calendar-alt"></i>
+                        Número de Cuotas:
+                    </label>
+                    <input type="number" id="modal-cuotas" required>
+                </div>
+                <div class="input-group">
+                    <label for="modal-fecha">
+                        <i class="fas fa-calendar-day"></i>
+                        Fecha de Inicio:
+                    </label>
+                    <input type="date" id="modal-fecha" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelEdit" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button id="btnSaveEdit" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
 
-    function exportarCSV() {
-      let csv = 'Mes,Total Mensual\n';
-      let pagos = {};
-      productos.forEach(prod => {
-        let fecha = new Date(prod.fecha);
-        for (let i = 0; i < prod.cuotas; i++) {
-          const clave = `${fecha.getFullYear()}-${(fecha.getMonth()+1).toString().padStart(2, '0')}`;
-          pagos[clave] = (pagos[clave] || 0) + prod.mensualidad;
-          fecha.setMonth(fecha.getMonth() + 1);
-        }
-      });
-      Object.keys(pagos).sort().forEach(k => {
-        csv += `${k},${pagos[k].toFixed(2)}\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'resumen_mensual.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h3>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar el producto "<span id="confirm-product-name"></span>"?</p>
+                <p class="warning-text">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelDelete" class="btn btn-secondary confirm-btn-cancel">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button id="btnConfirmDelete" class="btn btn-danger confirm-btn-delete">
+                    <i class="fas fa-trash"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').then(() => {
-        console.log('Service Worker registrado');
-      });
-    }
+    <!-- Sistema de Notificaciones Flotantes -->
+    <div id="notificationContainer" class="notification-container"></div>
 
-    mostrarProductos();
-    calcularPagosMensuales();
-  </script>
+    <!-- Scripts JavaScript -->
+    <!-- Cargar configuración de servicios primero -->
+    <script src="./src/config/services.js"></script>
+    
+    <!-- Cargar scripts principales directamente -->
+    <script src="./src/modules/reminders.js"></script>
+    <script src="./src/scripts/app.js"></script>
+    
+    <!-- Script de navegación -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.querySelector('.hamburger');
+            const navMenu = document.querySelector('.nav-menu');
+            const navOverlay = document.querySelector('.nav-overlay');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            // Toggle menú móvil
+            hamburger.addEventListener('click', function() {
+                hamburger.classList.toggle('active');
+                navMenu.classList.toggle('active');
+                navOverlay.classList.toggle('active');
+                document.body.classList.toggle('nav-open');
+            });
+
+            // Cerrar menú al hacer clic en overlay
+            navOverlay.addEventListener('click', function() {
+                closeMenu();
+            });
+
+            // Cerrar menú al hacer clic en un enlace
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    
+                    if (targetSection) {
+                        targetSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                    
+                    closeMenu();
+                    
+                    // Actualizar enlace activo
+                    navLinks.forEach(l => l.parentElement.classList.remove('active'));
+                    this.parentElement.classList.add('active');
+                });
+            });
+
+            // Función para cerrar menú
+            function closeMenu() {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+                navOverlay.classList.remove('active');
+                document.body.classList.remove('nav-open');
+            }
+
+            // Cerrar menú al scroll en móvil
+            let isScrolling = false;
+            window.addEventListener('scroll', function() {
+                if (!isScrolling && window.innerWidth <= 768) {
+                    isScrolling = true;
+                    closeMenu();
+                    setTimeout(() => {
+                        isScrolling = false;
+                    }, 100);
+                }
+            });
+
+            // Actualizar enlace activo al hacer scroll
+            window.addEventListener('scroll', function() {
+                const sections = document.querySelectorAll('.section');
+                const scrollPos = window.scrollY + 100;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.offsetHeight;
+                    const sectionId = section.getAttribute('id');
+
+                    if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                        navLinks.forEach(link => {
+                            link.parentElement.classList.remove('active');
+                            if (link.getAttribute('href') === '#' + sectionId) {
+                                link.parentElement.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <!-- Timeout de emergencia para evitar cuelgues -->
+    <script>
+        // Timeout de emergencia - fuerza ocultar loading después de 2 segundos
+        setTimeout(() => {
+            const loading = document.getElementById('loadingIndicator');
+            if (loading && loading.style.display !== 'none') {
+                loading.style.display = 'none';
+                console.log('✅ Loading ocultado por timeout de emergencia');
+            }
+        }, 2000);
+        
+        // Inicialización inmediata del loading
+        document.addEventListener('DOMContentLoaded', () => {
+            const loading = document.getElementById('loadingIndicator');
+            if (loading) {
+                setTimeout(() => {
+                    if (loading.style.display !== 'none') {
+                        loading.style.display = 'none';
+                        console.log('✅ Loading ocultado por timeout DOM');
+                    }
+                }, 1000);
+            }
+        });
+    </script>
 </body>
 </html>
