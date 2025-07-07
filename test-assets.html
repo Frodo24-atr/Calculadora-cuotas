@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Assets - Calculadora de Cuotas</title>
+    <link rel="stylesheet" href="./styles/fallback.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .test-item { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test de Carga de Assets - Vercel</h1>
+    <p>Esta página verifica que todos los assets estáticos se cargan correctamente en Vercel.</p>
+    
+    <div id="results">
+        <div class="test-item loading">
+            <h3>📄 CSS (fallback.css)</h3>
+            <p id="css-status">Verificando...</p>
+        </div>
+        
+        <div class="test-item loading">
+            <h3>📜 JavaScript (app.js)</h3>
+            <p id="js-status">Verificando...</p>
+        </div>
+        
+        <div class="test-item loading">
+            <h3>⚙️ Config (services.js)</h3>
+            <p id="config-status">Verificando...</p>
+        </div>
+        
+        <div class="test-item loading">
+            <h3>📦 Modules (reminders.js)</h3>
+            <p id="modules-status">Verificando...</p>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <h2>🚀 Acciones</h2>
+        <button onclick="window.location.href='/'" style="padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Ir a la Aplicación Principal
+        </button>
+    </div>
+
+    <script>
+        function updateStatus(elementId, message, isSuccess) {
+            const element = document.getElementById(elementId);
+            const parent = element.parentElement;
+            parent.className = `test-item ${isSuccess ? 'success' : 'error'}`;
+            element.textContent = message;
+        }
+
+        function testAsset(url, statusId, name) {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                
+                script.onload = () => {
+                    updateStatus(statusId, `✅ ${name} cargado correctamente`, true);
+                    document.head.removeChild(script);
+                    resolve(true);
+                };
+                
+                script.onerror = () => {
+                    updateStatus(statusId, `❌ Error al cargar ${name}`, false);
+                    document.head.removeChild(script);
+                    resolve(false);
+                };
+                
+                script.src = url + '?t=' + Date.now();
+                document.head.appendChild(script);
+            });
+        }
+
+        function testCSS() {
+            // Test CSS by checking if it loaded
+            const sheets = document.styleSheets;
+            let cssLoaded = false;
+            
+            for (let i = 0; i < sheets.length; i++) {
+                try {
+                    if (sheets[i].href && sheets[i].href.includes('fallback.css')) {
+                        cssLoaded = true;
+                        break;
+                    }
+                } catch (e) {
+                    // Cross-origin or other error
+                }
+            }
+            
+            if (cssLoaded) {
+                updateStatus('css-status', '✅ CSS cargado correctamente', true);
+            } else {
+                updateStatus('css-status', '❌ CSS no encontrado o error al cargar', false);
+            }
+            
+            return cssLoaded;
+        }
+
+        // Run tests
+        async function runTests() {
+            console.log('🔍 Iniciando tests de assets...');
+            
+            // Test CSS
+            setTimeout(testCSS, 100);
+            
+            // Test JavaScript files
+            const jsTests = [
+                { url: './scripts/app.js', id: 'js-status', name: 'app.js' },
+                { url: './config/services.js', id: 'config-status', name: 'services.js' },
+                { url: './modules/reminders.js', id: 'modules-status', name: 'reminders.js' }
+            ];
+            
+            for (const test of jsTests) {
+                try {
+                    await testAsset(test.url, test.id, test.name);
+                } catch (error) {
+                    updateStatus(test.id, `❌ Error: ${error.message}`, false);
+                }
+            }
+            
+            console.log('✅ Tests completados');
+        }
+
+        // Start tests when page loads
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>
