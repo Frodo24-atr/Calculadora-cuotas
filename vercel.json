@@ -1,12 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "rewrites": [
-    {
-      "source": "/((?!styles|scripts|config|modules|assets|manifest\\.json|favicon\\.ico).*)",
-      "destination": "/index.html"
-    }
-  ],
   "headers": [
     {
       "source": "/styles/(.*)",

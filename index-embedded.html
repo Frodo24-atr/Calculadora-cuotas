@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Calculadora de Cuotas v2.0 - Versión Embebida</title>
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- CSS Principal embebido -->
+    <style id="embedded-css">
+        /* CSS se insertará aquí */
+    </style>
+</head>
+<body>
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Cargando aplicación (versión embebida)...</p>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 50px;">
+        <h1>🔧 Preparando versión con assets embebidos...</h1>
+        <p>Esta será la versión de respaldo con CSS y JS embebidos directamente.</p>
+        <div id="status">Preparando archivos...</div>
+    </div>
+
+    <script>
+        // Script temporal para mostrar progreso
+        document.getElementById('status').innerHTML = 'Leyendo archivos locales...';
+        
+        // Este archivo será reemplazado con el contenido completo embebido
+        setTimeout(() => {
+            document.getElementById('status').innerHTML = '⚠️ Esta es una versión temporal. Ejecutando script para embeber assets...';
+        }, 1000);
+    </script>
+</body>
+</html>
