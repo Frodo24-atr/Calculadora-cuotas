@@ -1,0 +1,20 @@
+# Ignorar archivos de desarrollo y debug
+debug/
+tests/
+*.md
+check_ids.sh
+start-server.bat
+vite.config.ts
+tsconfig.json
+.eslintrc.json
+.prettierrc
+.vscode/
+node_modules/
+src/
+backup/
+legacy-backup/
+archive/
+docs/
+test_*.html
+debug_*.html
+force_update.txt
